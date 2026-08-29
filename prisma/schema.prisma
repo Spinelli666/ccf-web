@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  displayName  String
+  createdAt    DateTime @default(now())
+
+  sheets       Sheet[]
+  chatMessages ChatMessage[]
+}
+
+model Sheet {
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name      String
+  private   Boolean  @default(false)
+  // Todo o restante da ficha (pericias, stats, armas, armaduras, remedios,
+  // racaHabilidades, classeHabilidades, biografia...) igual ao formato que
+  // o app original salvava em "sheet:<id>" no storage do artifact.
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model Race {
+  id          String   @id @default(cuid())
+  nome        String   @unique
+  habilidades Json
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+enum ChatMessageKind {
+  roll
+  text
+  log
+}
+
+model ChatMessage {
+  id             String           @id @default(cuid())
+  authorId       String?
+  author         User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName     String
+  characterName  String?
+  kind           ChatMessageKind
+  text           String
+  breakdown      String?
+  total          Int?
+  critClass      String?
+  createdAt      DateTime         @default(now())
+
+  @@index([createdAt])
+}
