@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { num, clamp } from "@/lib/derived";
 import { computeDerived } from "@/lib/derived";
-import { AUTO_GRANT_ABILITIES, CLASSES_ORDENADAS, findAbilityClass } from "@/lib/classes-lookup";
+import { AUTO_GRANT_ABILITIES, CLASSES_ORDENADAS, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
+import { EffectText } from "@/components/sheet/EffectText";
 import type { FullSheetData, HabilidadeClasse, HabilidadeRaca } from "@/lib/sheet-types";
 
 const ALL_AUTO_GRANT_NAMES = Object.values(AUTO_GRANT_ABILITIES).flat();
@@ -20,6 +21,7 @@ export function AbilitiesPanel({
   onLog: (text: string) => void;
 }) {
   const [classeFiltro, setClasseFiltro] = useState("Todas");
+  const [expandidas, setExpandidas] = useState<Set<number>>(new Set());
   const derived = computeDerived(sheet);
   const nome = sheet.name || "Personagem";
 
@@ -94,6 +96,26 @@ export function AbilitiesPanel({
   function acaoRemove() {
     const novo = clamp(acaoTotal - 1, 1, 12);
     onChange({ acaoTotal: novo, acaoBoxes: acaoBoxes.slice(0, novo) });
+  }
+
+  function toggleExpandida(i: number) {
+    const next = new Set(expandidas);
+    if (next.has(i)) next.delete(i);
+    else next.add(i);
+    setExpandidas(next);
+  }
+
+  // Os aprimoramentos aprendidos de uma habilidade base aparecem como linhas indentadas
+  // logo em seguida a ela (ver rebuildClasseHabilidades no wizard) — usado só pra marcar
+  // quais tiers do catálogo (I/II/III) o personagem já tem.
+  function aprimoramentosAprendidos(baseIndex: number): Set<string> {
+    const nomes = new Set<string>();
+    for (let k = baseIndex + 1; k < sheet.classeHabilidades.length; k++) {
+      const row = sheet.classeHabilidades[k];
+      if (!row.indent) break;
+      nomes.add(row.nome);
+    }
+    return nomes;
   }
 
   // Cada linha não-indentada infere sua classe pelo catálogo; uma linha indentada
@@ -226,82 +248,141 @@ export function AbilitiesPanel({
             </div>
           )}
 
+          <div className="sheet-table-wrap">
           <table className="sheet-table">
             <thead>
               <tr>
                 <th>Habilidade</th>
                 <th>Tipo</th>
                 <th>Custo</th>
-                <th>Efeito</th>
                 <th>Ação</th>
               </tr>
             </thead>
             <tbody>
-              {classePairsFiltrados.map(({ h, i }) =>
-                h.indent ? (
-                  <tr key={i} className="indent">
-                    <td className="name">{h.nome}</td>
-                    <td>{h.tipo}</td>
-                    <td>{h.custo}</td>
-                    <td>{h.efeito}</td>
-                    <td>
-                      {isMine && h.custoPE !== "" && h.custoPE !== undefined && (
-                        <label className="chk-inline">
-                          <input
-                            type="checkbox"
-                            checked={!!h.ativo}
-                            onChange={(e) => updateClasse(i, { ativo: e.target.checked })}
-                          />{" "}
-                          aprendido
-                        </label>
-                      )}
-                    </td>
-                  </tr>
+              {classePairsFiltrados.map(({ h, i }) => {
+                const aberta = expandidas.has(i);
+                const nomeCell = (
+                  <td className="name">
+                    <span
+                      className="ability-name-toggle"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => toggleExpandida(i)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          toggleExpandida(i);
+                        }
+                      }}
+                    >
+                      <span className={`ability-name-arrow ${aberta ? "open" : ""}`}>▶</span>
+                      {h.nome}
+                    </span>
+                  </td>
+                );
+                return h.indent ? (
+                  <Fragment key={i}>
+                    <tr className="indent">
+                      {nomeCell}
+                      <td>{h.tipo}</td>
+                      <td>{h.custo}</td>
+                      <td>
+                        {isMine && h.custoPE !== "" && h.custoPE !== undefined && (
+                          <label className="chk-inline">
+                            <input
+                              type="checkbox"
+                              checked={!!h.ativo}
+                              onChange={(e) => {
+                                updateClasse(i, { ativo: e.target.checked });
+                                onLog(
+                                  `${nome} marcou "${h.nome}" como ${e.target.checked ? "aprendido" : "não aprendido"}`
+                                );
+                              }}
+                            />{" "}
+                            aprendido
+                          </label>
+                        )}
+                      </td>
+                    </tr>
+                    {aberta && (
+                      <tr className="ability-effect-row">
+                        <td colSpan={4}>
+                          <EffectText text={h.efeito} />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ) : (
-                  <tr key={i}>
-                    <td className="name">{h.nome}</td>
-                    <td>{h.tipo}</td>
-                    <td>{h.custo}</td>
-                    <td>{h.efeito}</td>
-                    <td>
-                      {isMine && (
-                        <div className="ability-controls">
-                          {h.temContador && (
-                            <div className="counter">
-                              <button
-                                type="button"
-                                className="counter-btn"
-                                onClick={() => updateClasse(i, { contadorAtual: Math.max(0, h.contadorAtual - 1) })}
-                              >
-                                −
-                              </button>
-                              <span className="counter-val">
-                                {h.contadorAtual}/{h.contadorMax}
-                              </span>
-                              <button
-                                type="button"
-                                className="counter-btn"
-                                onClick={() =>
-                                  updateClasse(i, {
-                                    contadorAtual: Math.min(num(h.contadorMax, 99), h.contadorAtual + 1),
-                                  })
-                                }
-                              >
-                                +
-                              </button>
-                            </div>
-                          )}
-                          <button type="button" className="btn small secondary" onClick={() => usarClasse(i)}>
-                            Usar{effectiveCost(i) ? ` (-${effectiveCost(i)}⚡)` : ""}
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                )
-              )}
+                  <Fragment key={i}>
+                    <tr>
+                      {nomeCell}
+                      <td>{h.tipo}</td>
+                      <td>{h.custo}</td>
+                      <td>
+                        {isMine && (
+                          <div className="ability-controls">
+                            {h.temContador && (
+                              <div className="counter">
+                                <button
+                                  type="button"
+                                  className="counter-btn"
+                                  onClick={() => updateClasse(i, { contadorAtual: Math.max(0, h.contadorAtual - 1) })}
+                                >
+                                  −
+                                </button>
+                                <span className="counter-val">
+                                  {h.contadorAtual}/{h.contadorMax}
+                                </span>
+                                <button
+                                  type="button"
+                                  className="counter-btn"
+                                  onClick={() =>
+                                    updateClasse(i, {
+                                      contadorAtual: Math.min(num(h.contadorMax, 99), h.contadorAtual + 1),
+                                    })
+                                  }
+                                >
+                                  +
+                                </button>
+                              </div>
+                            )}
+                            <button type="button" className="btn small secondary" onClick={() => usarClasse(i)}>
+                              Usar{effectiveCost(i) ? ` (-${effectiveCost(i)}⚡)` : ""}
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                    {aberta &&
+                      (() => {
+                        const entry = findAbilityEntry(h.nome);
+                        const aprendidos = aprimoramentosAprendidos(i);
+                        const aprimorAprendidos = (entry?.aprimoramentos || []).filter((ap) => aprendidos.has(ap.nome));
+                        return (
+                          <tr className="ability-effect-row">
+                            <td colSpan={4}>
+                              <EffectText text={h.efeito} />
+                              {aprimorAprendidos.length > 0 && (
+                                <div className="ability-aprim-list">
+                                  <div className="ability-aprim-title">Aprimoramentos aprendidos</div>
+                                  {aprimorAprendidos.map((ap) => (
+                                    <div key={ap.nome} className="ability-aprim-item learned">
+                                      <span className="ability-aprim-tag">✓ {ap.nome}</span>
+                                      <EffectText text={ap.efeito} />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })()}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
+          </div>
         </>
       )}
     </div>

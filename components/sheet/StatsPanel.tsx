@@ -57,12 +57,17 @@ export function StatsPanel({
 
   function toggleFratura(i: number) {
     const atual = clamp(num(sheet.fraturas), 0, 5);
-    onChange({ fraturas: atual > i ? i : i + 1 });
+    const novo = atual > i ? i : i + 1;
+    onChange({ fraturas: novo });
+    onLog(`${nome} ajustou Fraturas para ${novo}/5`);
   }
 
   function toggleSurvival(key: "insania" | "toxidade" | "fome" | "sede", max: number, i: number) {
     const atual = clamp(num(sheet[key]), 0, max);
-    onChange({ [key]: atual > i ? i : i + 1 } as Partial<FullSheetData>);
+    const novo = atual > i ? i : i + 1;
+    onChange({ [key]: novo } as Partial<FullSheetData>);
+    const label = SURVIVAL_FIELDS.find((f) => f.key === key)?.label ?? key;
+    onLog(`${nome} ajustou ${label} para ${novo}/${max}`);
   }
 
   function sofrerDano() {
@@ -318,7 +323,7 @@ export function StatsPanel({
                 <input
                   key={i}
                   type="checkbox"
-                  className="cost-box"
+                  className="pip-box"
                   disabled={!isMine}
                   checked={num(sheet.fraturas) > i}
                   onChange={() => toggleFratura(i)}
@@ -334,7 +339,7 @@ export function StatsPanel({
                   <input
                     key={i}
                     type="checkbox"
-                    className="cost-box"
+                    className="pip-box"
                     disabled={!isMine}
                     checked={num(sheet[key]) > i}
                     onChange={() => toggleSurvival(key, max, i)}

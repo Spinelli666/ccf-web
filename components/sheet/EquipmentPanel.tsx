@@ -7,7 +7,7 @@ import { getSocket } from "@/lib/socket-client";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { AddEquipmentDialog } from "@/components/dialogs/AddEquipmentDialog";
 import { PROPRIEDADES_ARMAS_INFO } from "@/data/weapons";
-import type { Arma, FullSheetData } from "@/lib/sheet-types";
+import type { Arma, Armadura, FullSheetData } from "@/lib/sheet-types";
 
 const ATRIBUTOS_ATAQUE = ["Força", "Destreza", "Psionismo"] as const;
 
@@ -37,11 +37,13 @@ export function EquipmentPanel({
   isMine,
   onChange,
   onLog,
+  mesaId,
 }: {
   sheet: FullSheetData;
   isMine: boolean;
   onChange: (patch: Partial<FullSheetData>) => void;
   onLog: (text: string) => void;
+  mesaId: string;
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -118,7 +120,7 @@ export function EquipmentPanel({
       text += ` — ⚠ ERRO CRÍTICO! -1 Durabilidade (${next[idx].durabilidadeAtual}/${next[idx].durabilidadeMax})`;
     }
 
-    getSocket().emit("chat:send", {
+    getSocket(mesaId).emit("chat:send", {
       kind: "roll",
       text,
       total: danoFinal ?? undefined,
@@ -160,18 +162,42 @@ export function EquipmentPanel({
     const props = explicarPropriedades(a.propriedades);
     return (
       expanded.has(key) && (
-        <tr className="weapon-props-row" key={`${key}-props`}>
+        <tr className="item-info-row" key={`${key}-props`}>
           <td colSpan={colSpan}>
-            <div className="weapon-props-box">
+            <div className="item-info-box">
+              <div className="item-info-line">
+                <b>Preço:</b> {a.preco || "—"}
+              </div>
               {props.length ? (
                 props.map((p) => (
-                  <div className="weapon-prop-item" key={p.nome}>
+                  <div className="item-info-line" key={p.nome}>
                     <b>{p.nome}</b> — {p.desc}
                   </div>
                 ))
               ) : (
-                <em>Sem propriedades especiais.</em>
+                <div className="item-info-line">
+                  <em>Sem propriedades especiais.</em>
+                </div>
               )}
+            </div>
+          </td>
+        </tr>
+      )
+    );
+  }
+
+  function armorInfoRow(idx: number, a: Armadura, key: string, colSpan: number) {
+    return (
+      expanded.has(key) && (
+        <tr className="item-info-row" key={`${key}-info`}>
+          <td colSpan={colSpan}>
+            <div className="item-info-box">
+              <div className="item-info-line">
+                <b>Parte do corpo:</b> {a.parte || "—"}
+              </div>
+              <div className="item-info-line">
+                <b>Preço:</b> {a.preco || "—"}
+              </div>
             </div>
           </td>
         </tr>
@@ -191,121 +217,126 @@ export function EquipmentPanel({
         <div className="section">
           <h2>Equipamento</h2>
           {armasEquipadas.length > 0 && (
-            <table className="sheet-table" style={{ marginBottom: 16 }}>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Dano</th>
-                  <th>Preço</th>
-                  <th>Durab.</th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {armasEquipadas.map(([idx, a]) => (
-                  <Fragment key={idx}>
-                    <tr>
-                      <td className="name">
-                        <button type="button" className="weapon-name-btn" onClick={() => toggleExpanded(`w-${idx}`)}>
-                          {a.item}
-                        </button>
-                      </td>
-                      <td>{a.dano}</td>
-                      <td>{a.preco}</td>
-                      <td>
-                        <div className="counter">
-                          <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armas", idx, -1)}>
-                            −
-                          </button>
-                          <span className="counter-val">
-                            {a.durabilidadeAtual}/{a.durabilidadeMax}
-                          </span>
-                          <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armas", idx, 1)}>
-                            +
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        {isMine && (
-                          <div className="attack-cell">
-                            <select
-                              className="attr-select"
-                              value={attrByIdx[idx] || ""}
-                              onChange={(e) => setAttrByIdx((prev) => ({ ...prev, [idx]: e.target.value }))}
-                            >
-                              <option value="">Nenhum atributo</option>
-                              {atributoOpts.map((o) => (
-                                <option key={o.nome} value={o.nome}>
-                                  {o.nome} ({o.valor})
-                                </option>
-                              ))}
-                            </select>
-                            <button type="button" className="btn small secondary" onClick={() => setAttackIdx(idx)}>
-                              Atacar
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        {isMine && (
-                          <button type="button" className="btn ghost small" onClick={() => toggleEquipArma(idx)}>
-                            Desequipar
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                    {weaponPropsRow(idx, a, `w-${idx}`, 6)}
-                  </Fragment>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {armadurasEquipadas.length > 0 ? (
-            <>
+            <div className="sheet-table-wrap">
               <table className="sheet-table">
                 <thead>
                   <tr>
-                    <th>Parte</th>
                     <th>Item</th>
-                    <th>Armadura</th>
-                    <th>Preço</th>
+                    <th>Dano</th>
                     <th>Durab.</th>
+                    <th></th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {armadurasEquipadas.map(([idx, a]) => (
-                    <tr key={idx}>
-                      <td>{a.parte}</td>
-                      <td className="name">{a.item}</td>
-                      <td>{a.armadura}</td>
-                      <td>{a.preco}</td>
-                      <td>
-                        <div className="counter">
-                          <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armaduras", idx, -1)}>
-                            −
+                  {armasEquipadas.map(([idx, a]) => (
+                    <Fragment key={idx}>
+                      <tr>
+                        <td className="name">
+                          <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`w-${idx}`)}>
+                            {a.item}
                           </button>
-                          <span className="counter-val">
-                            {a.durabilidadeAtual}/{a.durabilidadeMax}
-                          </span>
-                          <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armaduras", idx, 1)}>
-                            +
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        {isMine && (
-                          <button type="button" className="btn ghost small" onClick={() => toggleEquipArmadura(idx)}>
-                            Desequipar
-                          </button>
-                        )}
-                      </td>
-                    </tr>
+                        </td>
+                        <td>{a.dano}</td>
+                        <td>
+                          <div className="counter">
+                            <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armas", idx, -1)}>
+                              −
+                            </button>
+                            <span className="counter-val">
+                              {a.durabilidadeAtual}/{a.durabilidadeMax}
+                            </span>
+                            <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armas", idx, 1)}>
+                              +
+                            </button>
+                          </div>
+                        </td>
+                        <td>
+                          {isMine && (
+                            <div className="attack-cell">
+                              <select
+                                className="attr-select"
+                                value={attrByIdx[idx] || ""}
+                                onChange={(e) => setAttrByIdx((prev) => ({ ...prev, [idx]: e.target.value }))}
+                              >
+                                <option value="">Nenhum atributo</option>
+                                {atributoOpts.map((o) => (
+                                  <option key={o.nome} value={o.nome}>
+                                    {o.nome} ({o.valor})
+                                  </option>
+                                ))}
+                              </select>
+                              <button type="button" className="btn small secondary" onClick={() => setAttackIdx(idx)}>
+                                Atacar
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          {isMine && (
+                            <button type="button" className="btn ghost small" onClick={() => toggleEquipArma(idx)}>
+                              Desequipar
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                      {weaponPropsRow(idx, a, `w-${idx}`, 5)}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {armadurasEquipadas.length > 0 ? (
+            <>
+              <div className="sheet-table-wrap">
+                <table className="sheet-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Armadura</th>
+                      <th>Durab.</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {armadurasEquipadas.map(([idx, a]) => (
+                      <Fragment key={idx}>
+                        <tr>
+                          <td className="name">
+                            <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`a-${idx}`)}>
+                              {a.item}
+                            </button>
+                          </td>
+                          <td>{a.armadura}</td>
+                          <td>
+                            <div className="counter">
+                              <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armaduras", idx, -1)}>
+                                −
+                              </button>
+                              <span className="counter-val">
+                                {a.durabilidadeAtual}/{a.durabilidadeMax}
+                              </span>
+                              <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armaduras", idx, 1)}>
+                                +
+                              </button>
+                            </div>
+                          </td>
+                          <td>
+                            {isMine && (
+                              <button type="button" className="btn ghost small" onClick={() => toggleEquipArmadura(idx)}>
+                                Desequipar
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                        {armorInfoRow(idx, a, `a-${idx}`, 4)}
+                      </Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <div className="armor-total">
                 Armadura: {armaduraAtual} / {armaduraMaximo}
                 {derived.armaduraNatural ? ` (inclui ${derived.armaduraNatural} natural)` : ""}
@@ -324,112 +355,119 @@ export function EquipmentPanel({
         <div className="section">
           <h2>Inventário</h2>
           {armasInventario.length > 0 && (
-            <table className="sheet-table" style={{ marginBottom: 16 }}>
-              <thead>
-                <tr>
-                  <th>Arma</th>
-                  <th>Dano</th>
-                  <th>Preço</th>
-                  <th>Peso</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {armasInventario.map(([idx, a]) => (
-                  <Fragment key={idx}>
-                    <tr>
-                      <td className="name">
-                        <button type="button" className="weapon-name-btn" onClick={() => toggleExpanded(`wi-${idx}`)}>
-                          {a.item}
-                        </button>
-                      </td>
-                      <td>{a.dano}</td>
-                      <td>{a.preco}</td>
-                      <td>{PESO_LABELS[pesoDe(a)]}</td>
-                      <td>
-                        {isMine && (
-                          <button type="button" className="btn small secondary" onClick={() => toggleEquipArma(idx)}>
-                            Equipar
+            <div className="sheet-table-wrap">
+              <table className="sheet-table">
+                <thead>
+                  <tr>
+                    <th>Arma</th>
+                    <th>Dano</th>
+                    <th>Peso</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {armasInventario.map(([idx, a]) => (
+                    <Fragment key={idx}>
+                      <tr>
+                        <td className="name">
+                          <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`wi-${idx}`)}>
+                            {a.item}
                           </button>
-                        )}
-                      </td>
-                    </tr>
-                    {weaponPropsRow(idx, a, `wi-${idx}`, 5)}
-                  </Fragment>
-                ))}
-              </tbody>
-            </table>
+                        </td>
+                        <td>{a.dano}</td>
+                        <td>{PESO_LABELS[pesoDe(a)]}</td>
+                        <td>
+                          {isMine && (
+                            <button type="button" className="btn small secondary" onClick={() => toggleEquipArma(idx)}>
+                              Equipar
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                      {weaponPropsRow(idx, a, `wi-${idx}`, 4)}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
           {armadurasInventario.length > 0 && (
-            <table className="sheet-table" style={{ marginBottom: 16 }}>
-              <thead>
-                <tr>
-                  <th>Armadura</th>
-                  <th>Parte</th>
-                  <th>Armadura</th>
-                  <th>Preço</th>
-                  <th>Peso</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {armadurasInventario.map(([idx, a]) => (
-                  <tr key={idx}>
-                    <td className="name">{a.item}</td>
-                    <td>{a.parte}</td>
-                    <td>{a.armadura}</td>
-                    <td>{a.preco}</td>
-                    <td>{PESO_LABELS[pesoDe(a)]}</td>
-                    <td>
-                      {isMine && (
-                        <button type="button" className="btn small secondary" onClick={() => toggleEquipArmadura(idx)}>
-                          Equipar
-                        </button>
-                      )}
-                    </td>
+            <div className="sheet-table-wrap">
+              <table className="sheet-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Armadura</th>
+                    <th>Peso</th>
+                    <th></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {armadurasInventario.map(([idx, a]) => (
+                    <Fragment key={idx}>
+                      <tr>
+                        <td className="name">
+                          <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`ai-${idx}`)}>
+                            {a.item}
+                          </button>
+                        </td>
+                        <td>{a.armadura}</td>
+                        <td>{PESO_LABELS[pesoDe(a)]}</td>
+                        <td>
+                          {isMine && (
+                            <button type="button" className="btn small secondary" onClick={() => toggleEquipArmadura(idx)}>
+                              Equipar
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                      {armorInfoRow(idx, a, `ai-${idx}`, 4)}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
           {remedioPairs.length > 0 && (
-            <table className="sheet-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Efeito</th>
-                  <th>Preço</th>
-                  <th>Usos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {remedioPairs.map(([idx, r]) => {
-                  const max = num(r.usosMax, 0);
-                  return (
-                    <tr key={idx}>
-                      <td className="name">{r.item}</td>
-                      <td>{r.efeito}</td>
-                      <td>{r.preco}</td>
-                      <td>
-                        {max > 0 && <span className="uses-count">{r.usosGastos}/{max}</span>}{" "}
-                        {isMine && (
-                          <button
-                            type="button"
-                            className="btn small secondary"
-                            disabled={max > 0 && r.usosGastos >= max}
-                            onClick={() => usarRemedio(idx)}
-                          >
-                            Usar
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="sheet-table-wrap">
+              <table className="sheet-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Efeito</th>
+                    <th>Preço</th>
+                    <th>Usos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {remedioPairs.map(([idx, r]) => {
+                    const max = num(r.usosMax, 0);
+                    return (
+                      <tr key={idx}>
+                        <td className="name">{r.item}</td>
+                        <td>{r.efeito}</td>
+                        <td>{r.preco}</td>
+                        <td>
+                          {max > 0 && <span className="uses-count">{r.usosGastos}/{max}</span>}{" "}
+                          {isMine && (
+                            <button
+                              type="button"
+                              className="btn small secondary"
+                              disabled={max > 0 && r.usosGastos >= max}
+                              onClick={() => usarRemedio(idx)}
+                            >
+                              Usar
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
@@ -451,7 +489,7 @@ export function EquipmentPanel({
       {showAdd && (
         <AddEquipmentDialog
           onCancel={() => setShowAdd(false)}
-          onAdd={({ armas: novasArmas, armaduras: novasArmaduras }) => {
+          onAdd={({ armas: novasArmas, armaduras: novasArmaduras, remedios: novosRemedios }) => {
             onChange({
               armas: [
                 ...sheet.armas,
@@ -461,8 +499,11 @@ export function EquipmentPanel({
                 ...sheet.armaduras,
                 ...novasArmaduras.map((a) => ({ ...a, durabilidadeAtual: 3, durabilidadeMax: 3 })),
               ],
+              remedios: [...sheet.remedios, ...novosRemedios],
             });
-            const nomes = [...novasArmas.map((a) => a.item), ...novasArmaduras.map((a) => a.item)].join(", ");
+            const nomes = [...novasArmas.map((a) => a.item), ...novasArmaduras.map((a) => a.item), ...novosRemedios.map((r) => r.item)].join(
+              ", "
+            );
             onLog(`${sheet.name || "Personagem"} adicionou ao Inventário: ${nomes}`);
             setShowAdd(false);
           }}

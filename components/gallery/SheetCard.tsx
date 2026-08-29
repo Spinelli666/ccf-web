@@ -13,10 +13,12 @@ export type SheetSummary = {
 };
 
 export function SheetCard({
+  mesaId,
   sheet,
   isMine,
   onDeleted,
 }: {
+  mesaId: string;
   sheet: SheetSummary;
   isMine: boolean;
   onDeleted: (id: string) => void;
@@ -36,7 +38,7 @@ export function SheetCard({
   }
 
   return (
-    <div className="frame card" onClick={() => router.push(`/sheets/${sheet.id}`)}>
+    <div className="frame card" onClick={() => router.push(`/mesas/${mesaId}/sheets/${sheet.id}`)}>
       {isMine && (
         <button type="button" className="card-del-btn" onClick={handleDelete} title="Apagar ficha">
           🗑️

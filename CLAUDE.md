@@ -4,7 +4,7 @@ Contexto para o Claude Code ao trabalhar neste repositório (`ccf-web`).
 
 ## O que é este projeto
 
-`ccf-web` é a versão web standalone do gerenciador de fichas do sistema de RPG **Cardigan**, fora do Foundry VTT. Foi portado de um app single-file (`sistema-cardigan-fichas - Copia.html`, feito originalmente pra rodar como Claude Artifact) pra um app Next.js completo com contas de usuário, PostgreSQL e chat de mesa em tempo real — pra rodar numa VPS própria (Hostinger KVM 1).
+`ccf-web` é a versão web standalone do gerenciador de fichas do sistema de RPG **Cardigan**, fora do Foundry VTT. Foi portado de um app single-file (`sistema-cardigan-fichas - Copia.html`, feito originalmente pra rodar como Claude Artifact) pra um app Next.js completo com contas de usuário, PostgreSQL, múltiplas mesas independentes (senha de convite por mesa) e chat de mesa em tempo real — pra rodar numa VPS própria (Hostinger KVM 1).
 
 O sistema Cardigan (o jogo em si) vive num repositório **separado**: o sistema Foundry VTT em `../cardigan` (fork do boilerplate CardiganSystem). Esse repo (`ccf-web`) é um projeto irmão, independente, com seu próprio deploy — não depende do Foundry rodando.
 
@@ -20,15 +20,35 @@ Os componentes React (`components/sheet/*`, `components/dialogs/*`, `components/
 
 ## Status atual (verificado, não só "deveria funcionar")
 
-`tsc --noEmit`, `eslint` e `next build` limpos. Rodou de verdade contra um Postgres real (via `scripts/setup.sh`/`docker-compose.yml`, migração inicial `prisma/migrations/20260829053242_init` já gerada e aplicada, raças semeadas) — registro de conta, login via NextAuth, criação de ficha, rolagem de dado e chat em tempo real entre duas contas foram testados ponta-a-ponta (via requisições HTTP/WebSocket reais, sem navegador interativo disponível no ambiente) e confirmados funcionando. O git já está vinculado ao GitHub (`origin` → `https://github.com/Spinelli666/ccf-web.git`, branch `main`).
+`tsc --noEmit`, `eslint` e `next build` limpos. Rodou de verdade contra um Postgres real
+(via `scripts/setup.sh`/`docker-compose.yml`). O git já está vinculado ao GitHub
+(`origin` → `https://github.com/Spinelli666/ccf-web.git`, branch `main`).
 
-Os recursos que faltavam em relação ao app original (durabilidade de arma/armadura, toggle de aprimoramento, Insanidade/Toxidade/Fome/Sede, bônus temporário de PV/PE, sistema de Julgamento completo, pontos de ação, ataque com arma, ficha de exemplo, baixar como imagem, Log da Mesa completo, limpar chat) foram portados — ver README, seção "O que já funciona". Essa parte também só foi verificada por `tsc`/`eslint`/`build` limpos e testes de API/socket direcionados (round-trip de campos novos, `chat:clear`, compatibilidade com fichas salvas antes da mudança) — **não por clique real na UI**, já que não há navegador interativo neste ambiente.
+Fluxos testados ponta-a-ponta (requisições HTTP/WebSocket reais contra o Postgres real, sem
+navegador interativo disponível no ambiente — a UI em si nunca foi clicada de verdade):
+registro/login, criação de ficha, rolagem de dado, chat em tempo real, todos os recursos
+listados no README ("O que já funciona" — durabilidade, Julgamento completo, pontos de ação,
+Espaços de Inventário, ataque com arma etc.), e o **sistema de Mesas** (criar mesa gera
+código+senha, entrar com código+senha certo/errado, isolamento de fichas/chat/socket.io entre
+mesas diferentes, bloqueio de não-membro).
+
+O sistema de Mesas migrou o schema com **backfill de dado real**: a migração
+`prisma/migrations/20260829153019_mesas` cria uma "Mesa Principal" (código `LEGADO1`, senha
+temporária — troque se for reusar) pro que já existia antes de mesas existirem, preservando a
+ficha e o histórico de chat que já estavam no banco.
 
 ### Pendências conhecidas (retomar aqui)
 
-1. **Testar a UI nova num navegador de verdade** (pips de sanidade/toxidade/fome/sede, fluxo de sofrer dano com armadura, painel de Julgamento, barra de pontos de ação, diálogo de ataque com arma, botão de baixar imagem) — só foi verificado por leitura de código e testes de API, nunca clicado.
-2. **Deploy real na VPS Hostinger** ainda não foi feito — README tem o roteiro (PM2 + Nginx + Certbot), mas é só um roteiro, nunca foi executado.
-3. **Simplificações vs. o app original que continuam de fora** (ver README, seção "Simplificações conhecidas"): Espaços de Inventário (contagem de slots por peso), bônus de perícia persistente por perícia, e sync automático dos catálogos com os compêndios do Foundry em `../cardigan/src/packs/`. Cortes conscientes de escopo — só mexer se o usuário pedir explicitamente.
+1. **Testar a UI num navegador de verdade** — todo o app (fichas, mesas, diálogos de criar/
+   entrar) só foi verificado por leitura de código, `tsc`/`build` e testes de API/socket
+   diretos, nunca clicado.
+2. **Deploy real na VPS Hostinger** ainda não foi feito — README tem o roteiro (PM2 + Nginx +
+   Certbot), mas é só um roteiro, nunca foi executado.
+3. **Gerenciar mesa** (remover jogador, trocar senha/código, apagar mesa) não tem UI ainda —
+   só criar e entrar. Corte consciente de escopo, mexer só se o usuário pedir.
+4. **Simplificações que continuam de fora** (ver README): catálogos de regras/raças
+   compartilhados entre todas as mesas (não há "raças customizadas por mesa"), sync automático
+   com os compêndios do Foundry em `../cardigan/src/packs/`.
 
 ## Comandos úteis
 

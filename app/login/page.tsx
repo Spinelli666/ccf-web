@@ -22,7 +22,7 @@ export default function LoginPage() {
       setError("Usuário ou senha inválidos.");
       return;
     }
-    router.push("/gallery");
+    router.push("/mesas");
     router.refresh();
   }
 

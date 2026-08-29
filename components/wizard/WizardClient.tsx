@@ -2,19 +2,27 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { num } from "@/lib/derived";
+import { computeDerived, num } from "@/lib/derived";
 import { ABILITIES_LIBRARY, AUTO_GRANT_ABILITIES, CLASSES_ORDENADAS } from "@/lib/classes-lookup";
 import { RACE_PERICIA_BONUS } from "@/data/rulebook";
 import { AddEquipmentDialog } from "@/components/dialogs/AddEquipmentDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
-import { emptySheetData, type Arma, type Armadura, type HabilidadeClasse, type HabilidadeRaca, type Pericia } from "@/lib/sheet-types";
+import {
+  emptySheetData,
+  type Arma,
+  type Armadura,
+  type HabilidadeClasse,
+  type HabilidadeRaca,
+  type Pericia,
+  type Remedio,
+} from "@/lib/sheet-types";
 
 const STEP_TITLES = ["Identidade", "Raça", "Classe", "Perícias", "Equipamento", "Biografia"];
 
 type RaceOption = { nome: string; habilidades: { nome: string; desc: string }[] };
 type ClasseSel = { on: boolean; aprim: boolean[] };
 
-export function WizardClient({ races }: { races: RaceOption[] }) {
+export function WizardClient({ mesaId, races }: { mesaId: string; races: RaceOption[] }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
@@ -26,6 +34,7 @@ export function WizardClient({ races }: { races: RaceOption[] }) {
   const [pericias, setPericias] = useState<Pericia[]>(emptySheetData().pericias.map((p) => ({ ...p, valor: "0" })));
   const [armas, setArmas] = useState<Arma[]>([]);
   const [armaduras, setArmaduras] = useState<Armadura[]>([]);
+  const [remedios, setRemedios] = useState<Remedio[]>([]);
   const [biografia, setBiografia] = useState("");
   const [showAddEq, setShowAddEq] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
@@ -162,6 +171,7 @@ export function WizardClient({ races }: { races: RaceOption[] }) {
     const bonusMapFinal = (RACE_PERICIA_BONUS as Record<string, Record<string, number>>)[racaTitulo] || {};
     const finalPericias = pericias.map((p) => ({ ...p, valor: String(num(p.valor, 0) + (bonusMapFinal[p.nome] || 0)) }));
     const classeHabilidades = rebuildClasseHabilidades(classeSelecoes);
+    const derivedPreview = computeDerived({ nivel, fraturas: 0, pericias: finalPericias, stats: {} });
 
     const data = emptySheetData({
       name: name.trim(),
@@ -176,16 +186,26 @@ export function WizardClient({ races }: { races: RaceOption[] }) {
       pericias: finalPericias,
       armas,
       armaduras,
+      remedios,
+      stats: {
+        pvBonus: "0",
+        peBonus: "0",
+        armaduraNaturalBonus: "0",
+        deslocamentoBonus: "0",
+        inventarioBonus: "0",
+        pvAtual: String(derivedPreview.pvMax),
+        peAtual: String(derivedPreview.peMax),
+      },
     });
 
     const res = await fetch("/api/sheets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), private: false, data }),
+      body: JSON.stringify({ mesaId, name: name.trim(), private: false, data }),
     });
     if (res.ok) {
       const sheet = await res.json();
-      router.push(`/sheets/${sheet.id}`);
+      router.push(`/mesas/${mesaId}/sheets/${sheet.id}`);
     } else {
       setError("Não foi possível criar a ficha. Tenta de novo.");
     }
@@ -424,12 +444,13 @@ export function WizardClient({ races }: { races: RaceOption[] }) {
           {showAddEq && (
             <AddEquipmentDialog
               onCancel={() => setShowAddEq(false)}
-              onAdd={({ armas: novasArmas, armaduras: novasArmaduras }) => {
+              onAdd={({ armas: novasArmas, armaduras: novasArmaduras, remedios: novosRemedios }) => {
                 setArmas((prev) => [...prev, ...novasArmas.map((a) => ({ ...a, equipado: true, durabilidadeAtual: 0, durabilidadeMax: 0 }))]);
                 setArmaduras((prev) => [
                   ...prev,
                   ...novasArmaduras.map((a) => ({ ...a, equipado: true, durabilidadeAtual: 0, durabilidadeMax: 0 })),
                 ]);
+                setRemedios((prev) => [...prev, ...novosRemedios]);
                 setShowAddEq(false);
               }}
             />
@@ -482,7 +503,7 @@ export function WizardClient({ races }: { races: RaceOption[] }) {
           title="Cancelar criação"
           message="Descartar essa ficha e voltar pra galeria? Nada será salvo."
           confirmLabel="Descartar"
-          onConfirm={() => router.push("/gallery")}
+          onConfirm={() => router.push(`/mesas/${mesaId}/gallery`)}
           onCancel={() => setShowCancel(false)}
         />
       )}

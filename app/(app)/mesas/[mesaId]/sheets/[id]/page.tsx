@@ -6,8 +6,8 @@ import { emptySheetData } from "@/lib/sheet-types";
 
 export const dynamic = "force-dynamic";
 
-export default async function SheetPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function SheetPage({ params }: { params: Promise<{ mesaId: string; id: string }> }) {
+  const { mesaId, id } = await params;
   const session = await auth();
   if (!session?.user) redirect("/login");
 
@@ -15,7 +15,7 @@ export default async function SheetPage({ params }: { params: Promise<{ id: stri
     where: { id },
     include: { owner: { select: { id: true, displayName: true } } },
   });
-  if (!sheet) notFound();
+  if (!sheet || sheet.mesaId !== mesaId) notFound();
   if (sheet.private && sheet.ownerId !== session.user.id) notFound();
 
   const data = emptySheetData(sheet.data as object);
@@ -23,6 +23,7 @@ export default async function SheetPage({ params }: { params: Promise<{ id: stri
 
   return (
     <SheetView
+      mesaId={mesaId}
       sheetId={sheet.id}
       sheetName={sheet.name}
       isPrivate={sheet.private}

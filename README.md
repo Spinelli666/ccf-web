@@ -1,11 +1,11 @@
 # Cardigan Web — Fichas de Personagem
 
-Gerenciador de fichas de personagem do sistema Cardigan, standalone (fora do Foundry VTT). Portado de `sistema-cardigan-fichas - Copia.html` (um app single-file feito originalmente pra rodar como Claude Artifact) pra um projeto Next.js completo, com contas de usuário, banco PostgreSQL e chat de mesa em tempo real — pensado pra rodar numa VPS própria.
+Gerenciador de fichas de personagem do sistema Cardigan, standalone (fora do Foundry VTT). Portado de `sistema-cardigan-fichas - Copia.html` (um app single-file feito originalmente pra rodar como Claude Artifact) pra um projeto Next.js completo, com contas de usuário, banco PostgreSQL, **múltiplas mesas independentes** (uma sala com senha por grupo de jogo) e chat de mesa em tempo real — pensado pra rodar numa VPS própria.
 
 ## Stack
 
 - **Next.js 16 (App Router) + TypeScript**, servido por um `server.js` customizado que anexa o **Socket.io** no mesmo servidor HTTP (necessário pro chat de mesa em tempo real).
-- **Prisma 6 + PostgreSQL** — contas, fichas, biblioteca de raças e histórico de chat.
+- **Prisma 6 + PostgreSQL** — contas, mesas (com senha de convite), fichas, biblioteca de raças e histórico de chat.
 - **NextAuth (Auth.js) v5** — login por usuário/senha (bcrypt), sessão JWT.
 - Catálogos de regras (efeitos, armas, armaduras, habilidades de classe, manual) ficam em `data/*.ts`, extraídos do HTML original — ver "Catálogos de regras" abaixo.
 
@@ -40,15 +40,17 @@ Passo a passo manual:
 ## Estrutura
 
 ```
-server.js              # Next.js + Socket.io no mesmo processo/porta
-prisma/schema.prisma    # User, Sheet, Race, ChatMessage
+server.js              # Next.js + Socket.io no mesmo processo/porta (uma sala por mesa)
+prisma/schema.prisma    # User, Mesa, MesaMembro, Sheet, Race, ChatMessage
 prisma/seed.ts          # seed das raças padrão
-app/(app)/              # rotas autenticadas: galeria, ficha, wizard, regras
+app/(app)/mesas/        # lista de mesas do usuário (tela pós-login) + criar/entrar
+app/(app)/mesas/[mesaId]/  # tudo escopado por mesa: galeria, ficha, wizard, regras, log
 app/login, app/register # autenticação
-app/api/                # rotas REST (sheets, races, chat, register, auth)
+app/api/                # rotas REST (mesas, sheets, races, chat, register, auth)
+components/mesas/       # tela de lobby (listar/criar/entrar em mesa)
 components/sheet/       # painéis da ficha (stats, perícias, habilidades, equipamento, efeitos)
-components/dialogs/      # diálogos portados do app original (rolagem, subir de nível, equipar...)
-components/chat/         # chat de mesa em tempo real (Socket.io)
+components/dialogs/      # diálogos portados do app original (rolagem, subir de nível, equipar...) + criar/entrar em mesa
+components/chat/         # chat de mesa em tempo real (Socket.io, escopado por mesaId)
 lib/dice.ts, lib/derived.ts  # fórmulas oficiais e motor de dados, portados do app original
 data/*.ts                # catálogos de regras extraídos do HTML original
 ```
@@ -62,16 +64,16 @@ Esses arquivos foram **extraídos automaticamente** do `sistema-cardigan-fichas 
 ## O que já funciona
 
 - Login/registro de conta (usuário/senha).
-- Galeria de fichas (todas / minhas), ficha de exemplo pronta ("Harry de Hazel"), criação via wizard guiado (6 passos: identidade, raça, classe, perícias, equipamento, biografia).
-- Ficha completa: PV/PE com barras, bônus permanente e temporário, e descanso curto/longo; fraturas, sanidade, toxidade, fome e sede rastreados com pips e avisos; armadura atual/máxima com bônus manual e fluxo de "sofrer dano" (desconta armadura, consome bônus temporário) com opção de ignorar armadura; XP com gate de 100 pra liberar o diálogo de subir de nível; sistema de Julgamento completo (Sentenças/Dádivas, Executar, Poupar, estado de morto); pontos de ação por turno; perícias com rolagem (d20 + vantagem/desvantagem/bônus); habilidades de raça/classe com contador de usos e toggle de aprimoramento ativo/inativo; equipar/desequipar armas e armaduras com durabilidade, propriedades de arma expansíveis e botão de ataque (rolagem, crítico, erro crítico desgasta a arma); remédios com usos; efeitos ativos (catálogo completo); baixar a ficha como imagem (PNG).
-- Chat de mesa em tempo real (Socket.io) com rolagens `/r XdY+Z`, dados rápidos, "Limpar tudo", log persistido no banco e página de histórico completo ("Log da Mesa").
+- **Mesas**: tela pós-login lista as mesas em que o usuário está; "+ Criar Mesa" gera um código de 6 caracteres + define uma senha (o usuário vira o Mestre, já membro automático); "Entrar em Mesa" pede código + senha do Mestre. Cada mesa tem suas próprias fichas e seu próprio chat, isolados uns dos outros (inclusive a sala do Socket.io).
+- Galeria de fichas da mesa (todas / minhas), ficha de exemplo pronta ("Harry de Hazel"), criação via wizard guiado (6 passos: identidade, raça, classe, perícias, equipamento, biografia).
+- Ficha completa: PV/PE com barras, bônus permanente e temporário, e descanso curto/longo; fraturas, sanidade, toxidade, fome e sede rastreados com pips e avisos; armadura atual/máxima com bônus manual e fluxo de "sofrer dano" (desconta armadura, consome bônus temporário) com opção de ignorar armadura; XP com gate de 100 pra liberar o diálogo de subir de nível; sistema de Julgamento completo (Sentenças/Dádivas, Executar, Poupar, estado de morto); pontos de ação por turno; perícias com bônus persistente por perícia e rolagem (d20 + vantagem/desvantagem/bônus); habilidades de raça/classe com contador de usos e toggle de aprimoramento ativo/inativo; Espaços de Inventário por peso (leve/médio/pesado); equipar/desequipar armas e armaduras (tabelas separadas de equipado/inventário) com durabilidade, propriedades de arma expansíveis e botão de ataque (rolagem, crítico, erro crítico desgasta a arma); remédios com usos; efeitos ativos (catálogo completo, com dano direto); baixar a ficha como imagem (PNG).
+- Chat de mesa em tempo real (Socket.io, uma sala por mesa) com rolagens `/r XdY+Z`, dados rápidos, "Limpar tudo", log persistido no banco e página de histórico completo ("Log da Mesa") — tudo escopado pra mesa atual.
 - Fichas privadas (só o dono vê) ou públicas (toda a mesa vê).
 
 ## Simplificações conhecidas em relação ao app original
 
-- **Espaços de Inventário** (contagem de slots por peso/categoria de item) não foi portada — o inventário não impõe limite de carga.
-- **Bônus de perícia persistente** (`pericia.bonus` no original, um campo salvo por perícia) não existe; o diálogo de rolagem já pede um bônus avulso por rolagem, que cobre o caso de uso mais comum.
-- O manual de regras e os catálogos são cópia estática do HTML original — ver seção acima.
+- Gerenciar uma mesa (remover jogador, trocar senha/código, apagar a mesa) ainda não tem UI — só criar e entrar.
+- O manual de regras e os catálogos são cópia estática do HTML original, compartilhados entre todas as mesas — ver seção acima.
 
 ## Deploy na VPS (Hostinger KVM 1 ou similar)
 

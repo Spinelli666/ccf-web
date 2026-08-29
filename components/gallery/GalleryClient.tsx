@@ -7,9 +7,11 @@ import { exampleSheetData } from "@/lib/example-sheet";
 import { SheetCard, type SheetSummary } from "./SheetCard";
 
 export function GalleryClient({
+  mesaId,
   sheets: initialSheets,
   currentUserId,
 }: {
+  mesaId: string;
   sheets: SheetSummary[];
   currentUserId: string;
 }) {
@@ -23,7 +25,7 @@ export function GalleryClient({
   async function openExample() {
     const existing = sheets.find((s) => s.name === "Harry de Hazel");
     if (existing) {
-      router.push(`/sheets/${existing.id}`);
+      router.push(`/mesas/${mesaId}/sheets/${existing.id}`);
       return;
     }
     setLoadingExample(true);
@@ -32,10 +34,10 @@ export function GalleryClient({
       const res = await fetch("/api/sheets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: example.name, private: false, data: example }),
+        body: JSON.stringify({ mesaId, name: example.name, private: false, data: example }),
       });
       const created = await res.json();
-      if (created?.id) router.push(`/sheets/${created.id}`);
+      if (created?.id) router.push(`/mesas/${mesaId}/sheets/${created.id}`);
     } finally {
       setLoadingExample(false);
     }
@@ -53,13 +55,13 @@ export function GalleryClient({
           </span>
         </div>
         <div className="filler" />
-        <Link href="/history" className="btn ghost">
+        <Link href={`/mesas/${mesaId}/history`} className="btn ghost">
           📜 Log da Mesa
         </Link>
         <button type="button" className="btn ghost" disabled={loadingExample} onClick={openExample}>
           {loadingExample ? "Abrindo..." : "Ver ficha de exemplo"}
         </button>
-        <Link href="/wizard" className="btn">
+        <Link href={`/mesas/${mesaId}/wizard`} className="btn">
           + Nova Ficha
         </Link>
       </div>
@@ -74,6 +76,7 @@ export function GalleryClient({
           {visible.map((sheet) => (
             <SheetCard
               key={sheet.id}
+              mesaId={mesaId}
               sheet={sheet}
               isMine={sheet.ownerId === currentUserId}
               onDeleted={(id) => setSheets((prev) => prev.filter((s) => s.id !== id))}

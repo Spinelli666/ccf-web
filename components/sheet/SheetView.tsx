@@ -17,6 +17,7 @@ const TABS = ["Perícias", "Equipamentos", "Habilidades", "Profissões", "Biogra
 type Tab = (typeof TABS)[number];
 
 export function SheetView({
+  mesaId,
   sheetId,
   sheetName,
   isPrivate,
@@ -24,6 +25,7 @@ export function SheetView({
   initialData,
   isMine,
 }: {
+  mesaId: string;
   sheetId: string;
   sheetName: string;
   isPrivate: boolean;
@@ -45,7 +47,7 @@ export function SheetView({
   }
 
   function logToChat(text: string) {
-    getSocket().emit("chat:send", { kind: "log", text, characterName: sheet.name });
+    getSocket(mesaId).emit("chat:send", { kind: "log", text, characterName: sheet.name });
   }
 
   async function togglePrivate() {
@@ -60,22 +62,17 @@ export function SheetView({
 
   async function handleDelete() {
     await fetch(`/api/sheets/${sheetId}`, { method: "DELETE" });
-    router.push("/gallery");
+    router.push(`/mesas/${mesaId}/gallery`);
   }
 
-  async function handleDownloadImage() {
+  async function handleDownloadPdf() {
     setDownloading(true);
     try {
-      const { default: html2canvas } = await import("html2canvas");
-      const el = document.getElementById("sheet-frame");
-      if (!el) return;
-      const canvas = await html2canvas(el, { backgroundColor: "#0d2229", scale: 2 });
-      const link = document.createElement("a");
-      link.download = `${(sheet.name || "ficha").replace(/[^a-z0-9]+/gi, "_")}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      const { buildSheetPdf } = await import("@/lib/sheet-pdf");
+      const pdf = buildSheetPdf(sheet, ownerName);
+      pdf.save(`${(sheet.name || "ficha").replace(/[^a-z0-9]+/gi, "_")}.pdf`);
     } catch {
-      alert("Não foi possível gerar a imagem.");
+      alert("Não foi possível gerar o PDF.");
     } finally {
       setDownloading(false);
     }
@@ -84,18 +81,18 @@ export function SheetView({
   return (
     <>
       <div className="sheet-actions">
-        <button className="btn ghost" onClick={() => router.push("/gallery")}>
+        <button className="btn ghost" onClick={() => router.push(`/mesas/${mesaId}/gallery`)}>
           ← Voltar
         </button>
         <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn ghost" onClick={() => router.push("/rulebook")}>
+          <button className="btn ghost" onClick={() => router.push(`/mesas/${mesaId}/rulebook`)}>
             📖 Regras
           </button>
-          <button className="btn ghost" onClick={() => router.push("/history")}>
+          <button className="btn ghost" onClick={() => router.push(`/mesas/${mesaId}/history`)}>
             📜 Log da Mesa
           </button>
-          <button className="btn secondary small" disabled={downloading} onClick={handleDownloadImage}>
-            {downloading ? "Gerando imagem..." : "📥 Baixar como imagem"}
+          <button className="btn secondary small" disabled={downloading} onClick={handleDownloadPdf}>
+            {downloading ? "Gerando PDF..." : "📥 Baixar como PDF"}
           </button>
           {isMine && (
             <>
@@ -135,11 +132,13 @@ export function SheetView({
         <div className="sheet-tab-content">
           {tab === "Perícias" && (
             <>
-              <PericiasPanel sheet={sheet} isMine={isMine} onChange={patch} />
+              <PericiasPanel sheet={sheet} isMine={isMine} onChange={patch} mesaId={mesaId} />
               <EffectsPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />
             </>
           )}
-          {tab === "Equipamentos" && <EquipmentPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />}
+          {tab === "Equipamentos" && (
+            <EquipmentPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} mesaId={mesaId} />
+          )}
           {tab === "Habilidades" && <AbilitiesPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />}
           {tab === "Profissões" && <div className="derived-note">Em breve.</div>}
           {tab === "Biografia" && (
@@ -202,7 +201,6 @@ export function SheetView({
             </>
           )}
         </div>
-        <div className="footer-tag">Sistema Cardigan</div>
       </div>
 
       {showDelete && (

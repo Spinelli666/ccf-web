@@ -11,10 +11,12 @@ export function PericiasPanel({
   sheet,
   isMine,
   onChange,
+  mesaId,
 }: {
   sheet: FullSheetData;
   isMine: boolean;
   onChange: (patch: Partial<FullSheetData>) => void;
+  mesaId: string;
 }) {
   const [rollingIdx, setRollingIdx] = useState<number | null>(null);
 
@@ -33,7 +35,7 @@ export function PericiasPanel({
     let breakdown = `${p.nome}: ${formatRollDice(20, result)} + ${num(p.valor)}`;
     if (periciaBonus) breakdown += ` + Bônus (${periciaBonus})`;
     if (bonusExtra) breakdown += ` ${bonusExtra > 0 ? "+" : "-"} ${Math.abs(bonusExtra)}`;
-    getSocket().emit("chat:send", {
+    getSocket(mesaId).emit("chat:send", {
       kind: "roll",
       text: breakdown,
       total,

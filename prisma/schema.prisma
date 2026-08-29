@@ -16,10 +16,40 @@ model User {
 
   sheets       Sheet[]
   chatMessages ChatMessage[]
+  mesasCriadas Mesa[]        @relation("MesasCriadas")
+  mesaMembros  MesaMembro[]
+}
+
+model Mesa {
+  id           String        @id @default(cuid())
+  nome         String
+  // Código curto (6 chars) que o Mestre compartilha com os jogadores pra entrar na mesa.
+  codigo       String        @unique
+  senhaHash    String
+  ownerId      String
+  owner        User          @relation("MesasCriadas", fields: [ownerId], references: [id])
+  membros      MesaMembro[]
+  sheets       Sheet[]
+  chatMessages ChatMessage[]
+  combate      Combate?
+  createdAt    DateTime      @default(now())
+}
+
+model MesaMembro {
+  id       String   @id @default(cuid())
+  mesaId   String
+  mesa     Mesa     @relation(fields: [mesaId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt DateTime @default(now())
+
+  @@unique([mesaId, userId])
 }
 
 model Sheet {
   id        String   @id @default(cuid())
+  mesaId    String
+  mesa      Mesa     @relation(fields: [mesaId], references: [id], onDelete: Cascade)
   ownerId   String
   owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   name      String
@@ -31,7 +61,10 @@ model Sheet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  combateParticipantes CombateParticipante[]
+
   @@index([ownerId])
+  @@index([mesaId])
 }
 
 model Race {
@@ -50,6 +83,8 @@ enum ChatMessageKind {
 
 model ChatMessage {
   id             String           @id @default(cuid())
+  mesaId         String
+  mesa           Mesa             @relation(fields: [mesaId], references: [id], onDelete: Cascade)
   authorId       String?
   author         User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorName     String
@@ -62,4 +97,30 @@ model ChatMessage {
   createdAt      DateTime         @default(now())
 
   @@index([createdAt])
+  @@index([mesaId])
+}
+
+// Uma mesa tem no máximo um combate ativo por vez — iniciar um novo substitui o anterior.
+model Combate {
+  id              String                @id @default(cuid())
+  mesaId          String                @unique
+  mesa            Mesa                  @relation(fields: [mesaId], references: [id], onDelete: Cascade)
+  rodada          Int                   @default(1)
+  turnoAtualIndex Int                   @default(0)
+  createdAt       DateTime              @default(now())
+  participantes   CombateParticipante[]
+}
+
+model CombateParticipante {
+  id            String   @id @default(cuid())
+  combateId     String
+  combate       Combate  @relation(fields: [combateId], references: [id], onDelete: Cascade)
+  sheetId       String?
+  sheet         Sheet?   @relation(fields: [sheetId], references: [id], onDelete: SetNull)
+  nome          String
+  iniciativa    Int?
+  ordem         Int      @default(0)
+  mostrarStatus Boolean  @default(false)
+
+  @@index([combateId])
 }

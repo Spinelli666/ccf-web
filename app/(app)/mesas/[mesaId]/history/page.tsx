@@ -4,8 +4,10 @@ import { timeAgo } from "@/lib/dice";
 
 export const dynamic = "force-dynamic";
 
-export default async function HistoryPage() {
+export default async function HistoryPage({ params }: { params: Promise<{ mesaId: string }> }) {
+  const { mesaId } = await params;
   const messages = await prisma.chatMessage.findMany({
+    where: { mesaId },
     orderBy: { createdAt: "asc" },
     take: 500,
   });
@@ -13,7 +15,7 @@ export default async function HistoryPage() {
   return (
     <>
       <div className="sheet-actions" style={{ marginBottom: 10 }}>
-        <Link href="/gallery" className="btn ghost">
+        <Link href={`/mesas/${mesaId}/gallery`} className="btn ghost">
           ← Voltar
         </Link>
       </div>

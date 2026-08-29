@@ -26,3 +26,12 @@ export function findAbilityClass(nome: string): string | null {
   }
   return null;
 }
+
+/** Busca a entrada completa (com aprimoramentos) de uma habilidade base pelo nome, em qualquer classe. */
+export function findAbilityEntry(nome: string): AbilityEntry | null {
+  for (const cls of CLASSES_ORDENADAS) {
+    const entry = (ABILITIES_LIBRARY[cls] || []).find((e) => e.nome === nome);
+    if (entry) return entry;
+  }
+  return null;
+}

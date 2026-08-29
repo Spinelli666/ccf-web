@@ -1,0 +1,46 @@
+// Termos mecânicos recorrentes no sistema Cardigan (curados a partir da frequência real
+// de uso em chatbot-discord-sistema-rpg/data/**/*.md), usados pra destacar em negrito o
+// texto de efeito das habilidades na ficha. Ver também data/rules-effects.ts (Condições/Efeitos,
+// que ganham tooltip com a descrição da regra em vez de só negrito).
+export const PERICIAS_TERMOS = [
+  "Força",
+  "Vigor",
+  "Evasão",
+  "Persuasão",
+  "Precisão",
+  "Inteligência",
+  "Destreza",
+  "Furtividade",
+  "Psionismo",
+] as const;
+
+export const MECANICAS_TERMOS = [
+  "Desvantagem Aprimorada",
+  "Vantagem Aprimorada",
+  "Dano Extra",
+  "Acerto Crítico",
+  "Erros Críticos",
+  "Erro Crítico",
+  "Pontos de Ação",
+  "Ponto de Ação",
+  "Ação Longa",
+  "Ação Curta",
+  "Descanso Longo",
+  "Descanso Curto",
+  "Efeito Negativo",
+  "Efeito Positivo",
+  "PV Temporário",
+  "PE Temporário",
+  "Vantagem",
+  "Desvantagem",
+  "Armadura",
+  "Durabilidade",
+  "Reação",
+  "Passiva",
+  "Foco",
+  "Descanso",
+  "Inevitável",
+  "Deslocamento",
+  "Empurrar",
+  "Atacar",
+] as const;

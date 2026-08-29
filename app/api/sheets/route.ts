@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/api-auth";
+import { requireMesaMember } from "@/lib/api-auth";
 
-export async function GET() {
-  const { user, response } = await requireUser();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const mesaId = searchParams.get("mesaId") || "";
+  if (!mesaId) return NextResponse.json({ error: "mesaId é obrigatório." }, { status: 400 });
+
+  const { user, response } = await requireMesaMember(mesaId);
   if (!user) return response;
 
   const sheets = await prisma.sheet.findMany({
-    where: { OR: [{ private: false }, { ownerId: user.id }] },
+    where: { mesaId, OR: [{ private: false }, { ownerId: user.id }] },
     include: { owner: { select: { displayName: true, username: true } } },
     orderBy: { name: "asc" },
   });
@@ -15,16 +19,20 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { user, response } = await requireUser();
+  const body = await req.json().catch(() => null);
+  const mesaId = typeof body?.mesaId === "string" ? body.mesaId : "";
+  if (!mesaId) return NextResponse.json({ error: "mesaId é obrigatório." }, { status: 400 });
+
+  const { user, response } = await requireMesaMember(mesaId);
   if (!user) return response;
 
-  const body = await req.json().catch(() => null);
   if (!body || typeof body.name !== "string" || !body.name.trim()) {
     return NextResponse.json({ error: "Nome da ficha é obrigatório." }, { status: 400 });
   }
 
   const sheet = await prisma.sheet.create({
     data: {
+      mesaId,
       ownerId: user.id,
       name: body.name.trim(),
       private: !!body.private,
