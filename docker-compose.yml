@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cardigan
+      POSTGRES_PASSWORD: cardigan
+      POSTGRES_DB: cardigan
+    ports:
+      - "5432:5432"
+    volumes:
+      - ccf_web_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cardigan -d cardigan"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  ccf_web_db_data:

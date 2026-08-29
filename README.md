@@ -11,13 +11,19 @@ Gerenciador de fichas de personagem do sistema Cardigan, standalone (fora do Fou
 
 ## Setup local
 
-1. **Banco de dados**: suba um Postgres local (ex.: `docker run -e POSTGRES_PASSWORD=cardigan -e POSTGRES_USER=cardigan -e POSTGRES_DB=cardigan -p 5432:5432 postgres:16`).
+**Caminho rápido (Linux/macOS com Docker):** `bash scripts/setup.sh` faz os passos 1-5 abaixo sozinho (sobe o Postgres do `docker-compose.yml`, copia `.env.example`, instala dependências, roda a migração inicial e o seed). Só falta ajustar `AUTH_SECRET` no `.env` depois.
+
+Passo a passo manual:
+
+1. **Banco de dados**: `docker compose up -d db` (usa o `docker-compose.yml` do repo) ou suba um Postgres por conta própria.
 2. Copie `.env.example` pra `.env` e ajuste `DATABASE_URL` / gere um `AUTH_SECRET` (`openssl rand -base64 32`).
 3. Instale as dependências: `npm install`.
-4. Rode as migrações e o client do Prisma: `npm run prisma:migrate` (cria as tabelas) — isso já roda `prisma generate` internamente.
+4. Rode a migração inicial: `npx prisma migrate dev --name init` (primeira vez — cria `prisma/migrations/`) ou `npm run prisma:deploy` se as migrações já existirem.
 5. Popule as raças padrão: `npm run prisma:seed`.
 6. Suba o servidor: `npm run dev` (roda `node server.js`, com Next em modo dev + Socket.io na mesma porta, padrão `3000`).
 7. Crie uma conta em `/register` e comece a criar fichas.
+
+**Vincular ao GitHub:** `bash scripts/link-github.sh <url-do-repo>` — inicializa o git, adiciona o remote, e faz o push inicial (pede confirmação manual se o remoto já tiver commits, em vez de sobrescrever).
 
 ## Scripts
 
