@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useSession } from "next-auth/react";
 import { getSocket } from "@/lib/socket-client";
 import { parseDiceCommand, rollDiceCommand, rollCritClass, timeAgo } from "@/lib/dice";
+import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 
 type ChatMessage = {
   id: string;
@@ -25,6 +26,7 @@ export function TableChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [, forceTick] = useState(0);
+  const [showClear, setShowClear] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,8 +40,10 @@ export function TableChat() {
     const socket = getSocket();
     const onNew = (msg: ChatMessage) => setMessages((prev) => [...prev.slice(-199), msg]);
     const onDeleted = (id: string) => setMessages((prev) => prev.filter((m) => m.id !== id));
+    const onCleared = () => setMessages([]);
     socket.on("chat:new", onNew);
     socket.on("chat:deleted", onDeleted);
+    socket.on("chat:cleared", onCleared);
 
     // "tempo atrás" refresh
     const interval = setInterval(() => forceTick((t) => t + 1), 30000);
@@ -48,9 +52,15 @@ export function TableChat() {
       cancelled = true;
       socket.off("chat:new", onNew);
       socket.off("chat:deleted", onDeleted);
+      socket.off("chat:cleared", onCleared);
       clearInterval(interval);
     };
   }, []);
+
+  function clearAll() {
+    setShowClear(false);
+    getSocket().emit("chat:clear");
+  }
 
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
@@ -87,7 +97,24 @@ export function TableChat() {
     <div className="sidebar-inner">
       <div className="chat-header">
         <h3 style={{ margin: 0, border: "none", padding: 0 }}>💬 Mesa</h3>
+        <button
+          type="button"
+          className="chat-clear-btn"
+          title="Limpar tudo (rolagens, ações e mensagens)"
+          onClick={() => setShowClear(true)}
+        >
+          🗑️
+        </button>
       </div>
+      {showClear && (
+        <ConfirmDialog
+          title="Limpar tudo"
+          message="Apagar todo o histórico da mesa (rolagens, ações e mensagens) pra sempre? Essa ação não pode ser desfeita."
+          confirmLabel="Limpar tudo"
+          onConfirm={clearAll}
+          onCancel={() => setShowClear(false)}
+        />
+      )}
       <div className="chat-list" ref={listRef}>
         {messages.length === 0 ? (
           <div className="side-empty">

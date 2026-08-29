@@ -24,12 +24,15 @@ export function PericiasPanel({
     onChange({ pericias: next });
   }
 
-  function doRoll(mode: RollModeKey, bonus: number) {
+  function doRoll(mode: RollModeKey, bonusExtra: number) {
     if (rollingIdx === null) return;
     const p = sheet.pericias[rollingIdx];
+    const periciaBonus = num(p.bonus, 0);
     const result = rollWithMode(20, mode);
-    const total = result.picked + num(p.valor) + bonus;
-    const breakdown = `${p.nome}: ${formatRollDice(20, result)} + ${num(p.valor)}${bonus ? ` + ${bonus}` : ""}`;
+    const total = result.picked + num(p.valor) + periciaBonus + bonusExtra;
+    let breakdown = `${p.nome}: ${formatRollDice(20, result)} + ${num(p.valor)}`;
+    if (periciaBonus) breakdown += ` + Bônus (${periciaBonus})`;
+    if (bonusExtra) breakdown += ` ${bonusExtra > 0 ? "+" : "-"} ${Math.abs(bonusExtra)}`;
     getSocket().emit("chat:send", {
       kind: "roll",
       text: breakdown,
@@ -58,6 +61,14 @@ export function PericiasPanel({
               ) : (
                 <span className="v">{p.valor}</span>
               )}
+              <input
+                type="number"
+                className="mini-input pericia-bonus-input"
+                disabled={!isMine}
+                value={p.bonus || "0"}
+                title="Bônus da perícia (editável — soma ao rolar)"
+                onChange={(e) => setPericia(i, "bonus", e.target.value.trim() || "0")}
+              />
               <button
                 type="button"
                 className="dice-btn"

@@ -62,16 +62,15 @@ Esses arquivos foram **extraídos automaticamente** do `sistema-cardigan-fichas 
 ## O que já funciona
 
 - Login/registro de conta (usuário/senha).
-- Galeria de fichas (todas / minhas), criação via wizard guiado (6 passos: identidade, raça, classe, perícias, equipamento, biografia).
-- Ficha completa: PV/PE com barras e descanso curto/longo, fraturas, perícias com rolagem (d20 + vantagem/desvantagem/bônus), habilidades de raça/classe com contador de usos, equipar/desequipar armas e armaduras, remédios com usos, efeitos ativos (catálogo completo), subir de nível guiado.
-- Chat de mesa em tempo real (Socket.io) com rolagens `/r XdY+Z`, dados rápidos, log persistido no banco.
+- Galeria de fichas (todas / minhas), ficha de exemplo pronta ("Harry de Hazel"), criação via wizard guiado (6 passos: identidade, raça, classe, perícias, equipamento, biografia).
+- Ficha completa: PV/PE com barras, bônus permanente e temporário, e descanso curto/longo; fraturas, sanidade, toxidade, fome e sede rastreados com pips e avisos; armadura atual/máxima com bônus manual e fluxo de "sofrer dano" (desconta armadura, consome bônus temporário) com opção de ignorar armadura; XP com gate de 100 pra liberar o diálogo de subir de nível; sistema de Julgamento completo (Sentenças/Dádivas, Executar, Poupar, estado de morto); pontos de ação por turno; perícias com rolagem (d20 + vantagem/desvantagem/bônus); habilidades de raça/classe com contador de usos e toggle de aprimoramento ativo/inativo; equipar/desequipar armas e armaduras com durabilidade, propriedades de arma expansíveis e botão de ataque (rolagem, crítico, erro crítico desgasta a arma); remédios com usos; efeitos ativos (catálogo completo); baixar a ficha como imagem (PNG).
+- Chat de mesa em tempo real (Socket.io) com rolagens `/r XdY+Z`, dados rápidos, "Limpar tudo", log persistido no banco e página de histórico completo ("Log da Mesa").
 - Fichas privadas (só o dono vê) ou públicas (toda a mesa vê).
 
 ## Simplificações conhecidas em relação ao app original
 
-- **Durabilidade de arma/armadura** não foi portada (o app original tinha um fluxo de diálogo pra isso que não foi replicado).
-- **Aprimoramentos de classe como toggle ativo/inativo** (`data-aprim-ativo` no original) — aqui são só exibidos, sem toggle.
-- **Insanidade/Toxidade** não são campos rastreados nesta versão (o Descanso Longo remove Exaustão e 1 Fratura, mas não essas duas).
+- **Espaços de Inventário** (contagem de slots por peso/categoria de item) não foi portada — o inventário não impõe limite de carga.
+- **Bônus de perícia persistente** (`pericia.bonus` no original, um campo salvo por perícia) não existe; o diálogo de rolagem já pede um bônus avulso por rolagem, que cobre o caso de uso mais comum.
 - O manual de regras e os catálogos são cópia estática do HTML original — ver seção acima.
 
 ## Deploy na VPS (Hostinger KVM 1 ou similar)

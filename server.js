@@ -81,6 +81,17 @@ app.prepare().then(async () => {
         if (ack) ack({ ok: false, error: "failed" });
       }
     });
+
+    socket.on("chat:clear", async (_payload, ack) => {
+      try {
+        await prisma.chatMessage.deleteMany({});
+        io.to("table").emit("chat:cleared");
+        if (ack) ack({ ok: true });
+      } catch (err) {
+        console.error("chat:clear failed", err);
+        if (ack) ack({ ok: false, error: "failed" });
+      }
+    });
   });
 
   httpServer

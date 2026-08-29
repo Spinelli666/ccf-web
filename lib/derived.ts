@@ -1,6 +1,8 @@
 // Ported from the original Cardigan Artifact (computeDerived / getPericiaVal).
 // Keep in sync with module/data/*.mjs formulas in the Foundry system if the ruleset changes.
 
+import type { Armadura } from "@/lib/sheet-types";
+
 export type Pericia = { nome: string; valor: string | number };
 
 export type SheetStats = {
@@ -49,6 +51,12 @@ export type DerivedStats = {
   inventario: number;
   critRange: number;
 };
+
+export function equippedArmorSum(armaduras: Armadura[]): number {
+  return armaduras
+    .filter((a) => a.equipado)
+    .reduce((sum, a) => sum + num(a.armadura, 0), 0);
+}
 
 export function computeDerived(s: SheetData): DerivedStats {
   const nivel = Math.max(1, num(s.nivel, 1));

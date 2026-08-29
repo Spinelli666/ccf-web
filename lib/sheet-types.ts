@@ -1,4 +1,4 @@
-export type Pericia = { nome: string; valor: string };
+export type Pericia = { nome: string; valor: string; bonus: string };
 
 export type SheetStats = {
   pvBonus: string;
@@ -67,12 +67,27 @@ export type Remedio = {
   curaPericia: string;
 };
 
+export type Julgamento = { sentencas: number; dadivas: number };
+
 export type FullSheetData = {
   name: string;
   playerName: string;
   nivel: string;
   biografia: string;
   fraturas: number;
+  xp: number;
+  insania: number;
+  toxidade: number;
+  fome: number;
+  sede: number;
+  morto: boolean;
+  pvBonusTemp: number;
+  peBonusTemp: number;
+  armaduraAtual: number | null;
+  armaduraBonusManual: number;
+  julgamento: Julgamento;
+  acaoTotal: number;
+  acaoBoxes: boolean[];
   stats: SheetStats;
   pericias: Pericia[];
   racaTitulo: string;
@@ -94,6 +109,19 @@ export function emptySheetData(overrides: Partial<FullSheetData> = {}): FullShee
     nivel: "1",
     biografia: "",
     fraturas: 0,
+    xp: 0,
+    insania: 0,
+    toxidade: 0,
+    fome: 0,
+    sede: 0,
+    morto: false,
+    pvBonusTemp: 0,
+    peBonusTemp: 0,
+    armaduraAtual: null,
+    armaduraBonusManual: 0,
+    julgamento: { sentencas: 0, dadivas: 0 },
+    acaoTotal: 4,
+    acaoBoxes: [false, false, false, false],
     stats: {
       pvBonus: "0",
       peBonus: "0",
@@ -104,15 +132,15 @@ export function emptySheetData(overrides: Partial<FullSheetData> = {}): FullShee
       peAtual: "0",
     },
     pericias: [
-      { nome: "Força", valor: "0" },
-      { nome: "Vigor", valor: "0" },
-      { nome: "Evasão", valor: "0" },
-      { nome: "Persuasão", valor: "0" },
-      { nome: "Precisão", valor: "0" },
-      { nome: "Inteligência", valor: "0" },
-      { nome: "Destreza", valor: "0" },
-      { nome: "Furtividade", valor: "0" },
-      { nome: "Psionismo", valor: "0" },
+      { nome: "Força", valor: "0", bonus: "0" },
+      { nome: "Vigor", valor: "0", bonus: "0" },
+      { nome: "Evasão", valor: "0", bonus: "0" },
+      { nome: "Persuasão", valor: "0", bonus: "0" },
+      { nome: "Precisão", valor: "0", bonus: "0" },
+      { nome: "Inteligência", valor: "0", bonus: "0" },
+      { nome: "Destreza", valor: "0", bonus: "0" },
+      { nome: "Furtividade", valor: "0", bonus: "0" },
+      { nome: "Psionismo", valor: "0", bonus: "0" },
     ],
     racaTitulo: "",
     racaHabilidades: [],

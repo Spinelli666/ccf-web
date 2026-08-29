@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDebouncedSave } from "@/lib/use-debounced-save";
 import { getSocket } from "@/lib/socket-client";
-import { rollWithMode } from "@/lib/dice";
+import { RichText } from "@/components/RichText";
 import { StatsPanel } from "@/components/sheet/StatsPanel";
 import { PericiasPanel } from "@/components/sheet/PericiasPanel";
 import { AbilitiesPanel } from "@/components/sheet/AbilitiesPanel";
@@ -13,7 +13,7 @@ import { EffectsPanel } from "@/components/sheet/EffectsPanel";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import type { FullSheetData } from "@/lib/sheet-types";
 
-const TABS = ["Perícias", "Habilidades", "Equipamento", "Efeitos"] as const;
+const TABS = ["Perícias", "Equipamentos", "Habilidades", "Profissões", "Biografia"] as const;
 type Tab = (typeof TABS)[number];
 
 export function SheetView({
@@ -36,6 +36,7 @@ export function SheetView({
   const [tab, setTab] = useState<Tab>("Perícias");
   const [showDelete, setShowDelete] = useState(false);
   const [priv, setPriv] = useState(isPrivate);
+  const [downloading, setDownloading] = useState(false);
 
   useDebouncedSave(sheetId, sheet.name || sheetName, sheet, isMine);
 
@@ -62,17 +63,23 @@ export function SheetView({
     router.push("/gallery");
   }
 
-  function rollJulgamento() {
-    const result = rollWithMode(20, "normal");
-    getSocket().emit("chat:send", {
-      kind: "roll",
-      text: "Teste de Julgamento",
-      total: result.picked,
-      characterName: sheet.name,
-    });
+  async function handleDownloadImage() {
+    setDownloading(true);
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      const el = document.getElementById("sheet-frame");
+      if (!el) return;
+      const canvas = await html2canvas(el, { backgroundColor: "#0d2229", scale: 2 });
+      const link = document.createElement("a");
+      link.download = `${(sheet.name || "ficha").replace(/[^a-z0-9]+/gi, "_")}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch {
+      alert("Não foi possível gerar a imagem.");
+    } finally {
+      setDownloading(false);
+    }
   }
-
-  const derrotado = Number(sheet.stats.pvAtual) <= 0;
 
   return (
     <>
@@ -83,6 +90,12 @@ export function SheetView({
         <div style={{ display: "flex", gap: 8 }}>
           <button className="btn ghost" onClick={() => router.push("/rulebook")}>
             📖 Regras
+          </button>
+          <button className="btn ghost" onClick={() => router.push("/history")}>
+            📜 Log da Mesa
+          </button>
+          <button className="btn secondary small" disabled={downloading} onClick={handleDownloadImage}>
+            {downloading ? "Gerando imagem..." : "📥 Baixar como imagem"}
           </button>
           {isMine && (
             <>
@@ -97,80 +110,13 @@ export function SheetView({
         </div>
       </div>
 
-      <div className="frame">
+      <div className="frame" id="sheet-frame">
+        <div className="corner tl" /> <div className="corner tr" /> <div className="corner bl" /> <div className="corner br" />
         <div className="sheet-head">
-          {isMine ? (
-            <input
-              className="field"
-              style={{
-                fontFamily: "'Cormorant Garamond',serif",
-                fontWeight: 700,
-                fontSize: 40,
-                textAlign: "center",
-                border: "none",
-                background: "transparent",
-                color: "var(--ink)",
-                width: "100%",
-              }}
-              value={sheet.name}
-              placeholder="Nome do personagem"
-              onChange={(e) => patch({ name: e.target.value })}
-            />
-          ) : (
-            <h1>{sheet.name || sheetName}</h1>
-          )}
-          <div className="sub">Jogador: {ownerName}</div>
-          {isMine ? (
-            <textarea
-              className="field"
-              style={{ width: "100%", background: "transparent", border: "none", textAlign: "center" }}
-              value={sheet.biografia}
-              placeholder="Biografia..."
-              onChange={(e) => patch({ biografia: e.target.value })}
-            />
-          ) : (
-            sheet.biografia && <div className="desc">{sheet.biografia}</div>
-          )}
+          <h1>{sheet.name || sheetName}</h1>
+          {priv && <div className="private-tag">🔒 Ficha privada — só você vê ela em &quot;Todas as fichas&quot;</div>}
         </div>
-
-        {derrotado && (
-          <div className="julgamento-panel">
-            <div className="julgamento-title">☠️ Derrotado</div>
-            <div className="julgamento-actions">
-              <button type="button" className="btn small secondary" onClick={rollJulgamento}>
-                🎲 Rolar Julgamento (1d20)
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="field-row" style={{ justifyContent: "center" }}>
-          <div className="field" style={{ maxWidth: 120 }}>
-            <label>Nível</label>
-            <input
-              type="number"
-              disabled={!isMine}
-              value={sheet.nivel}
-              onChange={(e) => patch({ nivel: e.target.value })}
-            />
-          </div>
-          <div className="field" style={{ maxWidth: 200 }}>
-            <label>Raça</label>
-            <input
-              disabled={!isMine}
-              value={sheet.racaTitulo}
-              onChange={(e) => patch({ racaTitulo: e.target.value })}
-            />
-          </div>
-          <div className="field" style={{ maxWidth: 200 }}>
-            <label>Classe</label>
-            <input
-              disabled={!isMine}
-              value={sheet.classeTitulo}
-              onChange={(e) => patch({ classeTitulo: e.target.value })}
-            />
-          </div>
-        </div>
+        <div className="divider">⦿</div>
 
         <StatsPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />
 
@@ -187,15 +133,76 @@ export function SheetView({
           ))}
         </div>
         <div className="sheet-tab-content">
-          {tab === "Perícias" && <PericiasPanel sheet={sheet} isMine={isMine} onChange={patch} />}
-          {tab === "Habilidades" && (
-            <AbilitiesPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />
+          {tab === "Perícias" && (
+            <>
+              <PericiasPanel sheet={sheet} isMine={isMine} onChange={patch} />
+              <EffectsPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />
+            </>
           )}
-          {tab === "Equipamento" && (
-            <EquipmentPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />
+          {tab === "Equipamentos" && <EquipmentPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />}
+          {tab === "Habilidades" && <AbilitiesPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />}
+          {tab === "Profissões" && <div className="derived-note">Em breve.</div>}
+          {tab === "Biografia" && (
+            <>
+              <div className="section identidade-inline" style={{ marginTop: 0 }}>
+                <h2>Identidade</h2>
+                {isMine ? (
+                  <>
+                    <div className="field-row">
+                      <div className="field">
+                        <label>Nome do personagem</label>
+                        <input
+                          type="text"
+                          value={sheet.name}
+                          placeholder="Ex: Harry de Hazel"
+                          onChange={(e) => patch({ name: e.target.value })}
+                        />
+                      </div>
+                      <div className="field">
+                        <label>Jogador</label>
+                        <input type="text" value={ownerName} disabled />
+                      </div>
+                    </div>
+                    <label className="chk-inline" style={{ marginTop: 8 }}>
+                      <input type="checkbox" checked={priv} onChange={togglePrivate} /> 🔒 Ficha privada (só aparece
+                      pra você em &quot;Todas as fichas&quot;; outros jogadores não veem)
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <div className="mini-row">
+                      <span className="mini-label">Nome</span>
+                      <span className="info-val">{sheet.name}</span>
+                    </div>
+                    <div className="mini-row">
+                      <span className="mini-label">Jogador</span>
+                      <span className="info-val">{ownerName || "—"}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="section">
+                <h2>Biografia</h2>
+                {isMine && (
+                  <textarea
+                    className="field"
+                    style={{ width: "100%", minHeight: 90, marginBottom: 10 }}
+                    value={sheet.biografia}
+                    placeholder="História, aparência, personalidade..."
+                    onChange={(e) => patch({ biografia: e.target.value })}
+                  />
+                )}
+                {!isMine &&
+                  (sheet.biografia ? (
+                    <RichText text={sheet.biografia} />
+                  ) : (
+                    <div className="derived-note">Sem biografia cadastrada ainda.</div>
+                  ))}
+              </div>
+            </>
           )}
-          {tab === "Efeitos" && <EffectsPanel sheet={sheet} isMine={isMine} onChange={patch} />}
         </div>
+        <div className="footer-tag">Sistema Cardigan</div>
       </div>
 
       {showDelete && (

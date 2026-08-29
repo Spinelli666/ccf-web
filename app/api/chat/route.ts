@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   if (!user) return response;
 
   const { searchParams } = new URL(req.url);
-  const take = Math.min(200, Math.max(1, Number(searchParams.get("take")) || 50));
+  const take = Math.min(500, Math.max(1, Number(searchParams.get("take")) || 50));
 
   const messages = await prisma.chatMessage.findMany({
     orderBy: { createdAt: "desc" },
