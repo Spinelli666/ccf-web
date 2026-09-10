@@ -10,9 +10,12 @@ const { PrismaClient } = require("@prisma/client");
 
 // `next()` only loads .env* files once it prepares the app — too late for the
 // PORT/DATABASE_URL/AUTH_SECRET reads below, so load them explicitly first.
+// This must run BEFORE checking NODE_ENV: a NODE_ENV=production set only inside .env
+// (not in the process environment itself) would otherwise never be seen here, and the
+// server would boot in dev mode even in production (exactly what happened on the VPS).
 const { loadEnvConfig } = require("@next/env");
+loadEnvConfig(process.cwd(), true);
 const dev = process.env.NODE_ENV !== "production";
-loadEnvConfig(process.cwd(), dev);
 
 const prisma = new PrismaClient();
 
