@@ -6,8 +6,9 @@ import { rollWithMode, formatRollDice, type RollModeKey } from "@/lib/dice";
 import { getSocket } from "@/lib/socket-client";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { AddEquipmentDialog } from "@/components/dialogs/AddEquipmentDialog";
+import { EditItemDialog, type EditTarget } from "@/components/dialogs/EditItemDialog";
 import { PROPRIEDADES_ARMAS_INFO } from "@/data/weapons";
-import type { Arma, Armadura, FullSheetData } from "@/lib/sheet-types";
+import type { Arma, Armadura, Remedio, FullSheetData } from "@/lib/sheet-types";
 
 const ATRIBUTOS_ATAQUE = ["Força", "Destreza", "Psionismo"] as const;
 
@@ -49,6 +50,7 @@ export function EquipmentPanel({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [attackIdx, setAttackIdx] = useState<number | null>(null);
   const [attrByIdx, setAttrByIdx] = useState<Record<number, string>>({});
+  const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
 
   const derived = computeDerived(sheet);
   const atributoOpts = ATRIBUTOS_ATAQUE.map((nome) => {
@@ -98,6 +100,38 @@ export function EquipmentPanel({
     const item = list[i];
     list[i] = { ...item, durabilidadeAtual: clamp(item.durabilidadeAtual + delta, 0, item.durabilidadeMax) };
     onChange({ [kind]: list } as Partial<FullSheetData>);
+  }
+
+  function salvarEdicao(patch: Partial<Arma> | Partial<Armadura> | Partial<Remedio>) {
+    if (!editTarget) return;
+    if (editTarget.tipo === "arma") {
+      const next = sheet.armas.slice();
+      next[editTarget.idx] = { ...next[editTarget.idx], ...(patch as Partial<Arma>) };
+      onChange({ armas: next });
+    } else if (editTarget.tipo === "armadura") {
+      const next = sheet.armaduras.slice();
+      next[editTarget.idx] = { ...next[editTarget.idx], ...(patch as Partial<Armadura>) };
+      onChange({ armaduras: next });
+    } else {
+      const next = sheet.remedios.slice();
+      next[editTarget.idx] = { ...next[editTarget.idx], ...(patch as Partial<Remedio>) };
+      onChange({ remedios: next });
+    }
+    setEditTarget(null);
+  }
+
+  function removerItemEditado() {
+    if (!editTarget) return;
+    const nome = editTarget.data.item;
+    if (editTarget.tipo === "arma") {
+      onChange({ armas: sheet.armas.filter((_, i) => i !== editTarget.idx) });
+    } else if (editTarget.tipo === "armadura") {
+      onChange({ armaduras: sheet.armaduras.filter((_, i) => i !== editTarget.idx) });
+    } else {
+      onChange({ remedios: sheet.remedios.filter((_, i) => i !== editTarget.idx) });
+    }
+    onLog(`${sheet.name || "Personagem"} removeu "${nome}" do Inventário.`);
+    setEditTarget(null);
   }
 
   function doAttack(mode: RollModeKey) {
@@ -240,6 +274,7 @@ export function EquipmentPanel({
                     <th>Durab.</th>
                     <th></th>
                     <th></th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -293,8 +328,20 @@ export function EquipmentPanel({
                             </button>
                           )}
                         </td>
+                        <td className="col-tight">
+                          {isMine && (
+                            <button
+                              type="button"
+                              className="icon-btn"
+                              title="Editar"
+                              onClick={() => setEditTarget({ tipo: "arma", idx, data: a })}
+                            >
+                              ✏️
+                            </button>
+                          )}
+                        </td>
                       </tr>
-                      {weaponPropsRow(idx, a, `w-${idx}`, 5)}
+                      {weaponPropsRow(idx, a, `w-${idx}`, 6)}
                     </Fragment>
                   ))}
                 </tbody>
@@ -311,6 +358,7 @@ export function EquipmentPanel({
                       <th>Item</th>
                       <th>Armadura</th>
                       <th>Durab.</th>
+                      <th></th>
                       <th></th>
                     </tr>
                   </thead>
@@ -344,8 +392,20 @@ export function EquipmentPanel({
                               </button>
                             )}
                           </td>
+                          <td className="col-tight">
+                            {isMine && (
+                              <button
+                                type="button"
+                                className="icon-btn"
+                                title="Editar"
+                                onClick={() => setEditTarget({ tipo: "armadura", idx, data: a })}
+                              >
+                                ✏️
+                              </button>
+                            )}
+                          </td>
                         </tr>
-                        {armorInfoRow(idx, a, `a-${idx}`, 4)}
+                        {armorInfoRow(idx, a, `a-${idx}`, 5)}
                       </Fragment>
                     ))}
                   </tbody>
@@ -377,6 +437,7 @@ export function EquipmentPanel({
                     <th>Dano</th>
                     <th>Peso</th>
                     <th></th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -397,8 +458,20 @@ export function EquipmentPanel({
                             </button>
                           )}
                         </td>
+                        <td className="col-tight">
+                          {isMine && (
+                            <button
+                              type="button"
+                              className="icon-btn"
+                              title="Editar"
+                              onClick={() => setEditTarget({ tipo: "arma", idx, data: a })}
+                            >
+                              ✏️
+                            </button>
+                          )}
+                        </td>
                       </tr>
-                      {weaponPropsRow(idx, a, `wi-${idx}`, 4)}
+                      {weaponPropsRow(idx, a, `wi-${idx}`, 5)}
                     </Fragment>
                   ))}
                 </tbody>
@@ -414,6 +487,7 @@ export function EquipmentPanel({
                     <th>Item</th>
                     <th>Armadura</th>
                     <th>Peso</th>
+                    <th></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -435,8 +509,20 @@ export function EquipmentPanel({
                             </button>
                           )}
                         </td>
+                        <td className="col-tight">
+                          {isMine && (
+                            <button
+                              type="button"
+                              className="icon-btn"
+                              title="Editar"
+                              onClick={() => setEditTarget({ tipo: "armadura", idx, data: a })}
+                            >
+                              ✏️
+                            </button>
+                          )}
+                        </td>
                       </tr>
-                      {armorInfoRow(idx, a, `ai-${idx}`, 4)}
+                      {armorInfoRow(idx, a, `ai-${idx}`, 5)}
                     </Fragment>
                   ))}
                 </tbody>
@@ -455,6 +541,7 @@ export function EquipmentPanel({
                     <th>Preço</th>
                     <th>Qtd</th>
                     <th>Usos</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -496,6 +583,18 @@ export function EquipmentPanel({
                               onClick={() => usarRemedio(idx)}
                             >
                               Usar
+                            </button>
+                          )}
+                        </td>
+                        <td className="col-tight">
+                          {isMine && (
+                            <button
+                              type="button"
+                              className="icon-btn"
+                              title="Editar"
+                              onClick={() => setEditTarget({ tipo: "generico", idx, data: r })}
+                            >
+                              ✏️
                             </button>
                           )}
                         </td>
@@ -552,6 +651,15 @@ export function EquipmentPanel({
           title={`Atacar com "${sheet.armas[attackIdx].item}" — como?`}
           onSelect={(mode) => doAttack(mode)}
           onCancel={() => setAttackIdx(null)}
+        />
+      )}
+
+      {editTarget && (
+        <EditItemDialog
+          target={editTarget}
+          onSave={salvarEdicao}
+          onRemove={removerItemEditado}
+          onCancel={() => setEditTarget(null)}
         />
       )}
     </>
