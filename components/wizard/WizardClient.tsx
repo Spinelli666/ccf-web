@@ -191,7 +191,8 @@ export function WizardClient({ mesaId, races }: { mesaId: string; races: RaceOpt
       stats: {
         pvBonus: "0",
         peBonus: "0",
-        armaduraNaturalBonus: "0",
+        // Racial do Norsca ("Sangue de Gigante"): +1 Armadura Natural.
+        armaduraNaturalBonus: racaTitulo === "Norsca" ? "1" : "0",
         deslocamentoBonus: "0",
         inventarioBonus: "0",
         pvAtual: String(derivedPreview.pvMax),
