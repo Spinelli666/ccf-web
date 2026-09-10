@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { getSocket } from "@/lib/socket-client";
 import { parseDiceCommand, rollDiceCommand, rollCritClass, timeAgo } from "@/lib/dice";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
+import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
 
 type ChatMessage = {
   id: string;
@@ -27,7 +28,12 @@ export function TableChat({ mesaId }: { mesaId: string }) {
   const [input, setInput] = useState("");
   const [, forceTick] = useState(0);
   const [showClear, setShowClear] = useState(false);
-  const [open, setOpen] = useState(false);
+  // Em celular o painel do chat cobre a tela quase inteira (fixed, largura ~viewport) —
+  // começa fechado nesse caso pra não esconder a ficha, igual a SideNav/CombateClient.
+  const isNarrow = useIsNarrowViewport(880);
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
+  const open = manualOpen ?? !isNarrow;
+  const setOpen = (v: boolean) => setManualOpen(v);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
