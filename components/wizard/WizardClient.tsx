@@ -48,6 +48,8 @@ export function WizardClient({ mesaId, races }: { mesaId: string; races: RaceOpt
     (sum, sel) => sum + (sel.on ? 1 : 0) + sel.aprim.filter(Boolean).length,
     0
   );
+  const periciaBudget = 15; // 12 pontos (máx. 3 cada) + 3 pontos livres
+  const periciaUsado = pericias.reduce((sum, p) => sum + num(p.valor, 0), 0);
   const autoGrant = useMemo(() => (classeTitulo ? AUTO_GRANT_ABILITIES[classeTitulo] || [] : []), [classeTitulo]);
   const listaHabilidades = useMemo(
     () => (classeTitulo ? (ABILITIES_LIBRARY[classeTitulo] || []).filter((e) => !autoGrant.includes(e.nome)) : []),
@@ -389,6 +391,13 @@ export function WizardClient({ mesaId, races }: { mesaId: string; races: RaceOpt
             acumuláveis. O bônus da sua raça ({racaTitulo || "nenhuma raça escolhida"}) é somado automaticamente por
             cima, no total mostrado abaixo do campo.
           </p>
+          <div className="ph-budget-bar">
+            Pontos distribuídos: <b>{periciaUsado} / {periciaBudget}</b>{" "}
+            <span className="derived-note" style={{ margin: 0 }}>
+              ({Math.max(0, periciaBudget - periciaUsado)} restando
+              {periciaUsado > periciaBudget ? ` — ${periciaUsado - periciaBudget} acima do limite!` : ""})
+            </span>
+          </div>
           <button type="button" className="add-row-btn" style={{ marginBottom: 12 }} onClick={randomizePericias}>
             🎲 Distribuir Aleatoriamente
           </button>

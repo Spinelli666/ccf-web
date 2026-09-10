@@ -468,7 +468,8 @@ export function AjustarNivelDialog({
         <>
           <div className="modal-title">+{bonusPericiaCount} Ponto(s) de Perícia Livre(s)</div>
           <div className="modal-message">
-            Distribua os pontos onde quiser (total: {totalAlocado}/{bonusPericiaCount}):
+            Distribua os pontos onde quiser — usados: <b>{totalAlocado}/{bonusPericiaCount}</b> (
+            {Math.max(0, bonusPericiaCount - totalAlocado)} restando):
           </div>
           <div className="lv-pericia-grid">
             {sheet.pericias.map((p, i) => (
