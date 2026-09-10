@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
+import { EditarPerfilDialog } from "@/components/dialogs/EditarPerfilDialog";
 
 export function SideNav({
   displayName,
@@ -21,6 +22,7 @@ export function SideNav({
   const isNarrow = useIsNarrowViewport(880);
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
   const collapsed = manualCollapsed ?? isNarrow;
+  const [showEditarPerfil, setShowEditarPerfil] = useState(false);
 
   function toggle() {
     setManualCollapsed(!collapsed);
@@ -64,12 +66,21 @@ export function SideNav({
         <button
           type="button"
           className="btn ghost small"
+          style={{ width: "100%", marginBottom: 6 }}
+          onClick={() => setShowEditarPerfil(true)}
+        >
+          ✏️ Editar Perfil
+        </button>
+        <button
+          type="button"
+          className="btn ghost small"
           style={{ width: "100%" }}
           onClick={() => signOut({ callbackUrl: "/login" })}
         >
           Sair
         </button>
       </div>
+      {showEditarPerfil && <EditarPerfilDialog onCancel={() => setShowEditarPerfil(false)} />}
     </nav>
   );
 }

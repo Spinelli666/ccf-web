@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { CreateMesaDialog } from "@/components/dialogs/CreateMesaDialog";
 import { JoinMesaDialog } from "@/components/dialogs/JoinMesaDialog";
+import { EditarPerfilDialog } from "@/components/dialogs/EditarPerfilDialog";
 
 export type MesaSummary = { id: string; nome: string; codigo: string; ownerId: string };
 
@@ -12,6 +13,7 @@ export function MesasClient({ mesas, currentUserId }: { mesas: MesaSummary[]; cu
   const router = useRouter();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
+  const [showEditarPerfil, setShowEditarPerfil] = useState(false);
 
   return (
     <>
@@ -20,11 +22,15 @@ export function MesasClient({ mesas, currentUserId }: { mesas: MesaSummary[]; cu
           Sistema Cardigan <span>· Mesas</span>
         </div>
         <div className="topbar-user">
+          <button type="button" className="btn ghost small" onClick={() => setShowEditarPerfil(true)}>
+            ✏️ Editar Perfil
+          </button>
           <button type="button" className="btn ghost small" onClick={() => signOut({ callbackUrl: "/login" })}>
             Sair
           </button>
         </div>
       </div>
+      {showEditarPerfil && <EditarPerfilDialog onCancel={() => setShowEditarPerfil(false)} />}
 
       <div className="page-inner">
         <div className="toolbar">

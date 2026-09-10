@@ -29,10 +29,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.username = user.username;
+      }
+      // Disparado pelo useSession().update(...) em EditarPerfilDialog depois de trocar
+      // nome de exibição/usuário — sem isso o token JWT (e a sessão) ficam com os dados
+      // antigos até o usuário sair e entrar de novo.
+      if (trigger === "update" && session) {
+        if (typeof session.username === "string") token.username = session.username;
+        if (typeof session.name === "string") token.name = session.name;
       }
       return token;
     },
