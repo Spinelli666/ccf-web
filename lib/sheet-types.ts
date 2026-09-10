@@ -60,6 +60,7 @@ export type Remedio = {
   item: string;
   efeito: string;
   preco: string;
+  peso?: string;
   usosMax: string;
   usosGastos: number;
   curaDado: string;

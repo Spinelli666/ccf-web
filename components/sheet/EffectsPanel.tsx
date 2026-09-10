@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { computeDerived, num, clamp } from "@/lib/derived";
 import { EFFECTS_CATALOG } from "@/data/effects";
+import { SURVIVAL_EFFECTS_CATALOG } from "@/lib/survival-effects";
 import { EffectPickerDialog } from "@/components/dialogs/EffectPickerDialog";
 import type { FullSheetData } from "@/lib/sheet-types";
 
@@ -53,7 +54,10 @@ export function EffectsPanel({
           </thead>
           <tbody>
             {sheet.efeitosAtivos.map((nomeEfeito) => {
-              const info = (EFFECTS_CATALOG as Record<string, EffectInfo>)[nomeEfeito] || { desc: "" };
+              const info =
+                (EFFECTS_CATALOG as Record<string, EffectInfo>)[nomeEfeito] ||
+                SURVIVAL_EFFECTS_CATALOG[nomeEfeito] ||
+                { desc: "" };
               const danoValor = info.danoRodada || info.manualDano;
               return (
                 <tr key={nomeEfeito}>

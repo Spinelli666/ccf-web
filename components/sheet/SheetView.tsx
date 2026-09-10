@@ -181,13 +181,13 @@ export function SheetView({
                 )}
               </div>
               <div className="section">
-                <h2>Biografia</h2>
+                <h2>Bloco de Notas</h2>
                 {isMine && (
                   <textarea
                     className="field"
                     style={{ width: "100%", minHeight: 90, marginBottom: 10 }}
                     value={sheet.biografia}
-                    placeholder="História, aparência, personalidade..."
+                    placeholder="Anotações livres — lembretes, ideias, informações da campanha..."
                     onChange={(e) => patch({ biografia: e.target.value })}
                   />
                 )}
@@ -195,7 +195,7 @@ export function SheetView({
                   (sheet.biografia ? (
                     <RichText text={sheet.biografia} />
                   ) : (
-                    <div className="derived-note">Sem biografia cadastrada ainda.</div>
+                    <div className="derived-note">Sem anotações ainda.</div>
                   ))}
               </div>
             </>

@@ -1,10 +1,11 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { num, clamp } from "@/lib/derived";
 import { computeDerived } from "@/lib/derived";
 import { AUTO_GRANT_ABILITIES, CLASSES_ORDENADAS, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
 import { EffectText } from "@/components/sheet/EffectText";
+import { AcaoDialog } from "@/components/dialogs/AcaoDialog";
 import type { FullSheetData, HabilidadeClasse, HabilidadeRaca } from "@/lib/sheet-types";
 
 const ALL_AUTO_GRANT_NAMES = Object.values(AUTO_GRANT_ABILITIES).flat();
@@ -22,6 +23,8 @@ export function AbilitiesPanel({
 }) {
   const [classeFiltro, setClasseFiltro] = useState("Todas");
   const [expandidas, setExpandidas] = useState<Set<number>>(new Set());
+  const [showAcao, setShowAcao] = useState(false);
+  const [erroAcao, setErroAcao] = useState<string | null>(null);
   const derived = computeDerived(sheet);
   const nome = sheet.name || "Personagem";
 
@@ -82,9 +85,30 @@ export function AbilitiesPanel({
     onLog(`🔸 Pontos de Ação usados: ${next.filter(Boolean).length}/${acaoTotal}`);
   }
 
-  function acaoNovoTurno() {
-    onChange({ acaoBoxes: new Array(acaoTotal).fill(false) });
-    onLog(`🔸 Novo turno — Pontos de Ação resetados`);
+  // Aviso de "Pontos de Ação insuficientes" é só local (nunca vai pro chat/socket) —
+  // só o próprio jogador vê, some sozinho depois de um tempo.
+  useEffect(() => {
+    if (!erroAcao) return;
+    const t = setTimeout(() => setErroAcao(null), 5000);
+    return () => clearTimeout(t);
+  }, [erroAcao]);
+
+  function escolherAcao(tipo: "curta" | "longa", opcao: string) {
+    setShowAcao(false);
+    const custo = tipo === "curta" ? 1 : 2;
+    const usados = acaoBoxes.filter(Boolean).length;
+    if (usados + custo > acaoTotal) {
+      setErroAcao(
+        `Pontos de Ação insuficientes para uma Ação ${tipo === "curta" ? "Curta" : "Longa"} (precisa de ${custo}, restam ${Math.max(0, acaoTotal - usados)}).`
+      );
+      return;
+    }
+    const next = acaoBoxes.slice();
+    for (let k = usados; k < usados + custo; k++) next[k] = true;
+    onChange({ acaoBoxes: next });
+    onLog(
+      `🔸 ${nome} usou uma Ação ${tipo === "curta" ? "Curta" : "Longa"}: ${opcao} (${usados + custo}/${acaoTotal})`
+    );
   }
 
   function acaoAdd() {
@@ -219,12 +243,20 @@ export function AbilitiesPanel({
                 <button type="button" className="counter-btn" title="Remover Ponto de Ação" onClick={acaoRemove}>
                   −
                 </button>
-                <button type="button" className="btn ghost small" onClick={acaoNovoTurno}>
-                  Novo turno
+                <button type="button" className="btn ghost small" onClick={() => setShowAcao(true)}>
+                  Utilizar
                 </button>
               </>
             )}
           </div>
+          {erroAcao && (
+            <div className="acao-erro-banner">
+              ⚠️ {erroAcao}
+              <button type="button" className="acao-erro-close" onClick={() => setErroAcao(null)}>
+                ×
+              </button>
+            </div>
+          )}
 
           {classesPresentes.length > 1 && (
             <div className="classe-filter-buttons">
@@ -385,6 +417,8 @@ export function AbilitiesPanel({
           </div>
         </>
       )}
+
+      {showAcao && <AcaoDialog onEscolher={escolherAcao} onCancel={() => setShowAcao(false)} />}
     </div>
   );
 }

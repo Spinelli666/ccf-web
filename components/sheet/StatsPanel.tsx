@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { computeDerived, equippedArmorSum, num, clamp } from "@/lib/derived";
 import { rollDie } from "@/lib/dice";
 import { DescansoDialog } from "@/components/dialogs/DescansoDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import { LevelUpDialog } from "@/components/dialogs/LevelUpDialog";
+import { AjustarNivelDialog } from "@/components/dialogs/AjustarNivelDialog";
 import type { FullSheetData } from "@/lib/sheet-types";
 
 const SURVIVAL_FIELDS = [
@@ -29,6 +30,7 @@ export function StatsPanel({
   const [showRest, setShowRest] = useState(false);
   const [showExecutar, setShowExecutar] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showAjustarNivel, setShowAjustarNivel] = useState(false);
   const [pvDelta, setPvDelta] = useState("");
   const [peDelta, setPeDelta] = useState("");
   const [ignoreArmor, setIgnoreArmor] = useState(false);
@@ -69,6 +71,52 @@ export function StatsPanel({
     const label = SURVIVAL_FIELDS.find((f) => f.key === key)?.label ?? key;
     onLog(`${nome} ajustou ${label} para ${novo}/${max}`);
   }
+
+  // As mensagens de aviso da Sobrevivência (Fratura/Sanidade/Toxidade/Fome/Sede no limite)
+  // não aparecem mais como texto em vermelho aqui — viram efeitos de verdade na lista de
+  // Efeitos Ativos (EffectsPanel). Ficam totalmente sincronizados com as checkboxes: com
+  // tudo marcado o efeito aparece, e some assim que pelo menos uma checkbox for desmarcada
+  // (Exaustão só some quando nenhuma das três condições que a causam — Toxidade, Fome ou
+  // Sede no limite — estiver mais ativa).
+  useEffect(() => {
+    if (!isMine) return;
+    const atuais = sheet.efeitosAtivos;
+    const presentes = new Set(atuais);
+    const toAdd: string[] = [];
+    const toRemove = new Set<string>();
+
+    const insaniaAtual = clamp(num(sheet.insania), 0, 5);
+    if (insaniaAtual >= 5) {
+      if (!presentes.has("Surto Psicótico")) toAdd.push("Surto Psicótico");
+      if (presentes.has("Instabilidade Mental")) toRemove.add("Instabilidade Mental");
+    } else if (insaniaAtual >= 4) {
+      if (!presentes.has("Instabilidade Mental")) toAdd.push("Instabilidade Mental");
+      if (presentes.has("Surto Psicótico")) toRemove.add("Surto Psicótico");
+    } else {
+      if (presentes.has("Surto Psicótico")) toRemove.add("Surto Psicótico");
+      if (presentes.has("Instabilidade Mental")) toRemove.add("Instabilidade Mental");
+    }
+
+    const fraturasNoLimite = clamp(num(sheet.fraturas), 0, 5) >= 5;
+    if (fraturasNoLimite && !presentes.has("Derrotado")) toAdd.push("Derrotado");
+    if (!fraturasNoLimite && presentes.has("Derrotado")) toRemove.add("Derrotado");
+
+    const toxidadeNoLimite = clamp(num(sheet.toxidade), 0, 5) >= 5;
+    const fomeNoLimite = clamp(num(sheet.fome), 0, 3) >= 3;
+    const sedeNoLimite = clamp(num(sheet.sede), 0, 3) >= 3;
+    const precisaExaustao = toxidadeNoLimite || fomeNoLimite || sedeNoLimite;
+
+    if (precisaExaustao && !presentes.has("Exaustão")) toAdd.push("Exaustão");
+    if (!precisaExaustao && presentes.has("Exaustão")) toRemove.add("Exaustão");
+
+    if (toxidadeNoLimite && !presentes.has("Intoxicado")) toAdd.push("Intoxicado");
+    if (!toxidadeNoLimite && presentes.has("Intoxicado")) toRemove.add("Intoxicado");
+
+    if (toAdd.length || toRemove.size) {
+      onChange({ efeitosAtivos: [...atuais.filter((e) => !toRemove.has(e)), ...toAdd] });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sheet.insania, sheet.fraturas, sheet.toxidade, sheet.fome, sheet.sede, isMine]);
 
   function sofrerDano() {
     const v = Math.abs(num(pvDelta, 0));
@@ -240,14 +288,26 @@ export function StatsPanel({
         <div className="resource-box">
           <div className="mini-row">
             <span className="mini-label">Nível</span>
-            <input
-              type="number"
-              className="mini-input"
-              disabled={!isMine}
-              value={sheet.nivel}
-              min={1}
-              onChange={(e) => onChange({ nivel: e.target.value })}
-            />
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <input
+                type="number"
+                className="mini-input"
+                disabled={!isMine}
+                value={sheet.nivel}
+                min={1}
+                onChange={(e) => onChange({ nivel: e.target.value })}
+              />
+              {isMine && (
+                <button
+                  type="button"
+                  className="counter-btn"
+                  title="Ajustar Nível (sobe ou desce com habilidades/perícias reconciliadas)"
+                  onClick={() => setShowAjustarNivel(true)}
+                >
+                  🔧
+                </button>
+              )}
+            </span>
           </div>
           <div className="mini-row">
             <span className="mini-label">XP</span>
@@ -348,23 +408,6 @@ export function StatsPanel({
               </div>
             </div>
           ))}
-          {[
-            derived.fraturas >= 5 ? "5 Fraturas = Derrotado." : "",
-            num(sheet.insania) >= 5
-              ? "🌀 Surto psicótico!"
-              : num(sheet.insania) >= 4
-              ? "Desv. Aprimorada em Int./Persuasão."
-              : "",
-            num(sheet.toxidade) >= 5 ? "Toxidade: Exaustão + Intoxicado." : "",
-            num(sheet.fome) >= 3 ? "Fome: Exaustão." : "",
-            num(sheet.sede) >= 3 ? "Sede: Exaustão." : "",
-          ]
-            .filter(Boolean)
-            .map((w, i) => (
-              <div className="survival-warn" key={i}>
-                {w}
-              </div>
-            ))}
           {isMine && (
             <button type="button" className="btn ghost small" style={{ marginTop: 10, width: "100%" }} onClick={() => setShowRest(true)}>
               😴 Descanso
@@ -501,6 +544,27 @@ export function StatsPanel({
             });
             onLog(`${nome} subiu para o nível ${patch.nivel}!`);
             setShowLevelUp(false);
+          }}
+        />
+      )}
+      {showAjustarNivel && (
+        <AjustarNivelDialog
+          sheet={sheet}
+          onCancel={() => setShowAjustarNivel(false)}
+          onApply={(patch) => {
+            const nivelAntigo = sheet.nivel;
+            onChange({
+              nivel: patch.nivel,
+              classeHabilidades: patch.classeHabilidades,
+              pericias: patch.pericias,
+              stats: {
+                ...sheet.stats,
+                pvAtual: String(num(sheet.stats.pvAtual) + patch.pvDelta),
+                peAtual: String(num(sheet.stats.peAtual) + patch.peDelta),
+              },
+            });
+            onLog(`${nome} teve o Nível ajustado de ${nivelAntigo} para ${patch.nivel}.`);
+            setShowAjustarNivel(false);
           }}
         />
       )}

@@ -584,6 +584,14 @@ body{
   padding:10px 14px; margin-bottom:14px;
 }
 .action-points-label{ font-family:'Cinzel',serif; font-size:12px; letter-spacing:.5px; color:var(--maroon); }
+/* Aviso de Pontos de Ação insuficientes — só aparece pra quem clicou, nunca vai pro chat. */
+.acao-erro-banner{
+  display:flex; align-items:center; gap:8px; margin-bottom:14px; margin-top:-6px;
+  background:rgba(138,58,42,0.12); border:1px solid #8a3a2a; color:#f3d9d9;
+  border-radius:4px; padding:8px 12px; font-size:12.5px; line-height:1.4;
+}
+.acao-erro-close{ margin-left:auto; background:none; border:none; color:#f3d9d9; cursor:pointer; font-size:15px; padding:0 2px; flex-shrink:0; }
+.acao-erro-close:hover{ opacity:0.7; }
 .cost-box{ width:16px; height:16px; accent-color: var(--maroon); cursor:pointer; }
 .attack-cell{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
 .attr-select{
@@ -595,14 +603,14 @@ body{
 .pericia-row{ display:flex; justify-content:space-between; border-bottom:1px dotted var(--gold-line); padding:7px 2px; }
 .pericia-row .n{ font-size:16px; }
 .pericia-row .v{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px; color: var(--maroon); }
-.pericia-row.zero .v, .pericia-row.zero .n{ color: var(--muted); }
+.pericia-row.zero .v{ color: var(--muted); }
 
 /* Tabelas da ficha (armas, armaduras, remédios, habilidades) — um padrão visual único:
    moldura fechada, cabeçalho em destaque, hover nas linhas e texto que QUEBRA em vez de
-   forçar scroll lateral (o overflow-x só existe como rede de segurança pra casos extremos,
-   ex. uma palavra sozinha maior que a coluna). */
+   forçar scroll lateral. Sem overflow-x:auto aqui de propósito: isso criaria uma caixa de
+   clipping que cortava os tooltips de efeito (position:absolute) nas bordas da tabela. */
 .sheet-table-wrap{
-  width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  width:100%;
   border:1px solid var(--gold-line); border-radius:8px;
   box-shadow: 0 3px 10px var(--shadow);
   margin-bottom:16px;
@@ -623,6 +631,8 @@ table.sheet-table td{
   word-break: break-word;
 }
 table.sheet-table tbody tr:last-child > td{ border-bottom:none; }
+table.sheet-table tbody tr:last-child > td:first-child{ border-bottom-left-radius:7px; }
+table.sheet-table tbody tr:last-child > td:last-child{ border-bottom-right-radius:7px; }
 table.sheet-table tbody tr:not(.item-info-row):not(.ability-effect-row):hover{ background: rgba(255,183,92,0.1); }
 table.sheet-table tr.indent td:first-child{ padding-left:26px; color: var(--ink-soft); font-style:italic; }
 table.sheet-table td.name{ font-weight:600; min-width:120px; }

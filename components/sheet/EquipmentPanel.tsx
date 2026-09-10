@@ -150,12 +150,12 @@ export function EquipmentPanel({
 
   let slotsLeveCount = 0;
   let slotsFixos = 0;
-  [...armasInventario, ...armadurasInventario].forEach(([, item]) => {
+  [...armasInventario, ...armadurasInventario, ...remedioPairs].forEach(([, item]) => {
     const p = pesoDe(item);
     if (p === "leve") slotsLeveCount++;
     else slotsFixos += PESO_SPACE[p];
   });
-  const slotsUsados = slotsFixos + Math.floor(slotsLeveCount / 10) + remedioPairs.length;
+  const slotsUsados = slotsFixos + Math.floor(slotsLeveCount / 10);
   const invMax = derived.inventario;
 
   function weaponPropsRow(idx: number, a: Arma, key: string, colSpan: number) {
@@ -437,6 +437,7 @@ export function EquipmentPanel({
                   <tr>
                     <th>Item</th>
                     <th>Efeito</th>
+                    <th>Peso</th>
                     <th>Preço</th>
                     <th>Usos</th>
                   </tr>
@@ -448,6 +449,7 @@ export function EquipmentPanel({
                       <tr key={idx}>
                         <td className="name">{r.item}</td>
                         <td>{r.efeito}</td>
+                        <td>{PESO_LABELS[pesoDe(r)]}</td>
                         <td>{r.preco}</td>
                         <td>
                           {max > 0 && <span className="uses-count">{r.usosGastos}/{max}</span>}{" "}

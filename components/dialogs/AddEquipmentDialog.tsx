@@ -43,7 +43,7 @@ export function AddEquipmentDialog({
 
   const [novaArma, setNovaArma] = useState({ item: "", dano: "", propriedades: "", preco: "", peso: "medio" });
   const [novaArmadura, setNovaArmadura] = useState({ item: "", parte: "", armadura: "", preco: "", peso: "medio" });
-  const [novoGenerico, setNovoGenerico] = useState({ item: "", efeito: "", preco: "" });
+  const [novoGenerico, setNovoGenerico] = useState({ item: "", efeito: "", preco: "", peso: "leve" });
 
   const partesArmadura = useMemo(() => Array.from(new Set(ARMOR_LIBRARY.map((a) => a.parte))), []);
   const total = selArmas.size + selArmaduras.size;
@@ -101,6 +101,7 @@ export function AddEquipmentDialog({
           item: novoGenerico.item.trim(),
           efeito: novoGenerico.efeito.trim(),
           preco: novoGenerico.preco,
+          peso: novoGenerico.peso,
           usosMax: "0",
           usosGastos: 0,
           curaDado: "",
@@ -303,6 +304,16 @@ export function AddEquipmentDialog({
               placeholder="O que é / pra que serve..."
               onChange={(e) => setNovoGenerico((v) => ({ ...v, efeito: e.target.value }))}
             />
+          </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>Peso</label>
+            <select value={novoGenerico.peso} onChange={(e) => setNovoGenerico((v) => ({ ...v, peso: e.target.value }))}>
+              {PESO_OPCOES.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="field" style={{ marginBottom: 14, textAlign: "left" }}>
             <label>Preço (opcional)</label>

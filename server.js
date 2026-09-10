@@ -341,9 +341,28 @@ app.prepare().then(async () => {
           return ack && ack({ ok: false, error: "Só o mestre ou quem está no turno pode avançar." });
         }
         const proximoIndex = combate.turnoAtualIndex + 1;
-        const data =
-          proximoIndex >= total ? { turnoAtualIndex: 0, rodada: combate.rodada + 1 } : { turnoAtualIndex: proximoIndex };
+        const mudaRodada = proximoIndex >= total;
+        const novaRodada = mudaRodada ? combate.rodada + 1 : combate.rodada;
+        const data = mudaRodada ? { turnoAtualIndex: 0, rodada: novaRodada } : { turnoAtualIndex: proximoIndex };
         await prisma.combate.update({ where: { id: combate.id }, data });
+
+        const novoAtivo = combate.participantes[data.turnoAtualIndex];
+        const textosLog = [];
+        if (mudaRodada) textosLog.push(`🔔 Rodada ${novaRodada} começou!`);
+        if (novoAtivo) textosLog.push(`▶ Agora é o turno de ${novoAtivo.nome}.`);
+        for (const texto of textosLog) {
+          const logMsg = await prisma.chatMessage.create({
+            data: {
+              mesaId: socket.data.mesaId,
+              authorId: socket.data.user.id,
+              authorName: socket.data.user.name || socket.data.user.username,
+              kind: "log",
+              text: texto,
+            },
+          });
+          io.to(room).emit("chat:new", logMsg);
+        }
+
         const state = await getCombateState(socket.data.mesaId);
         io.to(room).emit("combat:state", state);
         if (ack) ack({ ok: true, state });
