@@ -251,8 +251,8 @@ export function EquipmentPanel({
                             {a.item}
                           </button>
                         </td>
-                        <td>{a.dano}</td>
-                        <td>
+                        <td className="col-tight">{a.dano}</td>
+                        <td className="col-tight">
                           <div className="counter">
                             <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armas", idx, -1)}>
                               −
@@ -265,7 +265,7 @@ export function EquipmentPanel({
                             </button>
                           </div>
                         </td>
-                        <td>
+                        <td className="col-tight">
                           {isMine && (
                             <div className="attack-cell">
                               <select
@@ -286,7 +286,7 @@ export function EquipmentPanel({
                             </div>
                           )}
                         </td>
-                        <td>
+                        <td className="col-tight">
                           {isMine && (
                             <button type="button" className="btn ghost small" onClick={() => toggleEquipArma(idx)}>
                               Desequipar
@@ -323,8 +323,8 @@ export function EquipmentPanel({
                               {a.item}
                             </button>
                           </td>
-                          <td>{a.armadura}</td>
-                          <td>
+                          <td className="col-tight">{a.armadura}</td>
+                          <td className="col-tight">
                             <div className="counter">
                               <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armaduras", idx, -1)}>
                                 −
@@ -337,7 +337,7 @@ export function EquipmentPanel({
                               </button>
                             </div>
                           </td>
-                          <td>
+                          <td className="col-tight">
                             {isMine && (
                               <button type="button" className="btn ghost small" onClick={() => toggleEquipArmadura(idx)}>
                                 Desequipar
@@ -388,9 +388,9 @@ export function EquipmentPanel({
                             {a.item}
                           </button>
                         </td>
-                        <td>{a.dano}</td>
-                        <td>{PESO_LABELS[pesoDe(a)]}</td>
-                        <td>
+                        <td className="col-tight">{a.dano}</td>
+                        <td className="col-tight">{PESO_LABELS[pesoDe(a)]}</td>
+                        <td className="col-tight">
                           {isMine && (
                             <button type="button" className="btn small secondary" onClick={() => toggleEquipArma(idx)}>
                               Equipar
@@ -426,9 +426,9 @@ export function EquipmentPanel({
                             {a.item}
                           </button>
                         </td>
-                        <td>{a.armadura}</td>
-                        <td>{PESO_LABELS[pesoDe(a)]}</td>
-                        <td>
+                        <td className="col-tight">{a.armadura}</td>
+                        <td className="col-tight">{PESO_LABELS[pesoDe(a)]}</td>
+                        <td className="col-tight">
                           {isMine && (
                             <button type="button" className="btn small secondary" onClick={() => toggleEquipArmadura(idx)}>
                               Equipar
@@ -465,9 +465,9 @@ export function EquipmentPanel({
                       <tr key={idx}>
                         <td className="name">{r.item}</td>
                         <td>{r.efeito}</td>
-                        <td>{PESO_LABELS[pesoDe(r)]}</td>
-                        <td>{r.preco}</td>
-                        <td>
+                        <td className="col-tight">{PESO_LABELS[pesoDe(r)]}</td>
+                        <td className="col-tight">{r.preco}</td>
+                        <td className="col-tight">
                           {isGenerico ? (
                             isMine ? (
                               <div className="counter">
@@ -486,7 +486,7 @@ export function EquipmentPanel({
                             "—"
                           )}
                         </td>
-                        <td>
+                        <td className="col-tight">
                           {max > 0 && <span className="uses-count">{r.usosGastos}/{max}</span>}{" "}
                           {isMine && (
                             <button

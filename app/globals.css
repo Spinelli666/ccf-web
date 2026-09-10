@@ -280,7 +280,7 @@ body{
 .btn{
   font-family:'Cinzel', serif; letter-spacing:1px; font-size:13px;
   background: var(--maroon); color:var(--btn-text); border:none;
-  padding:10px 18px; border-radius:3px; cursor:pointer;
+  padding:10px 18px; border-radius:3px; cursor:pointer; white-space:nowrap;
   box-shadow: 0 2px 6px var(--shadow);
   transition: transform .12s ease, background .12s ease;
 }
@@ -630,6 +630,9 @@ table.sheet-table td{
   padding:10px 12px; border-bottom:1px solid var(--gold-line); vertical-align:middle;
   word-break: break-word;
 }
+/* Colunas de valor curto (Peso, Preço, Qtd, Usos...) não devem quebrar no meio da palavra
+   quando a coluna de texto livre (Efeito/Descrição) ao lado espreme o espaço disponível. */
+table.sheet-table td.col-tight{ white-space:nowrap; word-break:normal; }
 table.sheet-table tbody tr:last-child > td{ border-bottom:none; }
 table.sheet-table tbody tr:last-child > td:first-child{ border-bottom-left-radius:7px; }
 table.sheet-table tbody tr:last-child > td:last-child{ border-bottom-right-radius:7px; }
