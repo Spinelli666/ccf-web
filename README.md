@@ -77,11 +77,28 @@ Esses arquivos foram **extraídos automaticamente** do `sistema-cardigan-fichas 
 
 ## Deploy na VPS (Hostinger KVM 1 ou similar)
 
-1. Instale Node.js LTS e PostgreSQL na VPS (ou use um Postgres gerenciado).
-2. Clone o projeto, `npm install`, configure `.env` com o `DATABASE_URL` real e um `AUTH_SECRET` novo (não reuse o de dev).
-3. `npm run build`, depois `npm run prisma:deploy` e `npm run prisma:seed` (só na primeira vez).
-4. Rode com **PM2**: `pm2 start server.js --name ccf-web` (PM2 já seta `NODE_ENV=production` por padrão).
-5. **Nginx** como proxy reverso pra porta do Next (padrão 3000), incluindo os headers de upgrade pro WebSocket do Socket.io funcionar:
+Já foi executado de verdade (não é só um roteiro teórico) — rodando em produção em
+`cardiganficha.online`. Passos, com os detalhes que realmente importaram na prática:
+
+1. Instale Node.js LTS, PostgreSQL, Nginx e git na VPS (ou use um Postgres gerenciado).
+2. Clone o projeto, `npm install`, configure `.env` com:
+   - `DATABASE_URL` real e um `AUTH_SECRET` novo (não reuse o de dev).
+   - `NODE_ENV=production` — **importante**: PM2 *não* seta isso sozinho por padrão (apesar
+     do que uma versão antiga deste README dizia). Sem essa variável o app sobe em modo dev
+     mesmo em produção, e o Next.js bloqueia os bundles JS pra qualquer origem que não seja
+     "localhost" — quebra qualquer interação client-side (formulários não enviam nada).
+   - `AUTH_URL=https://seu-dominio` (a URL pública final, com `https://`) — sem isso o
+     NextAuth erra o cookie de sessão (`__Secure-` prefix) especificamente na conexão do
+     Socket.io (`getToken()` chamado direto em `server.js` não deriva isso sozinho de
+     `AUTH_TRUST_HOST`/headers do proxy do jeito que o resto do Auth.js faz), e o chat em
+     tempo real fica "mudo" (conecta mas nunca autentica) mesmo com login funcionando normal.
+3. `npm run build`, depois `npm run prisma:deploy` e `npm run prisma:seed` (só na primeira
+   vez — repare que `prisma:seed` roda via `tsx`, que não carrega `.env` sozinho; exporte as
+   variáveis antes: `set -a && . ./.env && set +a && npm run prisma:seed`).
+4. Rode com **PM2**: `pm2 start server.js --name ccf-web`, depois `pm2 save` e
+   `pm2 startup` (sobrevive a reboot da VPS).
+5. **Nginx** como proxy reverso pra porta do Next (padrão 3000), incluindo os headers de
+   upgrade pro WebSocket do Socket.io funcionar:
    ```nginx
    location / {
      proxy_pass http://127.0.0.1:3000;
@@ -89,8 +106,15 @@ Esses arquivos foram **extraídos automaticamente** do `sistema-cardigan-fichas 
      proxy_set_header Upgrade $http_upgrade;
      proxy_set_header Connection "upgrade";
      proxy_set_header Host $host;
+     proxy_set_header X-Real-IP $remote_addr;
+     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+     proxy_set_header X-Forwarded-Proto $scheme;
    }
    ```
-6. HTTPS com Certbot/Let's Encrypt na frente do Nginx.
+6. **Firewall (ufw)**: libere só `OpenSSH`/`80`/`443`; nunca exponha a porta 3000 direto.
+   Desative login por senha no SSH (`PasswordAuthentication no`) depois de confirmar que o
+   acesso por chave funciona — é o alvo nº1 de bots varrendo a internet.
+7. HTTPS com Certbot/Let's Encrypt na frente do Nginx (`certbot --nginx -d seu-dominio`).
 
-Isso ainda não foi executado nesta sessão — é um roteiro pra quando for hora de subir pra VPS de verdade.
+**Atualizar depois de mudar código**: `git pull`, `npm install` (se mudou dependência),
+`npm run prisma:deploy` (se mudou o schema), `npm run build`, `pm2 restart ccf-web`.

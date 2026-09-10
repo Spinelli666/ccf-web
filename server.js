@@ -64,9 +64,15 @@ app.prepare().then(async () => {
 
   io.use(async (socket, next_) => {
     try {
+      // getToken() (chamado direto, fora do pipeline completo do Auth.js) não lê
+      // AUTH_TRUST_HOST/X-Forwarded-Proto pra decidir o nome do cookie — atrás do Nginx
+      // com HTTPS ele sem isso procurava "authjs.session-token" em vez do
+      // "__Secure-authjs.session-token" que o navegador realmente envia, e a conexão do
+      // chat sempre dava "unauthorized" mesmo com a sessão válida.
       const token = await getToken({
         req: socket.request,
         secret: process.env.AUTH_SECRET,
+        secureCookie: !dev,
       });
       if (!token) return next_(new Error("unauthorized"));
 
