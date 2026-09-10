@@ -43,7 +43,7 @@ export function AddEquipmentDialog({
 
   const [novaArma, setNovaArma] = useState({ item: "", dano: "", propriedades: "", preco: "", peso: "medio" });
   const [novaArmadura, setNovaArmadura] = useState({ item: "", parte: "", armadura: "", preco: "", peso: "medio" });
-  const [novoGenerico, setNovoGenerico] = useState({ item: "", efeito: "", preco: "", peso: "leve" });
+  const [novoGenerico, setNovoGenerico] = useState({ item: "", efeito: "", preco: "", peso: "leve", quantidade: "1" });
 
   const partesArmadura = useMemo(() => Array.from(new Set(ARMOR_LIBRARY.map((a) => a.parte))), []);
   const total = selArmas.size + selArmaduras.size;
@@ -107,6 +107,7 @@ export function AddEquipmentDialog({
           curaDado: "",
           curaMultPericia: "",
           curaPericia: "",
+          quantidade: String(Math.max(1, parseInt(novoGenerico.quantidade, 10) || 1)),
         },
       ],
     });
@@ -315,13 +316,22 @@ export function AddEquipmentDialog({
               ))}
             </select>
           </div>
-          <div className="field" style={{ marginBottom: 14, textAlign: "left" }}>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Preço (opcional)</label>
             <input
               type="text"
               value={novoGenerico.preco}
               placeholder="Ex: 5"
               onChange={(e) => setNovoGenerico((v) => ({ ...v, preco: e.target.value }))}
+            />
+          </div>
+          <div className="field" style={{ marginBottom: 14, textAlign: "left" }}>
+            <label>Quantidade</label>
+            <input
+              type="number"
+              min={1}
+              value={novoGenerico.quantidade}
+              onChange={(e) => setNovoGenerico((v) => ({ ...v, quantidade: e.target.value }))}
             />
           </div>
           <div className="modal-options">

@@ -68,6 +68,12 @@ export function EquipmentPanel({
     onChange({ armaduras: next });
     onLog(`${sheet.name || "Personagem"} ${next[i].equipado ? "equipou" : "guardou"} "${next[i].item}"`);
   }
+  function adjustQuantidade(i: number, delta: number) {
+    const next = sheet.remedios.slice();
+    const atual = Math.max(0, num(next[i].quantidade, 1) + delta);
+    next[i] = { ...next[i], quantidade: String(atual) };
+    onChange({ remedios: next });
+  }
   function usarRemedio(i: number) {
     const r = sheet.remedios[i];
     const max = num(r.usosMax, 0);
@@ -150,10 +156,18 @@ export function EquipmentPanel({
 
   let slotsLeveCount = 0;
   let slotsFixos = 0;
-  [...armasInventario, ...armadurasInventario, ...remedioPairs].forEach(([, item]) => {
+  [...armasInventario, ...armadurasInventario].forEach(([, item]) => {
     const p = pesoDe(item);
     if (p === "leve") slotsLeveCount++;
     else slotsFixos += PESO_SPACE[p];
+  });
+  remedioPairs.forEach(([, r]) => {
+    // Itens Genéricos (sem Usos) empilham quantidade — cada cópia ocupa espaço.
+    // Remédios com Usos limitados continuam contando como 1, igual sempre foi.
+    const qtd = num(r.usosMax, 0) > 0 ? 1 : Math.max(1, num(r.quantidade, 1));
+    const p = pesoDe(r);
+    if (p === "leve") slotsLeveCount += qtd;
+    else slotsFixos += PESO_SPACE[p] * qtd;
   });
   const slotsUsados = slotsFixos + Math.floor(slotsLeveCount / 10);
   const invMax = derived.inventario;
@@ -439,18 +453,39 @@ export function EquipmentPanel({
                     <th>Efeito</th>
                     <th>Peso</th>
                     <th>Preço</th>
+                    <th>Qtd</th>
                     <th>Usos</th>
                   </tr>
                 </thead>
                 <tbody>
                   {remedioPairs.map(([idx, r]) => {
                     const max = num(r.usosMax, 0);
+                    const isGenerico = max === 0;
                     return (
                       <tr key={idx}>
                         <td className="name">{r.item}</td>
                         <td>{r.efeito}</td>
                         <td>{PESO_LABELS[pesoDe(r)]}</td>
                         <td>{r.preco}</td>
+                        <td>
+                          {isGenerico ? (
+                            isMine ? (
+                              <div className="counter">
+                                <button type="button" className="counter-btn" onClick={() => adjustQuantidade(idx, -1)}>
+                                  −
+                                </button>
+                                <span className="counter-val">{Math.max(0, num(r.quantidade, 1))}</span>
+                                <button type="button" className="counter-btn" onClick={() => adjustQuantidade(idx, 1)}>
+                                  +
+                                </button>
+                              </div>
+                            ) : (
+                              Math.max(0, num(r.quantidade, 1))
+                            )
+                          ) : (
+                            "—"
+                          )}
+                        </td>
                         <td>
                           {max > 0 && <span className="uses-count">{r.usosGastos}/{max}</span>}{" "}
                           {isMine && (
