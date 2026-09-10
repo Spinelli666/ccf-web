@@ -6,9 +6,20 @@ import { computeDerived } from "@/lib/derived";
 import { AUTO_GRANT_ABILITIES, CLASSES_ORDENADAS, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
 import { EffectText } from "@/components/sheet/EffectText";
 import { AcaoDialog } from "@/components/dialogs/AcaoDialog";
+import type { DerivedStats } from "@/lib/derived";
 import type { FullSheetData, HabilidadeClasse, HabilidadeRaca } from "@/lib/sheet-types";
 
 const ALL_AUTO_GRANT_NAMES = Object.values(AUTO_GRANT_ABILITIES).flat();
+
+// Racial do Anão ("Sangue Fervente"): 1 uso/dia base +1 a cada 2 pontos de Vigor
+// (o texto da regra pede pra "ajustar os usos por dia conforme o Vigor"; calculamos
+// isso na hora em vez de gravar um número fixo na ficha, pra acompanhar o Vigor atual).
+function usosDiariosEfetivo(h: HabilidadeRaca, derived: DerivedStats): number {
+  if (h.nome === "Sangue Fervente") {
+    return 1 + Math.floor(derived.vigor / 2);
+  }
+  return num(h.usosDiarios, 0);
+}
 
 export function AbilitiesPanel({
   sheet,
@@ -41,7 +52,7 @@ export function AbilitiesPanel({
 
   function usarRaca(i: number) {
     const h = sheet.racaHabilidades[i];
-    const max = num(h.usosDiarios, 0);
+    const max = usosDiariosEfetivo(h, derived);
     if (max > 0 && h.usosGastos >= max) return;
     updateRaca(i, { usosGastos: h.usosGastos + 1 });
     onLog(`${nome} usou a habilidade racial "${h.nome}".`);
@@ -171,7 +182,7 @@ export function AbilitiesPanel({
             Raça — {sheet.racaTitulo}
           </h3>
           {sheet.racaHabilidades.map((h, i) => {
-            const max = num(h.usosDiarios, 0);
+            const max = usosDiariosEfetivo(h, derived);
             return (
               <div key={i} className="ability">
                 <div className="ability-row">
