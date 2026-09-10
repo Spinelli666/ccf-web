@@ -42,7 +42,8 @@ export function WizardClient({ mesaId, races }: { mesaId: string; races: RaceOpt
   const [search, setSearch] = useState("");
 
   const nivelAtual = num(nivel, 1);
-  const phBudget = nivelAtual + 1;
+  // Racial do Elfo ("Conhecimento Antigo"): +1 Ponto de Habilidade permanente, ganho no nível 1.
+  const phBudget = nivelAtual + 1 + (racaTitulo === "Elfo" ? 1 : 0);
   const phUsado = Object.values(classeSelecoes).reduce(
     (sum, sel) => sum + (sel.on ? 1 : 0) + sel.aprim.filter(Boolean).length,
     0

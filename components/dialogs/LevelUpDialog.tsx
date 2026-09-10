@@ -37,7 +37,8 @@ export function LevelUpDialog({
 }) {
   const oldNivel = num(sheet.nivel, 1);
   const newNivel = oldNivel + 1;
-  const newBudget = newNivel + 1;
+  // Racial do Elfo ("Conhecimento Antigo"): +1 Ponto de Habilidade permanente, ganho no nível 1.
+  const newBudget = newNivel + 1 + (sheet.racaTitulo === "Elfo" ? 1 : 0);
   const currentUsed = sheet.classeHabilidades.filter(
     (a) => a.nome && !Object.values(AUTO_GRANT_ABILITIES).flat().includes(a.nome)
   ).length;
