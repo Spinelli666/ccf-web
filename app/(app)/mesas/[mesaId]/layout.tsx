@@ -35,6 +35,7 @@ export default async function MesaLayout({
         displayName={session.user.name ?? session.user.username}
         mesaId={mesaId}
         mesaNome={membro.mesa.nome}
+        isGM={isGM}
       />
       <CombateClient
         mesaId={mesaId}

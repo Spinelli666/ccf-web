@@ -2,30 +2,53 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
 import { EditarPerfilDialog } from "@/components/dialogs/EditarPerfilDialog";
+import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 
 export function SideNav({
   displayName,
   mesaId,
   mesaNome,
+  isGM,
 }: {
   displayName: string;
   mesaId: string;
   mesaNome: string;
+  isGM: boolean;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   // Em celular a navbar viria por cima do conteúdo empilhada — começa recolhida pra não
   // empurrar a ficha pra baixo da dobra, até o usuário decidir manualmente.
   const isNarrow = useIsNarrowViewport(880);
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
   const collapsed = manualCollapsed ?? isNarrow;
   const [showEditarPerfil, setShowEditarPerfil] = useState(false);
+  const [showSairMesa, setShowSairMesa] = useState(false);
+  const [saindoMesa, setSaindoMesa] = useState(false);
 
   function toggle() {
     setManualCollapsed(!collapsed);
+  }
+
+  async function confirmarSairMesa() {
+    setSaindoMesa(true);
+    try {
+      const res = await fetch(`/api/mesas/${mesaId}/leave`, { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        alert(data?.error ?? "Não foi possível sair da mesa.");
+        return;
+      }
+      router.push("/mesas");
+      router.refresh();
+    } finally {
+      setSaindoMesa(false);
+      setShowSairMesa(false);
+    }
   }
 
   const links = [
@@ -71,6 +94,16 @@ export function SideNav({
         >
           ✏️ Editar Perfil
         </button>
+        {!isGM && (
+          <button
+            type="button"
+            className="btn ghost small"
+            style={{ width: "100%", marginBottom: 6 }}
+            onClick={() => setShowSairMesa(true)}
+          >
+            🚪 Sair da Mesa
+          </button>
+        )}
         <button
           type="button"
           className="btn ghost small"
@@ -81,6 +114,15 @@ export function SideNav({
         </button>
       </div>
       {showEditarPerfil && <EditarPerfilDialog onCancel={() => setShowEditarPerfil(false)} />}
+      {showSairMesa && (
+        <ConfirmDialog
+          title="Sair da Mesa"
+          message={`Tem certeza que quer sair da mesa "${mesaNome}"? Você vai precisar do código e da senha do Mestre pra entrar de novo.`}
+          confirmLabel={saindoMesa ? "Saindo..." : "Sair da Mesa"}
+          onConfirm={confirmarSairMesa}
+          onCancel={() => setShowSairMesa(false)}
+        />
+      )}
     </nav>
   );
 }
