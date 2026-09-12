@@ -61,18 +61,93 @@ export function EquipmentPanel({
     return { nome, valor: p ? num(p.valor) : 0 };
   });
 
-  function toggleEquipArma(i: number) {
+  function qtdDe(item: { quantidade?: string }): number {
+    return item.quantidade === undefined ? 1 : Math.max(0, num(item.quantidade, 0));
+  }
+
+  function equiparArma(i: number) {
+    const item = sheet.armas[i];
+    const qtd = qtdDe(item);
+    if (qtd <= 0) return;
     const next = sheet.armas.slice();
-    next[i] = { ...next[i], equipado: !next[i].equipado };
+    if (qtd > 1) {
+      next[i] = { ...item, quantidade: String(qtd - 1) };
+      next.push({ ...item, equipado: true, quantidade: undefined });
+    } else {
+      next[i] = { ...item, equipado: true, quantidade: undefined };
+    }
     onChange({ armas: next });
-    onLog(`${sheet.name || "Personagem"} ${next[i].equipado ? "equipou" : "guardou"} "${next[i].item}"`);
+    onLog(`${sheet.name || "Personagem"} equipou "${item.item}"`);
   }
-  function toggleEquipArmadura(i: number) {
+
+  function desequiparArma(i: number) {
+    const item = sheet.armas[i];
+    const next = sheet.armas.slice();
+    const matchIdx = next.findIndex(
+      (a, j) =>
+        j !== i &&
+        !a.equipado &&
+        a.item === item.item &&
+        a.dano === item.dano &&
+        a.propriedades === item.propriedades &&
+        a.preco === item.preco &&
+        (a.peso || "medio") === (item.peso || "medio")
+    );
+    if (matchIdx >= 0) {
+      next[matchIdx] = { ...next[matchIdx], quantidade: String(qtdDe(next[matchIdx]) + 1) };
+      next.splice(i, 1);
+    } else {
+      next[i] = { ...item, equipado: false, quantidade: "1" };
+    }
+    onChange({ armas: next });
+    onLog(`${sheet.name || "Personagem"} guardou "${item.item}"`);
+  }
+
+  function equiparArmadura(i: number) {
+    const item = sheet.armaduras[i];
+    const qtd = qtdDe(item);
+    if (qtd <= 0) return;
     const next = sheet.armaduras.slice();
-    next[i] = { ...next[i], equipado: !next[i].equipado };
+    if (qtd > 1) {
+      next[i] = { ...item, quantidade: String(qtd - 1) };
+      next.push({ ...item, equipado: true, quantidade: undefined });
+    } else {
+      next[i] = { ...item, equipado: true, quantidade: undefined };
+    }
     onChange({ armaduras: next });
-    onLog(`${sheet.name || "Personagem"} ${next[i].equipado ? "equipou" : "guardou"} "${next[i].item}"`);
+    onLog(`${sheet.name || "Personagem"} equipou "${item.item}"`);
   }
+
+  function desequiparArmadura(i: number) {
+    const item = sheet.armaduras[i];
+    const next = sheet.armaduras.slice();
+    const matchIdx = next.findIndex(
+      (a, j) =>
+        j !== i &&
+        !a.equipado &&
+        a.item === item.item &&
+        a.parte === item.parte &&
+        a.armadura === item.armadura &&
+        a.preco === item.preco &&
+        (a.peso || "medio") === (item.peso || "medio")
+    );
+    if (matchIdx >= 0) {
+      next[matchIdx] = { ...next[matchIdx], quantidade: String(qtdDe(next[matchIdx]) + 1) };
+      next.splice(i, 1);
+    } else {
+      next[i] = { ...item, equipado: false, quantidade: "1" };
+    }
+    onChange({ armaduras: next });
+    onLog(`${sheet.name || "Personagem"} guardou "${item.item}"`);
+  }
+
+  function setQuantidadeItem(kind: "armas" | "armaduras", i: number, value: string) {
+    const list = sheet[kind].slice();
+    const n = Math.max(0, parseInt(value, 10) || 0);
+    list[i] = { ...list[i], quantidade: String(n) };
+    onChange({ [kind]: list } as Partial<FullSheetData>);
+  }
+
   function setQuantidade(i: number, value: string) {
     const next = sheet.remedios.slice();
     const n = Math.max(0, parseInt(value, 10) || 0);
@@ -233,9 +308,10 @@ export function EquipmentPanel({
   let slotsLeveCount = 0;
   let slotsFixos = 0;
   [...armasInventario, ...armadurasInventario].forEach(([, item]) => {
+    const qtd = qtdDe(item);
     const p = pesoDe(item);
-    if (p === "leve") slotsLeveCount++;
-    else slotsFixos += PESO_SPACE[p];
+    if (p === "leve") slotsLeveCount += qtd;
+    else slotsFixos += PESO_SPACE[p] * qtd;
   });
   remedioPairs.forEach(([, r]) => {
     // Itens Genéricos (sem Usos) empilham quantidade — cada cópia ocupa espaço.
@@ -386,7 +462,7 @@ export function EquipmentPanel({
                         </td>
                         <td className="col-tight">
                           {isMine && (
-                            <button type="button" className="btn ghost small" onClick={() => toggleEquipArma(idx)}>
+                            <button type="button" className="btn ghost small" onClick={() => desequiparArma(idx)}>
                               Desequipar
                             </button>
                           )}
@@ -442,7 +518,7 @@ export function EquipmentPanel({
                           <td className="col-tight">{durabField("armaduras", idx, a)}</td>
                           <td className="col-tight">
                             {isMine && (
-                              <button type="button" className="btn ghost small" onClick={() => toggleEquipArmadura(idx)}>
+                              <button type="button" className="btn ghost small" onClick={() => desequiparArmadura(idx)}>
                                 Desequipar
                               </button>
                             )}
@@ -491,12 +567,15 @@ export function EquipmentPanel({
                     <th>Arma</th>
                     <th>Dano</th>
                     <th>Peso</th>
+                    <th>Qtd</th>
                     <th></th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {armasInventario.map(([idx, a]) => (
+                  {armasInventario.map(([idx, a]) => {
+                    const qtd = qtdDe(a);
+                    return (
                     <Fragment key={idx}>
                       <tr>
                         <td className="name">
@@ -507,8 +586,21 @@ export function EquipmentPanel({
                         <td className="col-tight">{a.dano}</td>
                         <td className="col-tight">{PESO_LABELS[pesoDe(a)]}</td>
                         <td className="col-tight">
+                          {isMine ? (
+                            <input
+                              type="number"
+                              className="qty-input"
+                              min={0}
+                              value={qtd}
+                              onChange={(e) => setQuantidadeItem("armas", idx, e.target.value)}
+                            />
+                          ) : (
+                            qtd
+                          )}
+                        </td>
+                        <td className="col-tight">
                           {isMine && (
-                            <button type="button" className="btn small secondary" onClick={() => toggleEquipArma(idx)}>
+                            <button type="button" className="btn small secondary" disabled={qtd <= 0} onClick={() => equiparArma(idx)}>
                               Equipar
                             </button>
                           )}
@@ -526,9 +618,10 @@ export function EquipmentPanel({
                           )}
                         </td>
                       </tr>
-                      {weaponPropsRow(idx, a, `wi-${idx}`, 5)}
+                      {weaponPropsRow(idx, a, `wi-${idx}`, 6)}
                     </Fragment>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
               </div>
@@ -547,12 +640,15 @@ export function EquipmentPanel({
                     <th>Item</th>
                     <th>Armadura</th>
                     <th>Peso</th>
+                    <th>Qtd</th>
                     <th></th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {armadurasInventario.map(([idx, a]) => (
+                  {armadurasInventario.map(([idx, a]) => {
+                    const qtd = qtdDe(a);
+                    return (
                     <Fragment key={idx}>
                       <tr>
                         <td className="name">
@@ -563,8 +659,21 @@ export function EquipmentPanel({
                         <td className="col-tight">{a.armadura}</td>
                         <td className="col-tight">{PESO_LABELS[pesoDe(a)]}</td>
                         <td className="col-tight">
+                          {isMine ? (
+                            <input
+                              type="number"
+                              className="qty-input"
+                              min={0}
+                              value={qtd}
+                              onChange={(e) => setQuantidadeItem("armaduras", idx, e.target.value)}
+                            />
+                          ) : (
+                            qtd
+                          )}
+                        </td>
+                        <td className="col-tight">
                           {isMine && (
-                            <button type="button" className="btn small secondary" onClick={() => toggleEquipArmadura(idx)}>
+                            <button type="button" className="btn small secondary" disabled={qtd <= 0} onClick={() => equiparArmadura(idx)}>
                               Equipar
                             </button>
                           )}
@@ -582,9 +691,10 @@ export function EquipmentPanel({
                           )}
                         </td>
                       </tr>
-                      {armorInfoRow(idx, a, `ai-${idx}`, 5)}
+                      {armorInfoRow(idx, a, `ai-${idx}`, 6)}
                     </Fragment>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
               </div>

@@ -43,6 +43,9 @@ export type Arma = {
   equipado: boolean;
   durabilidadeAtual: number;
   durabilidadeMax: number;
+  // Só faz sentido enquanto desequipada (pilha no Inventário) — equipar tira 1 da pilha
+  // e cria uma cópia equipada avulsa; ao equipar a pilha some.
+  quantidade?: string;
 };
 
 export type Armadura = {
@@ -54,6 +57,7 @@ export type Armadura = {
   equipado: boolean;
   durabilidadeAtual: number;
   durabilidadeMax: number;
+  quantidade?: string;
 };
 
 export type Remedio = {
