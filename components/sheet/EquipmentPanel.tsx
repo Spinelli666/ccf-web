@@ -704,7 +704,7 @@ export function EquipmentPanel({
 
           {remedioPairs.length > 0 && (
             <>
-              {tableHead("inv-genericos", "Itens Genéricos / Remédios", remedioPairs.length)}
+              {tableHead("inv-genericos", "Itens Genéricos", remedioPairs.length)}
               {openTables.has("inv-genericos") && (
               <div className="sheet-table-wrap">
               <table className="sheet-table">
