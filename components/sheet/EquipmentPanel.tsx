@@ -48,6 +48,7 @@ export function EquipmentPanel({
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [openTables, setOpenTables] = useState<Set<string>>(new Set());
   const [attackIdx, setAttackIdx] = useState<number | null>(null);
   const [attrByIdx, setAttrByIdx] = useState<Record<number, string>>({});
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
@@ -93,6 +94,25 @@ export function EquipmentPanel({
       else next.add(key);
       return next;
     });
+  }
+
+  function toggleTable(key: string) {
+    setOpenTables((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function tableHead(key: string, label: string, count: number) {
+    const open = openTables.has(key);
+    return (
+      <button type="button" className="table-collapse-head" onClick={() => toggleTable(key)}>
+        <span className="table-collapse-arrow">{open ? "▾" : "▸"}</span> {label}{" "}
+        <span className="table-collapse-count">({count})</span>
+      </button>
+    );
   }
 
   function setDurabilidadeAtual(kind: "armas" | "armaduras", i: number, value: string) {
@@ -272,30 +292,17 @@ export function EquipmentPanel({
     );
   }
 
-  function setEfeito(i: number, value: string) {
-    const next = sheet.remedios.slice();
-    next[i] = { ...next[i], efeito: value };
-    onChange({ remedios: next });
-  }
-
   function genericoInfoRow(idx: number, r: Remedio, key: string, colSpan: number) {
     return (
       expanded.has(key) && (
         <tr className="item-info-row" key={`${key}-info`}>
           <td colSpan={colSpan}>
             <div className="item-info-box">
-              {isMine ? (
-                <textarea
-                  className="item-info-edit"
-                  value={r.efeito}
-                  placeholder="Descrição / efeito / anotações sobre esse item..."
-                  onChange={(e) => setEfeito(idx, e.target.value)}
-                />
-              ) : r.efeito ? (
+              {r.efeito ? (
                 <div className="item-info-line">{r.efeito}</div>
               ) : (
                 <div className="item-info-line">
-                  <em>Sem descrição.</em>
+                  <em>Sem descrição — edite pelo ✏️ pra adicionar.</em>
                 </div>
               )}
             </div>
@@ -307,6 +314,16 @@ export function EquipmentPanel({
 
   return (
     <>
+      <div className="resumo">
+        <div className="box">
+          <div className="val">
+            {slotsUsados}
+            {invMax ? ` / ${invMax}` : ""}
+          </div>
+          <div className="lbl">Espaços de Inventário</div>
+        </div>
+      </div>
+
       {isMine && (
         <button type="button" className="add-row-btn" style={{ marginBottom: 14 }} onClick={() => setShowAdd(true)}>
           + Adicionar Equipamento
@@ -317,7 +334,10 @@ export function EquipmentPanel({
         <div className="section">
           <h2>Equipamento</h2>
           {armasEquipadas.length > 0 && (
-            <div className="sheet-table-wrap">
+            <>
+              {tableHead("eq-armas", "Armas Equipadas", armasEquipadas.length)}
+              {openTables.has("eq-armas") && (
+              <div className="sheet-table-wrap">
               <table className="sheet-table">
                 <thead>
                   <tr>
@@ -386,11 +406,15 @@ export function EquipmentPanel({
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+              )}
+            </>
           )}
 
           {armadurasEquipadas.length > 0 ? (
             <>
+              {tableHead("eq-armaduras", "Armaduras Equipadas", armadurasEquipadas.length)}
+              {openTables.has("eq-armaduras") && (
               <div className="sheet-table-wrap">
                 <table className="sheet-table">
                   <thead>
@@ -439,10 +463,7 @@ export function EquipmentPanel({
                   </tbody>
                 </table>
               </div>
-              <div className="armor-total">
-                Armadura: {armaduraAtual} / {armaduraMaximo}
-                {derived.armaduraNatural ? ` (inclui ${derived.armaduraNatural} natural)` : ""}
-              </div>
+              )}
             </>
           ) : (
             <div className="derived-note">
@@ -457,7 +478,10 @@ export function EquipmentPanel({
         <div className="section">
           <h2>Inventário</h2>
           {armasInventario.length > 0 && (
-            <div className="sheet-table-wrap">
+            <>
+              {tableHead("inv-armas", "Armas", armasInventario.length)}
+              {openTables.has("inv-armas") && (
+              <div className="sheet-table-wrap">
               <table className="sheet-table">
                 <thead>
                   <tr>
@@ -504,11 +528,16 @@ export function EquipmentPanel({
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+              )}
+            </>
           )}
 
           {armadurasInventario.length > 0 && (
-            <div className="sheet-table-wrap">
+            <>
+              {tableHead("inv-armaduras", "Armaduras", armadurasInventario.length)}
+              {openTables.has("inv-armaduras") && (
+              <div className="sheet-table-wrap">
               <table className="sheet-table">
                 <thead>
                   <tr>
@@ -555,11 +584,16 @@ export function EquipmentPanel({
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+              )}
+            </>
           )}
 
           {remedioPairs.length > 0 && (
-            <div className="sheet-table-wrap">
+            <>
+              {tableHead("inv-genericos", "Itens Genéricos / Remédios", remedioPairs.length)}
+              {openTables.has("inv-genericos") && (
+              <div className="sheet-table-wrap">
               <table className="sheet-table">
                 <thead>
                   <tr>
@@ -634,7 +668,9 @@ export function EquipmentPanel({
                   })}
                 </tbody>
               </table>
-            </div>
+              </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -642,16 +678,6 @@ export function EquipmentPanel({
       {!equipHtmlVisible && !inventarioHtmlVisible && (
         <div className="derived-note">Nada em Equipamento ou Inventário ainda.</div>
       )}
-
-      <div className="resumo">
-        <div className="box">
-          <div className="val">
-            {slotsUsados}
-            {invMax ? ` / ${invMax}` : ""}
-          </div>
-          <div className="lbl">Espaços de Inventário</div>
-        </div>
-      </div>
 
       {showAdd && (
         <AddEquipmentDialog

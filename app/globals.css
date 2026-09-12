@@ -678,6 +678,13 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
   background:var(--input-bg); border:1px solid var(--gold-line); border-radius:4px; padding:8px 10px;
 }
 
+.notes-textarea{
+  font-family:'EB Garamond', serif; font-size:15px; font-style:italic; resize:vertical;
+  padding:10px 12px; border:1px solid var(--gold-line); border-radius:4px;
+  background:var(--input-bg); color:var(--ink);
+}
+.notes-textarea:focus{ outline:2px solid var(--blue); outline-offset:1px; }
+
 .armor-total{ text-align:center; font-style:italic; color: var(--blue); margin-top:10px; font-size:15px; }
 
 .resumo{ text-align:center; margin: 26px 0 6px; }
@@ -759,6 +766,16 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
 .remove-btn{ background:none; border:none; color:#8a3a2a; font-size:20px; cursor:pointer; line-height:1; padding:6px; }
 .add-row-btn{ font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; background:none; border:1px dashed var(--gold-line); color:var(--maroon); padding:8px 14px; border-radius:3px; cursor:pointer; }
 .add-row-btn:hover{ background: rgba(255,183,92,0.15); }
+
+.table-collapse-head{
+  display:flex; align-items:center; gap:6px; width:100%; text-align:left;
+  font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; color:var(--maroon);
+  background:rgba(255,183,92,0.08); border:1px solid var(--gold-line); border-radius:6px;
+  padding:9px 14px; margin-bottom:8px; cursor:pointer;
+}
+.table-collapse-head:hover{ background: rgba(255,183,92,0.16); }
+.table-collapse-arrow{ font-size:11px; color:var(--ink-soft); }
+.table-collapse-count{ color:var(--ink-soft); font-family:'EB Garamond',serif; font-style:italic; letter-spacing:0; text-transform:none; font-size:12px; }
 .lib-picker{
   background: rgba(111,195,224,0.08); border:1px solid var(--blue); border-radius:4px;
   padding:12px 14px; margin-bottom:14px;

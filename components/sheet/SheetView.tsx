@@ -218,7 +218,7 @@ export function SheetView({
                 <h2>Bloco de Notas</h2>
                 {isMine && (
                   <textarea
-                    className="field"
+                    className="notes-textarea"
                     style={{ width: "100%", minHeight: 90, marginBottom: 10 }}
                     value={sheet.biografia}
                     placeholder="Anotações livres — lembretes, ideias, informações da campanha..."
