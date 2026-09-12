@@ -380,6 +380,55 @@ app.prepare().then(async () => {
         if (ack) ack({ ok: false, error: "failed" });
       }
     });
+
+    socket.on("combat:prev-turn", async (_payload, ack) => {
+      try {
+        if (!socket.data.isGM) {
+          return ack && ack({ ok: false, error: "Só o mestre pode voltar o turno." });
+        }
+        const combate = await prisma.combate.findUnique({
+          where: { mesaId: socket.data.mesaId },
+          include: {
+            participantes: { orderBy: { ordem: "asc" }, include: { sheet: { select: { ownerId: true } } } },
+          },
+        });
+        if (!combate) return ack && ack({ ok: false, error: "Nenhum combate ativo." });
+        const total = combate.participantes.length;
+        if (total === 0) return ack && ack({ ok: false, error: "Nenhum participante." });
+        if (combate.turnoAtualIndex === 0 && combate.rodada <= 1) {
+          return ack && ack({ ok: false, error: "Já está no início do combate." });
+        }
+        const mudaRodada = combate.turnoAtualIndex === 0;
+        const novaRodada = mudaRodada ? combate.rodada - 1 : combate.rodada;
+        const anteriorIndex = mudaRodada ? total - 1 : combate.turnoAtualIndex - 1;
+        const data = { turnoAtualIndex: anteriorIndex, rodada: novaRodada };
+        await prisma.combate.update({ where: { id: combate.id }, data });
+
+        const novoAtivo = combate.participantes[anteriorIndex];
+        const textosLog = [];
+        if (mudaRodada) textosLog.push(`↩ Voltou pra Rodada ${novaRodada}.`);
+        if (novoAtivo) textosLog.push(`◀ Voltou o turno pra ${novoAtivo.nome}.`);
+        for (const texto of textosLog) {
+          const logMsg = await prisma.chatMessage.create({
+            data: {
+              mesaId: socket.data.mesaId,
+              authorId: socket.data.user.id,
+              authorName: socket.data.user.name || socket.data.user.username,
+              kind: "log",
+              text: texto,
+            },
+          });
+          io.to(room).emit("chat:new", logMsg);
+        }
+
+        const state = await getCombateState(socket.data.mesaId);
+        io.to(room).emit("combat:state", state);
+        if (ack) ack({ ok: true, state });
+      } catch (err) {
+        console.error("combat:prev-turn failed", err);
+        if (ack) ack({ ok: false, error: "failed" });
+      }
+    });
   });
 
   httpServer

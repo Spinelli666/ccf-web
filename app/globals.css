@@ -673,6 +673,10 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
 }
 .item-info-line{ margin-bottom:6px; }
 .item-info-line:last-child{ margin-bottom:0; }
+.item-info-edit{
+  width:100%; min-height:70px; resize:vertical; font-size:13px; color:var(--ink);
+  background:var(--input-bg); border:1px solid var(--gold-line); border-radius:4px; padding:8px 10px;
+}
 
 .armor-total{ text-align:center; font-style:italic; color: var(--blue); margin-top:10px; font-size:15px; }
 

@@ -272,6 +272,39 @@ export function EquipmentPanel({
     );
   }
 
+  function setEfeito(i: number, value: string) {
+    const next = sheet.remedios.slice();
+    next[i] = { ...next[i], efeito: value };
+    onChange({ remedios: next });
+  }
+
+  function genericoInfoRow(idx: number, r: Remedio, key: string, colSpan: number) {
+    return (
+      expanded.has(key) && (
+        <tr className="item-info-row" key={`${key}-info`}>
+          <td colSpan={colSpan}>
+            <div className="item-info-box">
+              {isMine ? (
+                <textarea
+                  className="item-info-edit"
+                  value={r.efeito}
+                  placeholder="Descrição / efeito / anotações sobre esse item..."
+                  onChange={(e) => setEfeito(idx, e.target.value)}
+                />
+              ) : r.efeito ? (
+                <div className="item-info-line">{r.efeito}</div>
+              ) : (
+                <div className="item-info-line">
+                  <em>Sem descrição.</em>
+                </div>
+              )}
+            </div>
+          </td>
+        </tr>
+      )
+    );
+  }
+
   return (
     <>
       {isMine && (
@@ -531,7 +564,6 @@ export function EquipmentPanel({
                 <thead>
                   <tr>
                     <th>Item</th>
-                    <th>Efeito</th>
                     <th>Peso</th>
                     <th>Preço</th>
                     <th>Qtd</th>
@@ -544,9 +576,13 @@ export function EquipmentPanel({
                     const max = num(r.usosMax, 0);
                     const isGenerico = max === 0;
                     return (
-                      <tr key={idx}>
-                        <td className="name">{r.item}</td>
-                        <td>{r.efeito}</td>
+                      <Fragment key={idx}>
+                      <tr>
+                        <td className="name">
+                          <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`g-${idx}`)}>
+                            {r.item}
+                          </button>
+                        </td>
                         <td className="col-tight">{PESO_LABELS[pesoDe(r)]}</td>
                         <td className="col-tight">{r.preco}</td>
                         <td className="col-tight">
@@ -592,6 +628,8 @@ export function EquipmentPanel({
                           )}
                         </td>
                       </tr>
+                      {genericoInfoRow(idx, r, `g-${idx}`, 6)}
+                      </Fragment>
                     );
                   })}
                 </tbody>

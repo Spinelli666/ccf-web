@@ -136,6 +136,12 @@ export function CombateClient({
     getSocket(mesaId).emit("combat:next-turn");
   }
 
+  function turnoAnterior() {
+    getSocket(mesaId).emit("combat:prev-turn", undefined, (ack?: { ok: boolean; error?: string }) => {
+      if (ack && !ack.ok && ack.error) alert(ack.error);
+    });
+  }
+
   function toggleStatus(participanteId: string, mostrarStatus: boolean) {
     getSocket(mesaId).emit("combat:toggle-status", { participanteId, mostrarStatus });
   }
@@ -277,6 +283,9 @@ export function CombateClient({
         <div className="combat-col-foot">
           <button type="button" className="btn small secondary" style={{ width: "100%" }} onClick={() => setShowAdicionar(true)}>
             + Adicionar
+          </button>
+          <button type="button" className="btn small secondary" style={{ width: "100%" }} onClick={turnoAnterior}>
+            ← Turno Anterior
           </button>
           <button type="button" className="btn small" style={{ width: "100%" }} onClick={proximoTurno}>
             Próximo turno →
