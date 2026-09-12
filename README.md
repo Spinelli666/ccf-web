@@ -33,7 +33,7 @@ Passo a passo manual:
 | `npm run build` | Build de produção do Next (`next build`) |
 | `npm run start` | Sobe `server.js` em modo produção (rodar depois do `build`) |
 | `npm run prisma:migrate` | Cria/atualiza o schema no banco (dev) |
-| `npm run prisma:deploy` | Aplica migrações em produção (sem gerar novas) |
+| `npm run prisma:deploy` | Aplica migrações em produção e regenera o Prisma Client (sem gerar migrações novas) |
 | `npm run prisma:seed` | Insere as raças padrão (Humano, Norsca, Anão, Gnomo, Elfo) |
 | `npm run lint` | ESLint |
 
