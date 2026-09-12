@@ -31,10 +31,11 @@ export function SheetCard({
 }) {
   const router = useRouter();
   const derived = computeDerived(sheet.data || {});
-  const meta = sheet.data as { name?: string; classeTitulo?: string; racaTitulo?: string } | undefined;
+  const meta = sheet.data as { name?: string; classeTitulo?: string; racaTitulo?: string; avatarUrl?: string } | undefined;
   const nome = meta?.name || sheet.name;
   const classeTitulo = meta?.classeTitulo || "";
   const racaTitulo = meta?.racaTitulo || "";
+  const avatarUrl = meta?.avatarUrl;
 
   async function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
@@ -59,6 +60,12 @@ export function SheetCard({
         <button type="button" className="card-del-btn" onClick={handleDelete} title="Apagar ficha">
           🗑️
         </button>
+      )}
+      {avatarUrl && (
+        <div className="card-avatar">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={avatarUrl} alt="" />
+        </div>
       )}
       <h3>
         {sheet.private && <span className="lock-badge">🔒 </span>}

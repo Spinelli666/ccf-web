@@ -7,7 +7,7 @@ import { SURVIVAL_EFFECTS_CATALOG } from "@/lib/survival-effects";
 import { EffectPickerDialog } from "@/components/dialogs/EffectPickerDialog";
 import type { FullSheetData } from "@/lib/sheet-types";
 
-type EffectInfo = { desc: string; danoRodada?: number; manualDano?: number };
+type EffectInfo = { desc: string; icone?: string; danoRodada?: number; manualDano?: number };
 
 export function EffectsPanel({
   sheet,
@@ -61,7 +61,7 @@ export function EffectsPanel({
               const danoValor = info.danoRodada || info.manualDano;
               return (
                 <tr key={nomeEfeito}>
-                  <td className="name">{nomeEfeito}</td>
+                  <td className="name">{info.icone ? `${info.icone} ` : ""}{nomeEfeito}</td>
                   <td>{info.desc}</td>
                   <td>
                     <div className="effect-row-actions">

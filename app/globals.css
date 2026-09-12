@@ -339,6 +339,8 @@ body{
 }
 .card-del-btn:hover{ opacity:1; background:rgba(138,58,42,0.1); }
 .lock-badge{ font-size:14px; vertical-align:middle; }
+.card-avatar{ width:70px; height:70px; border-radius:10px; overflow:hidden; margin:0 0 10px; }
+.card-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 .private-tag{
   display:inline-block; margin-top:8px; font-family:'Cinzel',serif; font-size:10.5px; letter-spacing:.5px;
   color:var(--blue); background:rgba(111,195,224,0.1); border:1px solid var(--blue); border-radius:12px; padding:4px 12px;
@@ -375,6 +377,7 @@ body{
   display:inline-flex; align-items:center; justify-content:center;
 }
 .sheet-avatar:disabled{ cursor:default; }
+.sheet-avatar.has-image{ border:none; background:transparent; }
 .sheet-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 .sheet-avatar-placeholder{ font-size:48px; opacity:.55; }
 .sheet-head{ text-align:center; margin-bottom: 18px; }

@@ -146,7 +146,7 @@ export function SheetView({
         <div className="sheet-avatar-wrap">
           <button
             type="button"
-            className="sheet-avatar"
+            className={`sheet-avatar${sheet.avatarUrl ? " has-image" : ""}`}
             disabled={!isMine}
             title={isMine ? "Trocar ícone do personagem" : undefined}
             onClick={() => avatarInputRef.current?.click()}

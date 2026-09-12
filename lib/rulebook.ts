@@ -12,7 +12,8 @@ export function buildRulebook(races: RaceLike[]): RulebookEntry[] {
   const entries: RulebookEntry[] = [...RULEBOOK_STATIC];
 
   Object.entries(EFFECTS_CATALOG).forEach(([nome, info]) => {
-    entries.push({ categoria: "Efeitos", titulo: nome, texto: info.desc });
+    const icone = (info as { icone?: string }).icone;
+    entries.push({ categoria: "Efeitos", titulo: icone ? `${icone} ${nome}` : nome, texto: info.desc });
   });
 
   races.forEach((r) => {

@@ -38,7 +38,7 @@ export function EffectPickerDialog({
         ) : (
           filtered.map(([nome, info]) => (
             <button key={nome} type="button" className="effect-picker-row" onClick={() => onSelect(nome)}>
-              <span className="effect-picker-name">{nome}</span>
+              <span className="effect-picker-name">{info.icone ? `${info.icone} ` : ""}{nome}</span>
               <span className="effect-picker-desc">{info.desc}</span>
             </button>
           ))
