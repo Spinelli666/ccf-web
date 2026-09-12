@@ -19,7 +19,10 @@ export function resizeImageToDataUrl(file: File, maxSize: number): Promise<strin
           return;
         }
         ctx.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
+        // PNG, não JPEG: preserva transparência — em JPEG o canvas preenche áreas
+        // transparentes com preto (sem canal alfa), o que dava um fundo preto feio
+        // em qualquer imagem com fundo transparente.
+        resolve(canvas.toDataURL("image/png"));
       };
       img.src = String(reader.result);
     };
