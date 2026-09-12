@@ -370,13 +370,13 @@ body{
 
 .sheet-avatar-wrap{ text-align:center; margin-bottom:10px; }
 .sheet-avatar{
-  width:45px; height:45px; border-radius:8px; padding:0; overflow:hidden;
+  width:150px; height:150px; border-radius:12px; padding:0; overflow:hidden;
   border:1px dashed var(--gold-line); background:var(--input-bg); cursor:pointer;
   display:inline-flex; align-items:center; justify-content:center;
 }
 .sheet-avatar:disabled{ cursor:default; }
 .sheet-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
-.sheet-avatar-placeholder{ font-size:18px; opacity:.55; }
+.sheet-avatar-placeholder{ font-size:48px; opacity:.55; }
 .sheet-head{ text-align:center; margin-bottom: 18px; }
 .sigil{ width:34px; height:34px; margin:0 auto 12px; opacity:0.75; }
 .sheet-head h1{

@@ -92,7 +92,7 @@ export function SheetView({
     if (!file) return;
     setAvatarError(null);
     try {
-      const dataUrl = await resizeImageToDataUrl(file, 160);
+      const dataUrl = await resizeImageToDataUrl(file, 300);
       patch({ avatarUrl: dataUrl });
     } catch {
       setAvatarError("Não foi possível carregar essa imagem.");
