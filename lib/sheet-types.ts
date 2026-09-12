@@ -79,6 +79,8 @@ export type Julgamento = { sentencas: number; dadivas: number };
 
 export type FullSheetData = {
   name: string;
+  // Ícone do personagem (data URL, já redimensionado no navegador antes de salvar).
+  avatarUrl?: string;
   playerName: string;
   nivel: string;
   biografia: string;
@@ -113,6 +115,7 @@ export type FullSheetData = {
 export function emptySheetData(overrides: Partial<FullSheetData> = {}): FullSheetData {
   return {
     name: "",
+    avatarUrl: "",
     playerName: "",
     nivel: "1",
     biografia: "",

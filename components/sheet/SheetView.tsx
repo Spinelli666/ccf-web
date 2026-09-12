@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useDebouncedSave } from "@/lib/use-debounced-save";
 import { getSocket } from "@/lib/socket-client";
+import { resizeImageToDataUrl } from "@/lib/resize-image";
 import { RichText } from "@/components/RichText";
 import { StatsPanel } from "@/components/sheet/StatsPanel";
 import { PericiasPanel } from "@/components/sheet/PericiasPanel";
@@ -46,6 +47,8 @@ export function SheetView({
   const [priv, setPriv] = useState(isPrivate);
   const [editableByOthers, setEditableByOthers] = useState(initialEditableByOthers);
   const [downloading, setDownloading] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const canManage = isOwner || isGM;
 
   useDebouncedSave(sheetId, sheet.name || sheetName, sheet, isMine);
@@ -81,6 +84,19 @@ export function SheetView({
   async function handleDelete() {
     await fetch(`/api/sheets/${sheetId}`, { method: "DELETE" });
     router.push(`/mesas/${mesaId}/gallery`);
+  }
+
+  async function handleAvatarFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setAvatarError(null);
+    try {
+      const dataUrl = await resizeImageToDataUrl(file, 160);
+      patch({ avatarUrl: dataUrl });
+    } catch {
+      setAvatarError("Não foi possível carregar essa imagem.");
+    }
   }
 
   async function handleDownloadPdf() {
@@ -127,6 +143,32 @@ export function SheetView({
 
       <div className="frame" id="sheet-frame">
         <div className="corner tl" /> <div className="corner tr" /> <div className="corner bl" /> <div className="corner br" />
+        <div className="sheet-avatar-wrap">
+          <button
+            type="button"
+            className="sheet-avatar"
+            disabled={!isMine}
+            title={isMine ? "Trocar ícone do personagem" : undefined}
+            onClick={() => avatarInputRef.current?.click()}
+          >
+            {sheet.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={sheet.avatarUrl} alt="" />
+            ) : (
+              <span className="sheet-avatar-placeholder">🖼️</span>
+            )}
+          </button>
+          {isMine && (
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleAvatarFile}
+            />
+          )}
+          {avatarError && <div className="survival-warn">{avatarError}</div>}
+        </div>
         <div className="sheet-head">
           <h1>{sheet.name || sheetName}</h1>
           {priv && (
@@ -188,13 +230,13 @@ export function SheetView({
                       </div>
                     </div>
                     {canManage && (
-                      <label className="chk-inline" style={{ marginTop: 8 }}>
+                      <label className="chk-inline" style={{ display: "flex", marginTop: 8 }}>
                         <input type="checkbox" checked={priv} onChange={togglePrivate} /> 🔒 Ficha privada (só o
                         dono e o Mestre veem em &quot;Todas as fichas&quot;)
                       </label>
                     )}
                     {isOwner && (
-                      <label className="chk-inline" style={{ marginTop: 8 }}>
+                      <label className="chk-inline" style={{ display: "flex", marginTop: 8 }}>
                         <input type="checkbox" checked={editableByOthers} onChange={toggleEditableByOthers} /> ✏️
                         Permitir que outros jogadores da mesa editem essa ficha (ex: um aliado mexer no seu
                         inventário)
