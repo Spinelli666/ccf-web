@@ -70,10 +70,10 @@ export function EquipmentPanel({
     onChange({ armaduras: next });
     onLog(`${sheet.name || "Personagem"} ${next[i].equipado ? "equipou" : "guardou"} "${next[i].item}"`);
   }
-  function adjustQuantidade(i: number, delta: number) {
+  function setQuantidade(i: number, value: string) {
     const next = sheet.remedios.slice();
-    const atual = Math.max(0, num(next[i].quantidade, 1) + delta);
-    next[i] = { ...next[i], quantidade: String(atual) };
+    const n = Math.max(0, parseInt(value, 10) || 0);
+    next[i] = { ...next[i], quantidade: String(n) };
     onChange({ remedios: next });
   }
   function usarRemedio(i: number) {
@@ -95,11 +95,30 @@ export function EquipmentPanel({
     });
   }
 
-  function adjustDurabilidade(kind: "armas" | "armaduras", i: number, delta: number) {
+  function setDurabilidadeAtual(kind: "armas" | "armaduras", i: number, value: string) {
     const list = sheet[kind].slice();
     const item = list[i];
-    list[i] = { ...item, durabilidadeAtual: clamp(item.durabilidadeAtual + delta, 0, item.durabilidadeMax) };
+    const n = clamp(parseInt(value, 10) || 0, 0, item.durabilidadeMax);
+    list[i] = { ...item, durabilidadeAtual: n };
     onChange({ [kind]: list } as Partial<FullSheetData>);
+  }
+
+  function durabField(kind: "armas" | "armaduras", idx: number, item: Arma | Armadura) {
+    return (
+      <div className="durab-field">
+        <input
+          type="number"
+          className="durab-input"
+          min={0}
+          max={item.durabilidadeMax}
+          value={item.durabilidadeAtual}
+          disabled={!isMine}
+          onChange={(e) => setDurabilidadeAtual(kind, idx, e.target.value)}
+        />
+        <span className="durab-sep">|</span>
+        <input type="number" className="durab-input durab-max" value={item.durabilidadeMax} disabled readOnly title="Durabilidade máxima — ajuste em Editar" />
+      </div>
+    );
   }
 
   function salvarEdicao(patch: Partial<Arma> | Partial<Armadura> | Partial<Remedio>) {
@@ -287,19 +306,7 @@ export function EquipmentPanel({
                           </button>
                         </td>
                         <td className="col-tight">{a.dano}</td>
-                        <td className="col-tight">
-                          <div className="counter">
-                            <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armas", idx, -1)}>
-                              −
-                            </button>
-                            <span className="counter-val">
-                              {a.durabilidadeAtual}/{a.durabilidadeMax}
-                            </span>
-                            <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armas", idx, 1)}>
-                              +
-                            </button>
-                          </div>
-                        </td>
+                        <td className="col-tight">{durabField("armas", idx, a)}</td>
                         <td className="col-tight">
                           {isMine && (
                             <div className="attack-cell">
@@ -372,19 +379,7 @@ export function EquipmentPanel({
                             </button>
                           </td>
                           <td className="col-tight">{a.armadura}</td>
-                          <td className="col-tight">
-                            <div className="counter">
-                              <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armaduras", idx, -1)}>
-                                −
-                              </button>
-                              <span className="counter-val">
-                                {a.durabilidadeAtual}/{a.durabilidadeMax}
-                              </span>
-                              <button type="button" className="counter-btn" disabled={!isMine} onClick={() => adjustDurabilidade("armaduras", idx, 1)}>
-                                +
-                              </button>
-                            </div>
-                          </td>
+                          <td className="col-tight">{durabField("armaduras", idx, a)}</td>
                           <td className="col-tight">
                             {isMine && (
                               <button type="button" className="btn ghost small" onClick={() => toggleEquipArmadura(idx)}>
@@ -557,15 +552,13 @@ export function EquipmentPanel({
                         <td className="col-tight">
                           {isGenerico ? (
                             isMine ? (
-                              <div className="counter">
-                                <button type="button" className="counter-btn" onClick={() => adjustQuantidade(idx, -1)}>
-                                  −
-                                </button>
-                                <span className="counter-val">{Math.max(0, num(r.quantidade, 1))}</span>
-                                <button type="button" className="counter-btn" onClick={() => adjustQuantidade(idx, 1)}>
-                                  +
-                                </button>
-                              </div>
+                              <input
+                                type="number"
+                                className="qty-input"
+                                min={0}
+                                value={Math.max(0, num(r.quantidade, 1))}
+                                onChange={(e) => setQuantidade(idx, e.target.value)}
+                              />
                             ) : (
                               Math.max(0, num(r.quantidade, 1))
                             )

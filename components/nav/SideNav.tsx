@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
 import { EditarPerfilDialog } from "@/components/dialogs/EditarPerfilDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
+import { RenomearMesaDialog } from "@/components/dialogs/RenomearMesaDialog";
 
 export function SideNav({
   displayName,
@@ -29,6 +30,7 @@ export function SideNav({
   const [showEditarPerfil, setShowEditarPerfil] = useState(false);
   const [showSairMesa, setShowSairMesa] = useState(false);
   const [saindoMesa, setSaindoMesa] = useState(false);
+  const [showRenomearMesa, setShowRenomearMesa] = useState(false);
 
   function toggle() {
     setManualCollapsed(!collapsed);
@@ -64,6 +66,11 @@ export function SideNav({
       <div className="side-nav-head">
         <div className="brand">
           Sistema Cardigan <span>· {mesaNome}</span>
+          {isGM && !collapsed && (
+            <button type="button" className="icon-btn" title="Renomear Mesa" onClick={() => setShowRenomearMesa(true)}>
+              ✏️
+            </button>
+          )}
         </div>
         <button
           type="button"
@@ -114,6 +121,9 @@ export function SideNav({
         </button>
       </div>
       {showEditarPerfil && <EditarPerfilDialog onCancel={() => setShowEditarPerfil(false)} />}
+      {showRenomearMesa && (
+        <RenomearMesaDialog mesaId={mesaId} nomeAtual={mesaNome} onCancel={() => setShowRenomearMesa(false)} />
+      )}
       {showSairMesa && (
         <ConfirmDialog
           title="Sair da Mesa"

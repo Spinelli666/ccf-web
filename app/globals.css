@@ -294,7 +294,7 @@ body{
 
 .icon-btn{
   background:none; border:1px solid var(--gold-line); border-radius:5px; cursor:pointer;
-  width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
+  width:28px; height:28px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;
   font-size:13px; opacity:0.75; transition: opacity .12s ease, background .12s ease;
 }
 .icon-btn:hover{ opacity:1; background: rgba(255,183,92,0.12); }
@@ -368,9 +368,9 @@ body{
 .section{ margin: 22px 0; }
 .section h2{
   font-family:'Cinzel', serif; font-size:14px; letter-spacing:2px; color: var(--maroon);
-  text-transform:uppercase; display:flex; align-items:center; gap:12px; margin: 0 0 14px;
+  text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:12px; margin: 0 0 14px;
 }
-.section h2::after{ content:""; flex:1; height:1px; background: var(--gold-line); opacity:.7; }
+.section h2::before, .section h2::after{ content:""; flex:1; height:1px; background: var(--gold-line); opacity:.7; }
 .section h2 .ph-tag{ font-family:'EB Garamond', serif; font-style:italic; text-transform:none; letter-spacing:0; font-size:13px; font-weight:400; }
 
 /* --- Rastreador de combate: coluna recolhível entre a navbar e a ficha --- */
@@ -577,6 +577,18 @@ body{
 .counter-val{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:15px; min-width:32px; text-align:center; }
 .uses-count{ font-family:'Cormorant Garamond',serif; font-weight:700; color:var(--blue); }
 
+.qty-input{
+  width:52px; text-align:center; font-family:'Cormorant Garamond',serif; font-weight:700; font-size:15px;
+  border:1px solid var(--gold-line); border-radius:4px; background:var(--input-bg); color:var(--ink); padding:4px 2px;
+}
+.durab-field{ display:flex; align-items:center; justify-content:center; gap:5px; }
+.durab-input{
+  width:40px; text-align:center; font-family:'Cormorant Garamond',serif; font-weight:700; font-size:15px;
+  border:1px solid var(--gold-line); border-radius:4px; background:var(--input-bg); color:var(--ink); padding:4px 2px;
+}
+.durab-input.durab-max{ opacity:0.65; background:transparent; }
+.durab-sep{ color:var(--ink-soft); font-weight:700; }
+
 .pericia-right{ display:flex; align-items:center; gap:8px; }
 .dice-btn{
   background:none; border:1px solid var(--gold-line); border-radius:4px; cursor:pointer;
@@ -628,7 +640,7 @@ table.sheet-table{
 }
 table.sheet-table th{
   font-family:'Cinzel',serif; font-size:10.5px; letter-spacing:1.2px; color:var(--btn-text);
-  text-transform:uppercase; text-align:left; padding:9px 12px;
+  text-transform:uppercase; text-align:center; padding:9px 12px;
   background: var(--maroon); white-space:nowrap;
 }
 table.sheet-table th:first-child{ border-top-left-radius:7px; }
@@ -639,7 +651,9 @@ table.sheet-table td{
 }
 /* Colunas de valor curto (Peso, Preço, Qtd, Usos...) não devem quebrar no meio da palavra
    quando a coluna de texto livre (Efeito/Descrição) ao lado espreme o espaço disponível. */
-table.sheet-table td.col-tight{ white-space:nowrap; word-break:normal; }
+table.sheet-table td.col-tight{ white-space:nowrap; word-break:normal; text-align:center; }
+table.sheet-table td.col-tight .counter,
+table.sheet-table td.col-tight .attack-cell{ justify-content:center; }
 table.sheet-table tbody tr:last-child > td{ border-bottom:none; }
 table.sheet-table tbody tr:last-child > td:first-child{ border-bottom-left-radius:7px; }
 table.sheet-table tbody tr:last-child > td:last-child{ border-bottom-right-radius:7px; }
