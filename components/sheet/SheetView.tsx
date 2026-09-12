@@ -24,6 +24,9 @@ export function SheetView({
   ownerName,
   initialData,
   isMine,
+  isOwner,
+  isGM,
+  initialEditableByOthers,
 }: {
   mesaId: string;
   sheetId: string;
@@ -32,13 +35,18 @@ export function SheetView({
   ownerName: string;
   initialData: FullSheetData;
   isMine: boolean;
+  isOwner: boolean;
+  isGM: boolean;
+  initialEditableByOthers: boolean;
 }) {
   const router = useRouter();
   const [sheet, setSheet] = useState(initialData);
   const [tab, setTab] = useState<Tab>("Perícias");
   const [showDelete, setShowDelete] = useState(false);
   const [priv, setPriv] = useState(isPrivate);
+  const [editableByOthers, setEditableByOthers] = useState(initialEditableByOthers);
   const [downloading, setDownloading] = useState(false);
+  const canManage = isOwner || isGM;
 
   useDebouncedSave(sheetId, sheet.name || sheetName, sheet, isMine);
 
@@ -57,6 +65,16 @@ export function SheetView({
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ private: next }),
+    });
+  }
+
+  async function toggleEditableByOthers() {
+    const next = !editableByOthers;
+    setEditableByOthers(next);
+    await fetch(`/api/sheets/${sheetId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ editableByOthers: next }),
     });
   }
 
@@ -94,7 +112,7 @@ export function SheetView({
           <button className="btn secondary small" disabled={downloading} onClick={handleDownloadPdf}>
             {downloading ? "Gerando PDF..." : "📥 Baixar como PDF"}
           </button>
-          {isMine && (
+          {canManage && (
             <>
               <button className="btn ghost small" onClick={togglePrivate}>
                 {priv ? "🔒 Privada" : "🔓 Pública"}
@@ -111,7 +129,14 @@ export function SheetView({
         <div className="corner tl" /> <div className="corner tr" /> <div className="corner bl" /> <div className="corner br" />
         <div className="sheet-head">
           <h1>{sheet.name || sheetName}</h1>
-          {priv && <div className="private-tag">🔒 Ficha privada — só você vê ela em &quot;Todas as fichas&quot;</div>}
+          {priv && (
+            <div className="private-tag">🔒 Ficha privada — só o dono e o Mestre veem ela em &quot;Todas as fichas&quot;</div>
+          )}
+          {isMine && !isOwner && (
+            <div className="private-tag">
+              {isGM ? "🎲 Você está editando como Mestre" : "✏️ O dono permitiu que você edite essa ficha"}
+            </div>
+          )}
         </div>
         <div className="divider">⦿</div>
 
@@ -162,10 +187,19 @@ export function SheetView({
                         <input type="text" value={ownerName} disabled />
                       </div>
                     </div>
-                    <label className="chk-inline" style={{ marginTop: 8 }}>
-                      <input type="checkbox" checked={priv} onChange={togglePrivate} /> 🔒 Ficha privada (só aparece
-                      pra você em &quot;Todas as fichas&quot;; outros jogadores não veem)
-                    </label>
+                    {canManage && (
+                      <label className="chk-inline" style={{ marginTop: 8 }}>
+                        <input type="checkbox" checked={priv} onChange={togglePrivate} /> 🔒 Ficha privada (só o
+                        dono e o Mestre veem em &quot;Todas as fichas&quot;)
+                      </label>
+                    )}
+                    {isOwner && (
+                      <label className="chk-inline" style={{ marginTop: 8 }}>
+                        <input type="checkbox" checked={editableByOthers} onChange={toggleEditableByOthers} /> ✏️
+                        Permitir que outros jogadores da mesa editem essa ficha (ex: um aliado mexer no seu
+                        inventário)
+                      </label>
+                    )}
                   </>
                 ) : (
                   <>

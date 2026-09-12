@@ -54,6 +54,10 @@ model Sheet {
   owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   name      String
   private   Boolean  @default(false)
+  // Dono da ficha permite que outros jogadores da mesa (não só o Mestre) editem —
+  // ex: um aliado precisa mexer no inventário. Mestre e dono sempre podem editar,
+  // independente disso.
+  editableByOthers Boolean @default(false)
   // Todo o restante da ficha (pericias, stats, armas, armaduras, remedios,
   // racaHabilidades, classeHabilidades, biografia...) igual ao formato que
   // o app original salvava em "sheet:<id>" no storage do artifact.

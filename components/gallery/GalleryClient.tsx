@@ -10,10 +10,12 @@ export function GalleryClient({
   mesaId,
   sheets: initialSheets,
   currentUserId,
+  isGM,
 }: {
   mesaId: string;
   sheets: SheetSummary[];
   currentUserId: string;
+  isGM: boolean;
 }) {
   const router = useRouter();
   const [sheets, setSheets] = useState(initialSheets);
@@ -78,7 +80,7 @@ export function GalleryClient({
               key={sheet.id}
               mesaId={mesaId}
               sheet={sheet}
-              isMine={sheet.ownerId === currentUserId}
+              isMine={sheet.ownerId === currentUserId || isGM}
               onDeleted={(id) => setSheets((prev) => prev.filter((s) => s.id !== id))}
             />
           ))}

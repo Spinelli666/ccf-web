@@ -13,13 +13,16 @@ export default async function SheetPage({ params }: { params: Promise<{ mesaId: 
 
   const sheet = await prisma.sheet.findUnique({
     where: { id },
-    include: { owner: { select: { id: true, displayName: true } } },
+    include: { owner: { select: { id: true, displayName: true } }, mesa: { select: { ownerId: true } } },
   });
   if (!sheet || sheet.mesaId !== mesaId) notFound();
-  if (sheet.private && sheet.ownerId !== session.user.id) notFound();
+
+  const isOwner = sheet.ownerId === session.user.id;
+  const isGM = sheet.mesa.ownerId === session.user.id;
+  if (sheet.private && !isOwner && !isGM) notFound();
 
   const data = emptySheetData(sheet.data as object);
-  const isMine = sheet.ownerId === session.user.id;
+  const canEditContent = isOwner || isGM || sheet.editableByOthers;
 
   return (
     <SheetView
@@ -29,7 +32,10 @@ export default async function SheetPage({ params }: { params: Promise<{ mesaId: 
       isPrivate={sheet.private}
       ownerName={sheet.owner.displayName}
       initialData={data}
-      isMine={isMine}
+      isMine={canEditContent}
+      isOwner={isOwner}
+      isGM={isGM}
+      initialEditableByOthers={sheet.editableByOthers}
     />
   );
 }

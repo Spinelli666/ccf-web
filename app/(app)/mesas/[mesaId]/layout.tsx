@@ -24,7 +24,7 @@ export default async function MesaLayout({
 
   const isGM = membro.mesa.ownerId === session.user.id;
   const sheets = await prisma.sheet.findMany({
-    where: { mesaId, OR: [{ private: false }, { ownerId: session.user.id }] },
+    where: isGM ? { mesaId } : { mesaId, OR: [{ private: false }, { ownerId: session.user.id }] },
     select: { id: true, name: true, ownerId: true, data: true },
     orderBy: { name: "asc" },
   });
