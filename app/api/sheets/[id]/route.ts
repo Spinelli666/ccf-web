@@ -40,7 +40,7 @@ export async function PUT(req: Request, { params }: Params) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "Corpo inválido." }, { status: 400 });
 
-  const data: { name?: string; data?: object; private?: boolean; editableByOthers?: boolean } = {};
+  const data: { name?: string; data?: object; private?: boolean; editableByOthers?: boolean; folderId?: string | null } = {};
   if (typeof body.name === "string" && body.name.trim()) data.name = body.name.trim();
   if (body.data !== undefined) data.data = body.data;
 
@@ -55,6 +55,20 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Só o dono da ficha pode permitir que outros a editem." }, { status: 403 });
     }
     data.editableByOthers = body.editableByOthers;
+  }
+  if (body.folderId !== undefined) {
+    if (!isOwner && !isGM) {
+      return NextResponse.json({ error: "Só o dono da ficha ou o Mestre podem mover ela de pasta." }, { status: 403 });
+    }
+    if (body.folderId === null) {
+      data.folderId = null;
+    } else if (typeof body.folderId === "string") {
+      const folder = await prisma.sheetFolder.findUnique({ where: { id: body.folderId } });
+      if (!folder || folder.mesaId !== existing.mesaId) {
+        return NextResponse.json({ error: "Pasta inválida." }, { status: 400 });
+      }
+      data.folderId = body.folderId;
+    }
   }
 
   const sheet = await prisma.sheet.update({ where: { id }, data });

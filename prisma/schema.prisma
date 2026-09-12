@@ -15,6 +15,7 @@ model User {
   createdAt    DateTime @default(now())
 
   sheets       Sheet[]
+  sheetFolders SheetFolder[]
   chatMessages ChatMessage[]
   mesasCriadas Mesa[]        @relation("MesasCriadas")
   mesaMembros  MesaMembro[]
@@ -30,6 +31,7 @@ model Mesa {
   owner        User          @relation("MesasCriadas", fields: [ownerId], references: [id])
   membros      MesaMembro[]
   sheets       Sheet[]
+  sheetFolders SheetFolder[]
   chatMessages ChatMessage[]
   combate      Combate?
   createdAt    DateTime      @default(now())
@@ -58,6 +60,8 @@ model Sheet {
   // ex: um aliado precisa mexer no inventário. Mestre e dono sempre podem editar,
   // independente disso.
   editableByOthers Boolean @default(false)
+  folderId  String?
+  folder    SheetFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
   // Todo o restante da ficha (pericias, stats, armas, armaduras, remedios,
   // racaHabilidades, classeHabilidades, biografia...) igual ao formato que
   // o app original salvava em "sheet:<id>" no storage do artifact.
@@ -68,6 +72,23 @@ model Sheet {
   combateParticipantes CombateParticipante[]
 
   @@index([ownerId])
+  @@index([mesaId])
+  @@index([folderId])
+}
+
+// Pastas pra organizar as fichas de uma mesa (ex: separar NPCs de fichas de jogadores).
+// Podem ser privadas (só o dono da pasta e o Mestre veem), igual às fichas.
+model SheetFolder {
+  id        String   @id @default(cuid())
+  mesaId    String
+  mesa      Mesa     @relation(fields: [mesaId], references: [id], onDelete: Cascade)
+  nome      String
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  private   Boolean  @default(false)
+  sheets    Sheet[]
+  createdAt DateTime @default(now())
+
   @@index([mesaId])
 }
 
@@ -98,6 +119,7 @@ model ChatMessage {
   breakdown      String?
   total          Int?
   critClass      String?
+  sheetPrivate   Boolean          @default(false)
   createdAt      DateTime         @default(now())
 
   @@index([createdAt])

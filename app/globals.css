@@ -196,7 +196,7 @@ body{
   border-radius:6px; padding:8px 26px 8px 10px;
 }
 .chat-log-icon{ flex-shrink:0; font-size:13px; }
-.chat-log-text{ flex:1; min-width:0; font-size:12.5px; font-style:italic; color:var(--ink-soft); word-break:break-word; }
+.chat-log-text{ flex:1; min-width:0; font-size:12.5px; color:var(--ink-soft); word-break:break-word; }
 .chat-log-time{ flex-shrink:0; font-size:10px; color:var(--muted); }
 .chat-log-del{
   position:absolute; top:8px; right:6px; background:none; border:none; cursor:pointer;
@@ -216,9 +216,11 @@ body{
   border-radius:4px; padding:7px 10px;
 }
 .chat-card-formula{
-  font-size:12px; font-style:italic; color:var(--ink-soft); background:var(--input-bg);
+  font-size:12px; font-weight:700; color:var(--ink-soft); background:var(--input-bg);
   border:1px solid var(--gold-line); border-radius:4px; padding:5px 8px; margin-bottom:6px; word-break:break-word;
 }
+.chat-dice-highlight{ font-weight:800; color:var(--maroon); }
+.chat-card.is-private, .chat-log-line.is-private{ filter:grayscale(70%); opacity:.75; }
 .chat-card-total-box{
   display:flex; align-items:center; justify-content:center;
   background: rgba(255,183,92,0.08); border:1px solid var(--gold-line); border-radius:4px; padding:6px;
@@ -351,6 +353,21 @@ body{
 }
 .empty h2{ font-family:'Cormorant Garamond', serif; font-size:28px; color:var(--maroon); }
 
+.folder-section{ margin-bottom:22px; position:relative; }
+.folder-head{
+  display:flex; align-items:center; gap:8px; width:100%; text-align:left; font-family:'Cinzel',serif;
+  font-size:13px; letter-spacing:1px; color:var(--maroon); background:rgba(255,183,92,0.08);
+  border:1px solid var(--gold-line); border-radius:6px; padding:10px 70px 10px 14px; cursor:pointer;
+}
+.folder-arrow{ font-size:11px; }
+.folder-count{ color:var(--ink-soft); font-family:'EB Garamond',serif; font-style:normal; letter-spacing:0; text-transform:none; font-size:12px; }
+.folder-actions{ position:absolute; top:6px; right:8px; display:flex; gap:4px; }
+.folder-section .grid{ margin-top:12px; }
+.card-folder-select{
+  margin-top:10px; width:100%; font-size:12px; padding:4px 6px; border-radius:4px;
+  border:1px solid var(--gold-line); background:var(--input-bg); color:var(--ink);
+}
+
 .sheet-head{ text-align:center; margin-bottom: 18px; }
 .sigil{ width:34px; height:34px; margin:0 auto 12px; opacity:0.75; }
 .sheet-head h1{
@@ -464,6 +481,8 @@ body{
 .julgamento-title{ font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; color:var(--maroon); margin-bottom:8px; }
 .julgamento-row{ display:flex; gap:20px; flex-wrap:wrap; font-size:14px; margin-bottom:10px; }
 .julgamento-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.judgment-pip{ opacity:1; margin-right:2px; }
+.judgment-pip.is-empty{ opacity:.35; }
 .rest-buttons{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
 
 .resource-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:14px; }

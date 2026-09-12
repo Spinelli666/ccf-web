@@ -55,7 +55,7 @@ export function SheetView({
   }
 
   function logToChat(text: string) {
-    getSocket(mesaId).emit("chat:send", { kind: "log", text, characterName: sheet.name });
+    getSocket(mesaId).emit("chat:send", { kind: "log", text, characterName: sheet.name, isPrivate: priv });
   }
 
   async function togglePrivate() {
@@ -157,12 +157,12 @@ export function SheetView({
         <div className="sheet-tab-content">
           {tab === "Perícias" && (
             <>
-              <PericiasPanel sheet={sheet} isMine={isMine} onChange={patch} mesaId={mesaId} />
+              <PericiasPanel sheet={sheet} isMine={isMine} onChange={patch} mesaId={mesaId} isPrivate={priv} />
               <EffectsPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />
             </>
           )}
           {tab === "Equipamentos" && (
-            <EquipmentPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} mesaId={mesaId} />
+            <EquipmentPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} mesaId={mesaId} isPrivate={priv} />
           )}
           {tab === "Habilidades" && <AbilitiesPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />}
           {tab === "Profissões" && <div className="derived-note">Em breve.</div>}

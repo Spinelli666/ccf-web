@@ -17,10 +17,16 @@ export default async function GalleryPage({ params }: { params: Promise<{ mesaId
     orderBy: { name: "asc" },
   });
 
+  const folders = await prisma.sheetFolder.findMany({
+    where: isGM ? { mesaId } : { mesaId, OR: [{ private: false }, { ownerId: session!.user.id }] },
+    orderBy: { nome: "asc" },
+  });
+
   return (
     <GalleryClient
       mesaId={mesaId}
       sheets={JSON.parse(JSON.stringify(sheets))}
+      folders={JSON.parse(JSON.stringify(folders))}
       currentUserId={session!.user.id}
       isGM={isGM}
     />

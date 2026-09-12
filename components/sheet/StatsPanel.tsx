@@ -259,8 +259,22 @@ export function StatsPanel({
         <div className="julgamento-panel">
           <div className="julgamento-title">⚖️ Teste de Julgamento</div>
           <div className="julgamento-row">
-            <span>Sentenças de Morte: {"●".repeat(julg.sentencas)}{"○".repeat(Math.max(0, 3 - julg.sentencas))}</span>
-            <span>Dádivas de Vida: {"🩹".repeat(julg.dadivas)}{"🤍".repeat(Math.max(0, 3 - julg.dadivas))}</span>
+            <span>
+              Sentenças de Morte:{" "}
+              {[0, 1, 2].map((i) => (
+                <span key={i} className={`judgment-pip${i < julg.sentencas ? "" : " is-empty"}`}>
+                  💀
+                </span>
+              ))}
+            </span>
+            <span>
+              Dádivas de Vida:{" "}
+              {[0, 1, 2].map((i) => (
+                <span key={i} className={`judgment-pip${i < julg.dadivas ? "" : " is-empty"}`}>
+                  ❤️‍🔥
+                </span>
+              ))}
+            </span>
           </div>
           {estabilizado ? (
             <div className="derived-note">

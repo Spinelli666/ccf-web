@@ -12,11 +12,13 @@ export function PericiasPanel({
   isMine,
   onChange,
   mesaId,
+  isPrivate,
 }: {
   sheet: FullSheetData;
   isMine: boolean;
   onChange: (patch: Partial<FullSheetData>) => void;
   mesaId: string;
+  isPrivate: boolean;
 }) {
   const [rollingIdx, setRollingIdx] = useState<number | null>(null);
 
@@ -41,6 +43,7 @@ export function PericiasPanel({
       total,
       critClass: rollCritClass(result.picked),
       characterName: sheet.name,
+      isPrivate,
     });
     setRollingIdx(null);
   }

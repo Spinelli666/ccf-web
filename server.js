@@ -113,6 +113,7 @@ app.prepare().then(async () => {
             breakdown: payload?.breakdown ? String(payload.breakdown).slice(0, 2000) : null,
             total: typeof payload?.total === "number" ? payload.total : null,
             critClass: payload?.critClass || null,
+            sheetPrivate: !!payload?.isPrivate,
           },
         });
         io.to(room).emit("chat:new", message);

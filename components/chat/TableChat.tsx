@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import { getSocket } from "@/lib/socket-client";
 import { parseDiceCommand, rollDiceCommand, rollCritClass, timeAgo } from "@/lib/dice";
@@ -17,10 +17,28 @@ type ChatMessage = {
   breakdown: string | null;
   total: number | null;
   critClass: string | null;
+  sheetPrivate: boolean;
   createdAt: string;
 };
 
 const QUICK_DICE = [4, 6, 8, 10, 12, 20, 100];
+
+const DICE_NOTATION_RE = /\d*d\d+(?:\s*[+-]\s*\d+)?/gi;
+
+function renderFormula(text: string) {
+  const parts = text.split(DICE_NOTATION_RE);
+  const matches = text.match(DICE_NOTATION_RE) || [];
+  const nodes: ReactNode[] = [];
+  parts.forEach((part, i) => {
+    if (part) nodes.push(<span key={`t${i}`}>{part}</span>);
+    if (matches[i]) nodes.push(
+      <span key={`d${i}`} className="chat-dice-highlight">
+        {matches[i]}
+      </span>
+    );
+  });
+  return nodes;
+}
 
 export function TableChat({ mesaId }: { mesaId: string }) {
   const { data: session } = useSession();
@@ -147,7 +165,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
         ) : (
           messages.map((item) =>
             item.kind === "log" ? (
-              <div key={item.id} className="chat-log-line">
+              <div key={item.id} className={`chat-log-line${item.sheetPrivate ? " is-private" : ""}`}>
                 <span className="chat-log-icon">📜</span>
                 <span className="chat-log-text">{item.text}</span>
                 <span className="chat-log-time">{timeAgo(new Date(item.createdAt).getTime())}</span>
@@ -163,7 +181,10 @@ export function TableChat({ mesaId }: { mesaId: string }) {
                 )}
               </div>
             ) : (
-              <div key={item.id} className={`chat-card ${item.kind === "roll" ? "is-roll" : ""}`}>
+              <div
+                key={item.id}
+                className={`chat-card ${item.kind === "roll" ? "is-roll" : ""}${item.sheetPrivate ? " is-private" : ""}`}
+              >
                 {item.authorId === session?.user?.id && (
                   <button
                     type="button"
@@ -181,7 +202,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
                 </div>
                 {item.kind === "roll" ? (
                   <>
-                    <div className="chat-card-formula">🎲 {item.text}</div>
+                    <div className="chat-card-formula">🎲 {renderFormula(item.text)}</div>
                     {item.total !== null && (
                       <div className="chat-card-total-box">
                         <span className={`chat-card-total ${item.critClass || ""}`}>{item.total}</span>

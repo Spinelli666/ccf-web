@@ -55,7 +55,7 @@ export function SideNav({
 
   const links = [
     { href: "/mesas", label: "← Mesas" },
-    { href: `/mesas/${mesaId}/gallery`, label: "Galeria" },
+    { href: `/mesas/${mesaId}/gallery`, label: "Fichas" },
     { href: `/mesas/${mesaId}/wizard`, label: "Criar Personagem" },
     { href: `/mesas/${mesaId}/rulebook`, label: "Regras" },
     { href: `/mesas/${mesaId}/history`, label: "Log da Mesa" },

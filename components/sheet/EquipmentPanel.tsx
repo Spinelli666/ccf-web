@@ -39,12 +39,14 @@ export function EquipmentPanel({
   onChange,
   onLog,
   mesaId,
+  isPrivate,
 }: {
   sheet: FullSheetData;
   isMine: boolean;
   onChange: (patch: Partial<FullSheetData>) => void;
   onLog: (text: string) => void;
   mesaId: string;
+  isPrivate: boolean;
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -205,6 +207,7 @@ export function EquipmentPanel({
       total: danoFinal ?? undefined,
       critClass: isFumble ? "roll-crit-low" : isCrit ? "roll-crit-high" : "",
       characterName: sheet.name,
+      isPrivate,
     });
     setAttackIdx(null);
   }
