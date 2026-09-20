@@ -33,6 +33,12 @@ const VISIBILITY_OPTIONS: { value: Visibility; label: string }[] = [
   { value: "gm", label: "🎩 Rolagem pro Mestre" },
 ];
 
+const VISIBILITY_LABELS: Record<Visibility, string> = {
+  public: "🌐 Pública",
+  private: "🔒 Privada",
+  gm: "🎩 Pro Mestre",
+};
+
 const DICE_NOTATION_RE = /\d*d\d+(?:\s*[+-]\s*\d+)?/gi;
 
 function renderFormula(text: string) {
@@ -218,6 +224,9 @@ export function TableChat({ mesaId }: { mesaId: string }) {
                   )}
                   <span className="chat-card-who">{item.characterName || item.authorName}</span>
                   <span className="chat-card-time">{timeAgo(new Date(item.createdAt).getTime())}</span>
+                </div>
+                <div className={`chat-card-visibility chat-card-visibility-${item.visibility}`}>
+                  {VISIBILITY_LABELS[item.visibility]}
                 </div>
                 {item.kind === "roll" ? (
                   <>

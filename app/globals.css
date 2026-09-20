@@ -219,6 +219,13 @@ body{
 }
 .chat-card-who{ font-family:'Cinzel',serif; font-size:12.5px; letter-spacing:.5px; color:var(--maroon); text-transform:uppercase; flex:1; min-width:0; }
 .chat-card-time{ font-size:10px; color:var(--muted); flex-shrink:0; }
+.chat-card-visibility{
+  display:inline-block; font-family:'Cinzel',serif; font-size:9px; letter-spacing:.5px;
+  color:var(--ink-soft); background:rgba(255,183,92,0.12); border:1px solid var(--gold-line);
+  border-radius:3px; padding:1px 6px; margin-bottom:6px;
+}
+.chat-card-visibility-private{ color:#8a3a2a; border-color:#8a3a2a; background:rgba(138,58,42,0.1); }
+.chat-card-visibility-gm{ color:#5a3a8a; border-color:#5a3a8a; background:rgba(90,58,138,0.1); }
 .chat-card-text{
   font-size:13px; color:var(--ink); word-break:break-word;
   background:var(--input-bg); border:1px solid var(--gold-line); border-left:3px solid var(--gold);
