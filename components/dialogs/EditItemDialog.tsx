@@ -11,6 +11,18 @@ const PESO_OPCOES = [
   { value: "mpesado", label: "M. Pesado" },
 ];
 
+const PERICIA_NOMES = [
+  "Força",
+  "Vigor",
+  "Evasão",
+  "Persuasão",
+  "Precisão",
+  "Inteligência",
+  "Destreza",
+  "Furtividade",
+  "Psionismo",
+];
+
 export type EditTarget =
   | { tipo: "arma"; idx: number; data: Arma }
   | { tipo: "armadura"; idx: number; data: Armadura }
@@ -35,6 +47,19 @@ export function EditItemDialog({
   const [protecao, setProtecao] = useState(target.tipo === "arma" ? target.data.protecao || "" : "");
   const [parte, setParte] = useState(target.tipo === "armadura" ? target.data.parte : "");
   const [armadura, setArmadura] = useState(target.tipo === "armadura" ? target.data.armadura : "");
+  const [inventarioBonus, setInventarioBonus] = useState(
+    target.tipo === "armadura" ? target.data.inventarioBonus || "" : ""
+  );
+  const [periciaBonusNome, setPericiaBonusNome] = useState(
+    target.tipo === "armadura" ? target.data.periciaBonusNome || "" : ""
+  );
+  const [periciaBonusValor, setPericiaBonusValor] = useState(
+    target.tipo === "armadura" ? target.data.periciaBonusValor || "" : ""
+  );
+  const [deslocamentoBonus, setDeslocamentoBonus] = useState(
+    target.tipo === "armadura" ? target.data.deslocamentoBonus || "" : ""
+  );
+  const [peBonus, setPeBonus] = useState(target.tipo === "armadura" ? target.data.peBonus || "" : "");
   const [descricao, setDescricao] = useState(
     target.tipo === "arma" || target.tipo === "armadura" ? target.data.descricao || "" : ""
   );
@@ -52,7 +77,21 @@ export function EditItemDialog({
       if (target.tipo === "arma") {
         onSave({ item: item.trim(), dano, propriedades, preco, peso, descricao, protecao, durabilidadeMax: novoMax, durabilidadeAtual });
       } else {
-        onSave({ item: item.trim(), parte, armadura, preco, peso, descricao, durabilidadeMax: novoMax, durabilidadeAtual });
+        onSave({
+          item: item.trim(),
+          parte,
+          armadura,
+          preco,
+          peso,
+          descricao,
+          inventarioBonus,
+          periciaBonusNome,
+          periciaBonusValor,
+          deslocamentoBonus,
+          peBonus,
+          durabilidadeMax: novoMax,
+          durabilidadeAtual,
+        });
       }
     } else {
       onSave({ item: item.trim(), efeito, preco, peso });
@@ -114,6 +153,51 @@ export function EditItemDialog({
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Armadura</label>
             <input type="text" value={armadura} onChange={(e) => setArmadura(e.target.value)} />
+          </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>Espaços de Inventário extra quando equipada (opcional — ex: Mochila)</label>
+            <input
+              type="text"
+              value={inventarioBonus}
+              placeholder="Ex: 10"
+              onChange={(e) => setInventarioBonus(e.target.value)}
+            />
+          </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>Deslocamento extra quando equipada (opcional — ex: Botas Leves)</label>
+            <input
+              type="text"
+              value={deslocamentoBonus}
+              placeholder="Ex: 1"
+              onChange={(e) => setDeslocamentoBonus(e.target.value)}
+            />
+          </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>PE extra quando equipada (opcional — ex: Botas Confortáveis)</label>
+            <input type="text" value={peBonus} placeholder="Ex: 1" onChange={(e) => setPeBonus(e.target.value)} />
+          </div>
+          <div className="field-row" style={{ marginBottom: 10 }}>
+            <div className="field" style={{ textAlign: "left" }}>
+              <label>Bônus de perícia quando equipada (opcional)</label>
+              <select value={periciaBonusNome} onChange={(e) => setPericiaBonusNome(e.target.value)}>
+                <option value="">Nenhuma</option>
+                {PERICIA_NOMES.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field" style={{ textAlign: "left" }}>
+              <label>Valor do bônus</label>
+              <input
+                type="text"
+                value={periciaBonusValor}
+                placeholder="Ex: 1"
+                disabled={!periciaBonusNome}
+                onChange={(e) => setPericiaBonusValor(e.target.value)}
+              />
+            </div>
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Durabilidade Máxima</label>

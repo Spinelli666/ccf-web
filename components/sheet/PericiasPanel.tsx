@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { num } from "@/lib/derived";
+import { num, equippedArmorPericiaBonus } from "@/lib/derived";
 import { rollWithMode, formatRollDice, rollCritClass, type RollModeKey } from "@/lib/dice";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { getSocket } from "@/lib/socket-client";
@@ -53,10 +53,12 @@ export function PericiasPanel({
     if (rollingIdx === null) return;
     const p = sheet.pericias[rollingIdx];
     const periciaBonus = num(p.bonus, 0);
+    const equipBonus = equippedArmorPericiaBonus(sheet.armaduras, p.nome);
     const result = rollWithMode(20, mode);
-    const total = result.picked + num(p.valor) + periciaBonus + bonusExtra;
+    const total = result.picked + num(p.valor) + periciaBonus + equipBonus + bonusExtra;
     let breakdown = `${p.nome}: ${formatRollDice(20, result)} + ${num(p.valor)}`;
     if (periciaBonus) breakdown += ` + Bônus (${periciaBonus})`;
+    if (equipBonus) breakdown += ` + Equipamento (${equipBonus})`;
     if (bonusExtra) breakdown += ` ${bonusExtra > 0 ? "+" : "-"} ${Math.abs(bonusExtra)}`;
     getSocket(mesaId).emit("chat:send", {
       kind: "roll",
@@ -76,9 +78,17 @@ export function PericiasPanel({
       <div className="pericias-grid">
         {ordemExibicao.map((i) => {
           const p = sheet.pericias[i];
+          const equipBonus = equippedArmorPericiaBonus(sheet.armaduras, p.nome);
           return (
           <div key={i} className={`pericia-row ${num(p.valor) === 0 ? "zero" : ""}`}>
-            <span className="n">{p.nome}</span>
+            <span className="n">
+              {p.nome}
+              {equipBonus > 0 && (
+                <span className="pericia-equip-bonus" title={`+${equipBonus} de equipamento (soma automático ao rolar)`}>
+                  🛡️+{equipBonus}
+                </span>
+              )}
+            </span>
             <span className="pericia-right">
               {isMine ? (
                 <input

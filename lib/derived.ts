@@ -21,6 +21,7 @@ export type SheetData = {
   pericias?: Pericia[];
   stats?: SheetStats;
   classeHabilidades?: HabilidadeClasse[];
+  armaduras?: Armadura[];
 };
 
 // Procura um aprimoramento (linha indentada logo após a habilidade base) marcado como
@@ -90,6 +91,27 @@ export function equippedArmorInventoryBonus(armaduras: Armadura[]): number {
     .reduce((sum, a) => sum + num(a.inventarioBonus, 0), 0);
 }
 
+// Ex: Botas Leves — Deslocamento extra quando equipadas. Somado dentro de computeDerived.
+function equippedArmorDeslocamentoBonus(armaduras: Armadura[] | undefined): number {
+  if (!armaduras) return 0;
+  return armaduras.filter((a) => a.equipado).reduce((sum, a) => sum + num(a.deslocamentoBonus, 0), 0);
+}
+
+// Ex: Botas Confortáveis — PE extra quando equipadas. Somado dentro de computeDerived.
+function equippedArmorPeBonus(armaduras: Armadura[] | undefined): number {
+  if (!armaduras) return 0;
+  return armaduras.filter((a) => a.equipado).reduce((sum, a) => sum + num(a.peBonus, 0), 0);
+}
+
+// Ex: Óculos (+1 Inteligência), Amuleto Divino (+1 Psionismo) — bônus de uma perícia
+// específica quando equipada. Não entra em computeDerived (só importa na hora de rolar
+// aquela perícia), usado por PericiasPanel.
+export function equippedArmorPericiaBonus(armaduras: Armadura[], periciaNome: string): number {
+  return armaduras
+    .filter((a) => a.equipado && a.periciaBonusNome?.trim().toLowerCase() === periciaNome.trim().toLowerCase())
+    .reduce((sum, a) => sum + num(a.periciaBonusValor, 0), 0);
+}
+
 export function computeDerived(s: SheetData): DerivedStats {
   const nivel = Math.max(1, num(s.nivel, 1));
   const forca = getPericiaVal(s, "Força");
@@ -101,9 +123,9 @@ export function computeDerived(s: SheetData): DerivedStats {
     0,
     50 + 10 * vigor + 5 * (nivel - 1) + num(stats.pvBonus, 0) - 5 * fraturas
   );
-  const peMax = 10 + 1 * vigor + 1 * (nivel - 1) + num(stats.peBonus, 0);
+  const peMax = 10 + 1 * vigor + 1 * (nivel - 1) + num(stats.peBonus, 0) + equippedArmorPeBonus(s.armaduras);
   const armaduraNatural = Math.floor(forca / 2) + num(stats.armaduraNaturalBonus, 0);
-  const deslocamento = 5 + Math.floor(destreza / 2) + num(stats.deslocamentoBonus, 0);
+  const deslocamento = 5 + Math.floor(destreza / 2) + num(stats.deslocamentoBonus, 0) + equippedArmorDeslocamentoBonus(s.armaduras);
   const colecionadorII = temAprimoramentoAtivo(s.classeHabilidades, "Colecionador", "Aprimoramento II");
   const inventario = 15 + Math.floor(forca / 2) + num(stats.inventarioBonus, 0) + (colecionadorII ? 10 : 0);
   const critRange = Math.max(2, 20 - Math.floor(destreza / 3));

@@ -61,6 +61,14 @@ export type Armadura = {
   descricao?: string;
   // Ex: Mochila/Cinto com Bolsas — aumenta os Espaços de Inventário quando equipada.
   inventarioBonus?: string;
+  // Ex: Óculos (+1 Inteligência), Capuz · Bandana / Roupa Escura (+1 Furtividade),
+  // Amuleto Divino (+1 Psionismo) — bônus numérico numa perícia específica quando equipada.
+  periciaBonusNome?: string;
+  periciaBonusValor?: string;
+  // Ex: Botas Leves (+1 Deslocamento).
+  deslocamentoBonus?: string;
+  // Ex: Botas Confortáveis (+1 PE).
+  peBonus?: string;
   equipado: boolean;
   durabilidadeAtual: number;
   durabilidadeMax: number;

@@ -684,6 +684,7 @@ body{
 .pericias-grid{ display:grid; grid-template-columns: 1fr; max-width:420px; margin:0 auto; gap:6px; }
 .pericia-row{ display:flex; justify-content:space-between; border-bottom:1px dotted var(--gold-line); padding:7px 2px; }
 .pericia-row .n{ font-size:16px; }
+.pericia-equip-bonus{ margin-left:6px; font-size:11px; font-weight:700; color:#2f6b3a; vertical-align:middle; }
 .pericia-row .v{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px; color: var(--maroon); }
 .pericia-row.zero .v{ color: var(--muted); }
 

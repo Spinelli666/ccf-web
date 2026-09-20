@@ -13,14 +13,18 @@ export const ARMOR_LIBRARY = [
     "item": "Óculos (+1 Inteligência)",
     "armadura": "—",
     "preco": "30",
-    "peso": "leve"
+    "peso": "leve",
+    "periciaBonusNome": "Inteligência",
+    "periciaBonusValor": "1"
   },
   {
     "parte": "Cabeça",
     "item": "Capuz · Bandana (+1 Furtividade)",
     "armadura": "—",
     "preco": "30",
-    "peso": "leve"
+    "peso": "leve",
+    "periciaBonusNome": "Furtividade",
+    "periciaBonusValor": "1"
   },
   {
     "parte": "Cabeça",
@@ -69,7 +73,9 @@ export const ARMOR_LIBRARY = [
     "item": "Roupa Escura (+1 Furtividade)",
     "armadura": "—",
     "preco": "30",
-    "peso": "leve"
+    "peso": "leve",
+    "periciaBonusNome": "Furtividade",
+    "periciaBonusValor": "1"
   },
   {
     "parte": "Torso",
@@ -254,14 +260,16 @@ export const ARMOR_LIBRARY = [
     "item": "Botas Leves (⚡+1 Deslocamento)",
     "armadura": "—",
     "preco": "40",
-    "peso": "leve"
+    "peso": "leve",
+    "deslocamentoBonus": "1"
   },
   {
     "parte": "Pés",
     "item": "Botas Confortáveis (🔥+1)",
     "armadura": "—",
     "preco": "40",
-    "peso": "leve"
+    "peso": "leve",
+    "peBonus": "1"
   },
   {
     "parte": "Pés",
@@ -289,7 +297,9 @@ export const ARMOR_LIBRARY = [
     "item": "Amuleto Divino (+1 Psionismo)",
     "armadura": "—",
     "preco": "40",
-    "peso": "leve"
+    "peso": "leve",
+    "periciaBonusNome": "Psionismo",
+    "periciaBonusValor": "1"
   },
   {
     "parte": "Acessórios",
