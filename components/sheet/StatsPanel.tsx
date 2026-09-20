@@ -248,7 +248,7 @@ export function StatsPanel({
   return (
     <div className="section" style={{ marginTop: 0 }}>
       <h2>Recursos</h2>
-      {morto && <div className="derrotado-banner morto">☠️ MORTO — o personagem não resistiu aos ferimentos.</div>}
+      {morto && derrotado && <div className="derrotado-banner morto">☠️ MORTO — o personagem não resistiu aos ferimentos.</div>}
       {!morto && derrotado && (
         <div className="derrotado-banner">
           ⚠️ DERROTADO — {derived.fraturas >= 5 ? "5 Fraturas acumuladas" : "PV chegou a zero"}.

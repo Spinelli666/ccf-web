@@ -158,6 +158,7 @@ export function CombateClient({
 
   return (
     <aside className={`combat-col ${collapsed ? "collapsed" : ""}`}>
+      <div className="combat-col-panel">
       <div className="combat-col-head">
         <div className="combat-col-title">
           ⚔️ Combate
@@ -289,6 +290,7 @@ export function CombateClient({
           </button>
         </div>
       )}
+      </div>
 
       {showIniciar && (
         <IniciarCombateDialog
