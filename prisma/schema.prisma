@@ -114,6 +114,9 @@ model ChatMessage {
   author         User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorName     String
   characterName  String?
+  // Ícone do personagem no momento da rolagem (data URL) — denormalizado, igual characterName,
+  // pra não precisar joinar com Sheet (que pode nem existir mais) pra renderizar o chat.
+  characterAvatarUrl String?
   kind           ChatMessageKind
   text           String
   breakdown      String?

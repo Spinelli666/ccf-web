@@ -12,6 +12,7 @@ type ChatMessage = {
   authorId: string | null;
   authorName: string;
   characterName: string | null;
+  characterAvatarUrl: string | null;
   kind: "roll" | "text" | "log";
   text: string;
   breakdown: string | null;
@@ -102,7 +103,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
       const { total, text: breakdown } = rollDiceCommand(dice);
       socket.emit("chat:send", {
         kind: "roll",
-        text: breakdown,
+        text: `🎲 ${breakdown}`,
         total,
         critClass: rollCritClass(total),
       });
@@ -196,13 +197,20 @@ export function TableChat({ mesaId }: { mesaId: string }) {
                   </button>
                 )}
                 <div className="chat-card-head">
-                  <span className="chat-card-avatar">{item.authorName.charAt(0).toUpperCase()}</span>
-                  <span className="chat-card-who">{item.authorName}</span>
+                  {item.characterAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className="chat-card-avatar" src={item.characterAvatarUrl} alt="" />
+                  ) : (
+                    <span className="chat-card-avatar chat-card-avatar-letter">
+                      {(item.characterName || item.authorName).charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="chat-card-who">{item.characterName || item.authorName}</span>
                   <span className="chat-card-time">{timeAgo(new Date(item.createdAt).getTime())}</span>
                 </div>
                 {item.kind === "roll" ? (
                   <>
-                    <div className="chat-card-formula">🎲 {renderFormula(item.text)}</div>
+                    <div className="chat-card-formula">{renderFormula(item.text)}</div>
                     {item.total !== null && (
                       <div className="chat-card-total-box">
                         <span className={`chat-card-total ${item.critClass || ""}`}>{item.total}</span>

@@ -205,8 +205,12 @@ body{
 .chat-log-del:hover{ opacity:1; }
 .chat-card-head{ display:flex; align-items:center; gap:7px; margin-bottom:5px; }
 .chat-card-avatar{
-  width:22px; height:22px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  width:24px; height:24px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  object-fit:cover; border:1px solid var(--gold-line);
+}
+.chat-card-avatar-letter{
   font-family:'Cinzel',serif; font-size:10px; font-weight:700; color:var(--btn-text); background: var(--maroon);
+  border-color: var(--maroon);
 }
 .chat-card-who{ font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.5px; color:var(--maroon); text-transform:uppercase; flex:1; min-width:0; }
 .chat-card-time{ font-size:10px; color:var(--muted); flex-shrink:0; }
@@ -216,8 +220,9 @@ body{
   border-radius:4px; padding:7px 10px;
 }
 .chat-card-formula{
-  font-size:12px; font-weight:700; color:var(--ink-soft); background:var(--input-bg);
-  border:1px solid var(--gold-line); border-radius:4px; padding:5px 8px; margin-bottom:6px; word-break:break-word;
+  font-size:12px; font-weight:600; color:var(--ink-soft); background:var(--input-bg);
+  border:1px solid var(--gold-line); border-radius:4px; padding:7px 9px; margin-bottom:6px;
+  word-break:break-word; white-space:pre-line; line-height:1.6;
 }
 .chat-dice-highlight{ font-weight:800; color:var(--maroon); }
 .chat-card.is-private, .chat-log-line.is-private{ filter:grayscale(70%); opacity:.75; }

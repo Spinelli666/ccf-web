@@ -39,10 +39,11 @@ export function PericiasPanel({
     if (bonusExtra) breakdown += ` ${bonusExtra > 0 ? "+" : "-"} ${Math.abs(bonusExtra)}`;
     getSocket(mesaId).emit("chat:send", {
       kind: "roll",
-      text: breakdown,
+      text: `🎲 ${breakdown}`,
       total,
       critClass: rollCritClass(result.picked),
       characterName: sheet.name,
+      characterAvatarUrl: sheet.avatarUrl || undefined,
       isPrivate,
     });
     setRollingIdx(null);

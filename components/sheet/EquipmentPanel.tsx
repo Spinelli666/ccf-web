@@ -269,32 +269,34 @@ export function EquipmentPanel({
     const natural = rollInfo.picked;
     const isCrit = natural >= derived.critRange;
     const isFumble = natural === 1;
+    const attackTotal = natural + precisaoValor;
     const rawDano = parseFloat(a.dano);
     let danoFinal: number | null = isNaN(rawDano) ? null : rawDano;
     if (danoFinal !== null && attrOpt) danoFinal += attrOpt.valor;
     if (danoFinal !== null && isCrit) danoFinal *= 2;
 
-    let text = `🗡️ Atacou com "${a.item}" (${formatRollDice(20, rollInfo)} + Precisão ${precisaoValor})`;
+    let text = `🗡️ Atacou com "${a.item}"\n${formatRollDice(20, rollInfo)} + Precisão ${precisaoValor} = ${attackTotal}`;
     if (danoFinal !== null) {
-      text += ` — Dano: ${danoFinal}`;
+      text += `\nDano: ${danoFinal}`;
       if (attrOpt) text += ` (${rawDano} + ${attrOpt.nome} ${attrOpt.valor})`;
       if (isCrit) text += " (⭐ CRÍTICO, dobrado!)";
     }
-    text += ` — Propriedades: ${a.propriedades || "—"}`;
+    text += `\nPropriedades: ${a.propriedades || "—"}`;
 
     if (isFumble) {
       const next = sheet.armas.slice();
       next[idx] = { ...next[idx], durabilidadeAtual: clamp(next[idx].durabilidadeAtual - 1, 0, next[idx].durabilidadeMax) };
       onChange({ armas: next });
-      text += ` — ⚠ ERRO CRÍTICO! -1 Durabilidade (${next[idx].durabilidadeAtual}/${next[idx].durabilidadeMax})`;
+      text += `\n⚠ ERRO CRÍTICO! -1 Durabilidade (${next[idx].durabilidadeAtual}/${next[idx].durabilidadeMax})`;
     }
 
     getSocket(mesaId).emit("chat:send", {
       kind: "roll",
       text,
-      total: danoFinal ?? undefined,
+      total: attackTotal,
       critClass: isFumble ? "roll-crit-low" : isCrit ? "roll-crit-high" : "",
       characterName: sheet.name,
+      characterAvatarUrl: sheet.avatarUrl || undefined,
       isPrivate,
     });
     setAttackIdx(null);

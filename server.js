@@ -108,6 +108,7 @@ app.prepare().then(async () => {
             authorId: user.id,
             authorName: user.name || user.username,
             characterName: payload?.characterName || null,
+            characterAvatarUrl: payload?.characterAvatarUrl || null,
             kind,
             text: String(payload?.text || "").slice(0, 2000),
             breakdown: payload?.breakdown ? String(payload.breakdown).slice(0, 2000) : null,
