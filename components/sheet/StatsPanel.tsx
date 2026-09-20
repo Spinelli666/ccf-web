@@ -303,14 +303,6 @@ export function StatsPanel({
           <div className="mini-row">
             <span className="mini-label">Nível</span>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input
-                type="number"
-                className="mini-input"
-                disabled={!isMine}
-                value={sheet.nivel}
-                min={1}
-                onChange={(e) => onChange({ nivel: e.target.value })}
-              />
               {isMine && (
                 <button
                   type="button"
@@ -321,6 +313,14 @@ export function StatsPanel({
                   🔧
                 </button>
               )}
+              <input
+                type="number"
+                className="mini-input"
+                disabled={!isMine}
+                value={sheet.nivel}
+                min={1}
+                onChange={(e) => onChange({ nivel: e.target.value })}
+              />
             </span>
           </div>
           <div className="mini-row">

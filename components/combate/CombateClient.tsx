@@ -57,7 +57,6 @@ export function CombateClient({
   sheets: SheetLite[];
 }) {
   const [combate, setCombate] = useState<CombateState | null>(null);
-  const [loaded, setLoaded] = useState(false);
   // Em telas menores (tablet pra baixo) a coluna de combate começa recolhida — ela nem
   // sempre está em uso, e ocupar 200+px fixos de largura atrapalha a ficha ao lado.
   const isNarrow = useIsNarrowViewport(1180);
@@ -73,10 +72,7 @@ export function CombateClient({
     fetch(`/api/combate?mesaId=${mesaId}`)
       .then((r) => r.json())
       .then((data) => {
-        if (!cancelled) {
-          setCombate(data);
-          setLoaded(true);
-        }
+        if (!cancelled) setCombate(data);
       });
 
     const socket = getSocket(mesaId);
@@ -157,8 +153,6 @@ export function CombateClient({
       lista.map((p) => p.id)
     );
   }
-
-  if (!loaded) return null;
 
   const ativo = combate ? combate.participantes[combate.turnoAtualIndex] || null : null;
 
