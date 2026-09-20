@@ -106,6 +106,14 @@ enum ChatMessageKind {
   log
 }
 
+// Quem pode VER a mensagem (filtrado de verdade, tanto no socket quanto no histórico) —
+// diferente de sheetPrivate, que é só um sinal visual (esmaece o card, mas todo mundo vê).
+enum ChatMessageVisibility {
+  public
+  private
+  gm
+}
+
 model ChatMessage {
   id             String           @id @default(cuid())
   mesaId         String
@@ -123,6 +131,7 @@ model ChatMessage {
   total          Int?
   critClass      String?
   sheetPrivate   Boolean          @default(false)
+  visibility     ChatMessageVisibility @default(public)
   createdAt      DateTime         @default(now())
 
   @@index([createdAt])

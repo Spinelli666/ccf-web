@@ -249,6 +249,11 @@ body{
   color:var(--maroon); border-radius:4px; padding:4px 9px; cursor:pointer;
 }
 .dice-quick-btn:hover{ background:rgba(255,183,92,0.2); }
+.chat-visibility-select{
+  width:100%; font-family:'Cinzel',serif; font-size:11px; letter-spacing:.3px; border:1px solid var(--gold-line);
+  background:var(--input-bg); color:var(--maroon); border-radius:4px; padding:6px 8px; margin-bottom:8px; cursor:pointer;
+}
+.chat-visibility-select:focus{ outline:2px solid var(--blue); outline-offset:1px; }
 .chat-input-row{ display:flex; gap:6px; }
 .chat-input-row input{
   flex:1; min-width:0; font-family:'EB Garamond', serif; font-size:13px; padding:8px 10px;

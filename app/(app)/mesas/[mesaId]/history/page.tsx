@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { timeAgo } from "@/lib/dice";
 
@@ -6,8 +7,23 @@ export const dynamic = "force-dynamic";
 
 export default async function HistoryPage({ params }: { params: Promise<{ mesaId: string }> }) {
   const { mesaId } = await params;
+  const session = await auth();
+  const userId = session!.user.id;
+
+  const mesa = await prisma.mesa.findUnique({ where: { id: mesaId }, select: { ownerId: true } });
+  const isGM = mesa?.ownerId === userId;
+
+  // "private"/"gm" filtram de verdade (diferente de sheetPrivate, que é só visual) —
+  // esse log também não pode vazar mensagem que o jogador não tinha permissão de ver.
   const messages = await prisma.chatMessage.findMany({
-    where: { mesaId },
+    where: {
+      mesaId,
+      OR: [
+        { visibility: "public" },
+        { visibility: "private", authorId: userId },
+        isGM ? { visibility: "gm" } : { visibility: "gm", authorId: userId },
+      ],
+    },
     orderBy: { createdAt: "asc" },
     take: 500,
   });

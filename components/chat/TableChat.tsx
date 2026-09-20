@@ -7,6 +7,8 @@ import { parseDiceCommand, rollDiceCommand, rollCritClass, timeAgo } from "@/lib
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
 
+type Visibility = "public" | "private" | "gm";
+
 type ChatMessage = {
   id: string;
   authorId: string | null;
@@ -19,10 +21,17 @@ type ChatMessage = {
   total: number | null;
   critClass: string | null;
   sheetPrivate: boolean;
+  visibility: Visibility;
   createdAt: string;
 };
 
 const QUICK_DICE = [4, 6, 8, 10, 12, 20, 100];
+
+const VISIBILITY_OPTIONS: { value: Visibility; label: string }[] = [
+  { value: "public", label: "🌐 Rolagem Pública" },
+  { value: "private", label: "🔒 Rolagem Privada" },
+  { value: "gm", label: "🎩 Rolagem pro Mestre" },
+];
 
 const DICE_NOTATION_RE = /\d*d\d+(?:\s*[+-]\s*\d+)?/gi;
 
@@ -47,6 +56,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
   const [input, setInput] = useState("");
   const [, forceTick] = useState(0);
   const [showClear, setShowClear] = useState(false);
+  const [visibility, setVisibility] = useState<Visibility>("public");
   // Em celular o painel do chat cobre a tela quase inteira (fixed, largura ~viewport) —
   // começa fechado nesse caso pra não esconder a ficha, igual a SideNav/CombateClient.
   const isNarrow = useIsNarrowViewport(880);
@@ -106,9 +116,10 @@ export function TableChat({ mesaId }: { mesaId: string }) {
         text: `🎲 ${breakdown}`,
         total,
         critClass: rollCritClass(total),
+        visibility,
       });
     } else {
-      socket.emit("chat:send", { kind: "text", text: raw });
+      socket.emit("chat:send", { kind: "text", text: raw, visibility });
     }
     setInput("");
   }
@@ -233,6 +244,18 @@ export function TableChat({ mesaId }: { mesaId: string }) {
             </button>
           ))}
         </div>
+        <select
+          className="chat-visibility-select"
+          value={visibility}
+          title="Quem pode ver as próximas rolagens/mensagens enviadas daqui"
+          onChange={(e) => setVisibility(e.target.value as Visibility)}
+        >
+          {VISIBILITY_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
         <div className="chat-input-row">
           <input
             type="text"

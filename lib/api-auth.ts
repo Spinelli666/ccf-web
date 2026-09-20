@@ -13,13 +13,18 @@ export async function requireUser() {
 /** Exige usuário autenticado E membro da mesa (dono ou convidado via código+senha). */
 export async function requireMesaMember(mesaId: string) {
   const { user, response } = await requireUser();
-  if (!user) return { user: null, response };
+  if (!user) return { user: null, response, isGM: false };
 
   const membro = await prisma.mesaMembro.findUnique({
     where: { mesaId_userId: { mesaId, userId: user.id } },
+    include: { mesa: { select: { ownerId: true } } },
   });
   if (!membro) {
-    return { user: null, response: NextResponse.json({ error: "Você não é membro dessa mesa." }, { status: 403 }) };
+    return {
+      user: null,
+      response: NextResponse.json({ error: "Você não é membro dessa mesa." }, { status: 403 }),
+      isGM: false,
+    };
   }
-  return { user, response: null };
+  return { user, response: null, isGM: membro.mesa.ownerId === user.id };
 }

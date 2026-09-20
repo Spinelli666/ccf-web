@@ -88,6 +88,7 @@ app.prepare().then(async () => {
       socket.data.user = { id: token.id, username: token.username, name: token.name };
       socket.data.mesaId = mesaId;
       socket.data.isGM = membro.mesa.ownerId === token.id;
+      socket.data.mesaOwnerId = membro.mesa.ownerId;
       next_();
     } catch {
       next_(new Error("unauthorized"));
@@ -97,11 +98,16 @@ app.prepare().then(async () => {
   io.on("connection", (socket) => {
     const room = `mesa:${socket.data.mesaId}`;
     socket.join(room);
+    // Sala pessoal dentro da mesa — usada pra entregar mensagens com visibilidade
+    // "private"/"gm" só pra quem pode ver, sem depender de rastrear socket.id (o mesmo
+    // usuário pode ter várias abas abertas).
+    socket.join(`mesa:${socket.data.mesaId}:user:${socket.data.user.id}`);
 
     socket.on("chat:send", async (payload, ack) => {
       try {
         const user = socket.data.user;
         const kind = payload?.kind === "roll" ? "roll" : payload?.kind === "log" ? "log" : "text";
+        const visibility = ["public", "private", "gm"].includes(payload?.visibility) ? payload.visibility : "public";
         const message = await prisma.chatMessage.create({
           data: {
             mesaId: socket.data.mesaId,
@@ -115,9 +121,16 @@ app.prepare().then(async () => {
             total: typeof payload?.total === "number" ? payload.total : null,
             critClass: payload?.critClass || null,
             sheetPrivate: !!payload?.isPrivate,
+            visibility,
           },
         });
-        io.to(room).emit("chat:new", message);
+        if (visibility === "public") {
+          io.to(room).emit("chat:new", message);
+        } else {
+          const targets = new Set([`mesa:${socket.data.mesaId}:user:${user.id}`]);
+          if (visibility === "gm") targets.add(`mesa:${socket.data.mesaId}:user:${socket.data.mesaOwnerId}`);
+          io.to([...targets]).emit("chat:new", message);
+        }
         if (ack) ack({ ok: true, message });
       } catch (err) {
         console.error("chat:send failed", err);
