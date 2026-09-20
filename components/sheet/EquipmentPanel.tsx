@@ -10,7 +10,7 @@ import { EditItemDialog, type EditTarget } from "@/components/dialogs/EditItemDi
 import { PROPRIEDADES_ARMAS_INFO } from "@/data/weapons";
 import type { Arma, Armadura, Remedio, FullSheetData } from "@/lib/sheet-types";
 
-const ATRIBUTOS_ATAQUE = ["Força", "Destreza", "Psionismo"] as const;
+const ATRIBUTOS_DANO = ["Força", "Destreza", "Psionismo"] as const;
 
 const PESO_LABELS: Record<string, string> = { leve: "Leve", medio: "Médio", pesado: "Pesado", mpesado: "M. Pesado" };
 const PESO_SPACE: Record<string, number> = { leve: 0, medio: 1, pesado: 2, mpesado: 4 };
@@ -56,10 +56,20 @@ export function EquipmentPanel({
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
 
   const derived = computeDerived(sheet);
-  const atributoOpts = ATRIBUTOS_ATAQUE.map((nome) => {
+  function periciaValor(nome: string): number {
     const p = sheet.pericias.find((pp) => pp.nome.trim().toLowerCase() === nome.toLowerCase());
-    return { nome, valor: p ? num(p.valor) : 0 };
-  });
+    return p ? num(p.valor) : 0;
+  }
+  const atributoOpts = ATRIBUTOS_DANO.map((nome) => ({ nome, valor: periciaValor(nome) }));
+  const precisaoValor = periciaValor("Precisão");
+
+  function danoComBonus(idx: number, a: Arma): string {
+    const raw = parseFloat(a.dano);
+    if (isNaN(raw)) return a.dano;
+    const attrOpt = atributoOpts.find((o) => o.nome === attrByIdx[idx]);
+    if (!attrOpt) return a.dano;
+    return String(raw + attrOpt.valor);
+  }
 
   function qtdDe(item: { quantidade?: string }): number {
     return item.quantidade === undefined ? 1 : Math.max(0, num(item.quantidade, 0));
@@ -261,12 +271,15 @@ export function EquipmentPanel({
     const isFumble = natural === 1;
     const rawDano = parseFloat(a.dano);
     let danoFinal: number | null = isNaN(rawDano) ? null : rawDano;
+    if (danoFinal !== null && attrOpt) danoFinal += attrOpt.valor;
     if (danoFinal !== null && isCrit) danoFinal *= 2;
 
-    let text = attrOpt
-      ? `🗡️ Atacou com "${a.item}" (${formatRollDice(20, rollInfo)} + ${attrOpt.nome} ${attrOpt.valor})`
-      : `🗡️ Atacou com "${a.item}" (${formatRollDice(20, rollInfo)})`;
-    if (danoFinal !== null) text += ` — Dano: ${danoFinal}${isCrit ? " (⭐ CRÍTICO, dobrado!)" : ""}`;
+    let text = `🗡️ Atacou com "${a.item}" (${formatRollDice(20, rollInfo)} + Precisão ${precisaoValor})`;
+    if (danoFinal !== null) {
+      text += ` — Dano: ${danoFinal}`;
+      if (attrOpt) text += ` (${rawDano} + ${attrOpt.nome} ${attrOpt.valor})`;
+      if (isCrit) text += " (⭐ CRÍTICO, dobrado!)";
+    }
     text += ` — Propriedades: ${a.propriedades || "—"}`;
 
     if (isFumble) {
@@ -439,7 +452,7 @@ export function EquipmentPanel({
                             {a.item}
                           </button>
                         </td>
-                        <td className="col-tight">{a.dano}</td>
+                        <td className="col-tight">{danoComBonus(idx, a)}</td>
                         <td className="col-tight">{durabField("armas", idx, a)}</td>
                         <td className="col-tight">
                           {isMine && (
@@ -447,12 +460,13 @@ export function EquipmentPanel({
                               <select
                                 className="attr-select"
                                 value={attrByIdx[idx] || ""}
+                                title="Bônus de dano opcional — o ataque já soma Precisão automaticamente"
                                 onChange={(e) => setAttrByIdx((prev) => ({ ...prev, [idx]: e.target.value }))}
                               >
-                                <option value="">Nenhum atributo</option>
+                                <option value="">Sem bônus de dano</option>
                                 {atributoOpts.map((o) => (
                                   <option key={o.nome} value={o.nome}>
-                                    {o.nome} ({o.valor})
+                                    +{o.nome} ({o.valor})
                                   </option>
                                 ))}
                               </select>
