@@ -90,14 +90,16 @@ export const ARMOR_LIBRARY = [
     "item": "Mochila (📦+10 Inventário)",
     "armadura": "—",
     "preco": "50",
-    "peso": "medio"
+    "peso": "medio",
+    "inventarioBonus": "10"
   },
   {
     "parte": "Torso",
     "item": "Mochila Grande (📦+20 Inventário)",
     "armadura": "—",
     "preco": "100",
-    "peso": "pesado"
+    "peso": "pesado",
+    "inventarioBonus": "20"
   },
   {
     "parte": "Torso",
@@ -202,7 +204,8 @@ export const ARMOR_LIBRARY = [
     "item": "Cinto com Bolsas (📦+10 Inventário)",
     "armadura": "—",
     "preco": "50",
-    "peso": "leve"
+    "peso": "leve",
+    "inventarioBonus": "10"
   },
   {
     "parte": "Pernas",

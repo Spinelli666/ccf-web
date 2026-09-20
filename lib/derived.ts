@@ -1,7 +1,7 @@
 // Ported from the original Cardigan Artifact (computeDerived / getPericiaVal).
 // Keep in sync with module/data/*.mjs formulas in the Foundry system if the ruleset changes.
 
-import type { Armadura } from "@/lib/sheet-types";
+import type { Arma, Armadura, HabilidadeClasse } from "@/lib/sheet-types";
 
 export type Pericia = { nome: string; valor: string | number };
 
@@ -20,7 +20,24 @@ export type SheetData = {
   fraturas?: string | number;
   pericias?: Pericia[];
   stats?: SheetStats;
+  classeHabilidades?: HabilidadeClasse[];
 };
+
+// Procura um aprimoramento (linha indentada logo após a habilidade base) marcado como
+// ativo/aprendido — usado pra bônus derivados automáticos que dependem de aprimoramentos
+// específicos (ex: Colecionador II aumentando Espaços de Inventário).
+function temAprimoramentoAtivo(lista: HabilidadeClasse[] | undefined, base: string, aprimoramento: string): boolean {
+  if (!lista) return false;
+  let dentroDaBase = false;
+  for (const h of lista) {
+    if (!h.indent) {
+      dentroDaBase = h.nome === base;
+      continue;
+    }
+    if (dentroDaBase && h.nome === aprimoramento) return h.ativo !== false;
+  }
+  return false;
+}
 
 export function num(v: unknown, fallback = 0): number {
   const n = parseFloat(String(v));
@@ -58,6 +75,21 @@ export function equippedArmorSum(armaduras: Armadura[]): number {
     .reduce((sum, a) => sum + num(a.armadura, 0), 0);
 }
 
+// Algumas armas (ex: Escudo) também protegem quando equipadas — soma à parte da
+// Armadura de itens de Armadura normais.
+export function equippedWeaponProtectionSum(armas: Arma[]): number {
+  return armas
+    .filter((a) => a.equipado)
+    .reduce((sum, a) => sum + num(a.protecao, 0), 0);
+}
+
+// Mochila/Cinto com Bolsas etc. — Espaços de Inventário extra quando equipadas.
+export function equippedArmorInventoryBonus(armaduras: Armadura[]): number {
+  return armaduras
+    .filter((a) => a.equipado)
+    .reduce((sum, a) => sum + num(a.inventarioBonus, 0), 0);
+}
+
 export function computeDerived(s: SheetData): DerivedStats {
   const nivel = Math.max(1, num(s.nivel, 1));
   const forca = getPericiaVal(s, "Força");
@@ -72,7 +104,8 @@ export function computeDerived(s: SheetData): DerivedStats {
   const peMax = 10 + 1 * vigor + 1 * (nivel - 1) + num(stats.peBonus, 0);
   const armaduraNatural = Math.floor(forca / 2) + num(stats.armaduraNaturalBonus, 0);
   const deslocamento = 5 + Math.floor(destreza / 2) + num(stats.deslocamentoBonus, 0);
-  const inventario = 15 + Math.floor(forca / 2) + num(stats.inventarioBonus, 0);
+  const colecionadorII = temAprimoramentoAtivo(s.classeHabilidades, "Colecionador", "Aprimoramento II");
+  const inventario = 15 + Math.floor(forca / 2) + num(stats.inventarioBonus, 0) + (colecionadorII ? 10 : 0);
   const critRange = Math.max(2, 20 - Math.floor(destreza / 3));
   return {
     nivel,

@@ -41,6 +41,9 @@ export type Arma = {
   preco: string;
   peso?: string;
   descricao?: string;
+  // Algumas armas (ex: Escudo) também protegem quando equipadas — soma na Armadura total
+  // igual um item de Armadura normal, além de continuar servindo pra atacar.
+  protecao?: string;
   equipado: boolean;
   durabilidadeAtual: number;
   durabilidadeMax: number;
@@ -56,6 +59,8 @@ export type Armadura = {
   preco: string;
   peso?: string;
   descricao?: string;
+  // Ex: Mochila/Cinto com Bolsas — aumenta os Espaços de Inventário quando equipada.
+  inventarioBonus?: string;
   equipado: boolean;
   durabilidadeAtual: number;
   durabilidadeMax: number;

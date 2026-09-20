@@ -41,7 +41,7 @@ export function AddEquipmentDialog({
   const [selArmas, setSelArmas] = useState<Set<number>>(new Set());
   const [selArmaduras, setSelArmaduras] = useState<Set<number>>(new Set());
 
-  const [novaArma, setNovaArma] = useState({ item: "", dano: "", propriedades: "", preco: "", peso: "medio", descricao: "" });
+  const [novaArma, setNovaArma] = useState({ item: "", dano: "", propriedades: "", preco: "", peso: "medio", descricao: "", protecao: "" });
   const [novaArmadura, setNovaArmadura] = useState({ item: "", parte: "", armadura: "", preco: "", peso: "medio", descricao: "" });
   const [novoGenerico, setNovoGenerico] = useState({ item: "", efeito: "", preco: "", peso: "leve", quantidade: "1" });
 
@@ -185,6 +185,15 @@ export function AddEquipmentDialog({
               value={novaArma.propriedades}
               placeholder="Ex: Certeiro · Ferir"
               onChange={(e) => setNovaArma((v) => ({ ...v, propriedades: e.target.value }))}
+            />
+          </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>Proteção quando equipada (opcional — ex: Escudo)</label>
+            <input
+              type="text"
+              value={novaArma.protecao}
+              placeholder="Ex: 3"
+              onChange={(e) => setNovaArma((v) => ({ ...v, protecao: e.target.value }))}
             />
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
@@ -404,6 +413,7 @@ export function AddEquipmentDialog({
                 <span className="eq-item-name">{w.item}</span>
                 <span className="eq-item-meta">
                   💥{w.dano} · {w.propriedades} · {w.preco}🪙
+                  {"protecao" in w && w.protecao ? ` · 🛡️+${w.protecao}` : ""}
                 </span>
               </label>
             ) : null))}

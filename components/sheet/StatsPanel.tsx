@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { computeDerived, equippedArmorSum, num, clamp } from "@/lib/derived";
+import { computeDerived, equippedArmorSum, equippedWeaponProtectionSum, num, clamp } from "@/lib/derived";
 import { rollDie } from "@/lib/dice";
 import { DescansoDialog } from "@/components/dialogs/DescansoDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
@@ -49,7 +49,7 @@ export function StatsPanel({
   const estabilizado = julg.dadivas >= 3;
   const xp = clamp(num(sheet.xp, 0), 0, 100);
 
-  const armaduraEquipada = equippedArmorSum(sheet.armaduras);
+  const armaduraEquipada = equippedArmorSum(sheet.armaduras) + equippedWeaponProtectionSum(sheet.armas);
   const armaduraBonus = num(sheet.armaduraBonusManual, 0);
   const armaduraMaximo = derived.armaduraNatural + armaduraEquipada + armaduraBonus;
   const armaduraAtual =

@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { computeDerived, equippedArmorSum, num, clamp } from "@/lib/derived";
+import { computeDerived, equippedArmorSum, equippedWeaponProtectionSum, equippedArmorInventoryBonus, num, clamp } from "@/lib/derived";
 import { rollWithMode, formatRollDice, type RollModeKey } from "@/lib/dice";
 import { getSocket } from "@/lib/socket-client";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
@@ -311,7 +311,8 @@ export function EquipmentPanel({
   const remedioPairs = sheet.remedios.map((r, i) => [i, r] as const).filter(([, r]) => r.item);
 
   const armaduraBonus = num(sheet.armaduraBonusManual, 0);
-  const armaduraMaximo = derived.armaduraNatural + equippedArmorSum(sheet.armaduras) + armaduraBonus;
+  const armaduraMaximo =
+    derived.armaduraNatural + equippedArmorSum(sheet.armaduras) + equippedWeaponProtectionSum(sheet.armas) + armaduraBonus;
   const armaduraAtual =
     sheet.armaduraAtual === null || sheet.armaduraAtual === undefined
       ? armaduraMaximo
@@ -337,7 +338,7 @@ export function EquipmentPanel({
     else slotsFixos += PESO_SPACE[p] * qtd;
   });
   const slotsUsados = slotsFixos + Math.floor(slotsLeveCount / 10);
-  const invMax = derived.inventario;
+  const invMax = derived.inventario + equippedArmorInventoryBonus(sheet.armaduras);
 
   function weaponPropsRow(idx: number, a: Arma, key: string, colSpan: number) {
     const props = explicarPropriedades(a.propriedades);
@@ -350,6 +351,11 @@ export function EquipmentPanel({
               <div className="item-info-line">
                 <b>Preço:</b> {a.preco || "—"}
               </div>
+              {num(a.protecao, 0) > 0 && (
+                <div className="item-info-line">
+                  <b>🛡️ Proteção quando equipada:</b> +{num(a.protecao, 0)} Armadura
+                </div>
+              )}
               {props.length ? (
                 props.map((p) => (
                   <div className="item-info-line" key={p.nome}>

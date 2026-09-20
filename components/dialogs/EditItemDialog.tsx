@@ -32,6 +32,7 @@ export function EditItemDialog({
   const [peso, setPeso] = useState(target.data.peso || "medio");
   const [dano, setDano] = useState(target.tipo === "arma" ? target.data.dano : "");
   const [propriedades, setPropriedades] = useState(target.tipo === "arma" ? target.data.propriedades : "");
+  const [protecao, setProtecao] = useState(target.tipo === "arma" ? target.data.protecao || "" : "");
   const [parte, setParte] = useState(target.tipo === "armadura" ? target.data.parte : "");
   const [armadura, setArmadura] = useState(target.tipo === "armadura" ? target.data.armadura : "");
   const [descricao, setDescricao] = useState(
@@ -49,7 +50,7 @@ export function EditItemDialog({
       const novoMax = Math.max(0, parseInt(durabilidadeMax, 10) || 0);
       const durabilidadeAtual = Math.min(target.data.durabilidadeAtual, novoMax);
       if (target.tipo === "arma") {
-        onSave({ item: item.trim(), dano, propriedades, preco, peso, descricao, durabilidadeMax: novoMax, durabilidadeAtual });
+        onSave({ item: item.trim(), dano, propriedades, preco, peso, descricao, protecao, durabilidadeMax: novoMax, durabilidadeAtual });
       } else {
         onSave({ item: item.trim(), parte, armadura, preco, peso, descricao, durabilidadeMax: novoMax, durabilidadeAtual });
       }
@@ -78,6 +79,15 @@ export function EditItemDialog({
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Propriedades</label>
             <input type="text" value={propriedades} onChange={(e) => setPropriedades(e.target.value)} />
+          </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>Proteção quando equipada (opcional — ex: Escudo)</label>
+            <input
+              type="text"
+              value={protecao}
+              placeholder="Ex: 3"
+              onChange={(e) => setProtecao(e.target.value)}
+            />
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Durabilidade Máxima</label>

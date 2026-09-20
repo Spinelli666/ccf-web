@@ -31,7 +31,8 @@ export const WEAPONS_LIBRARY = [
     "propriedades": "—",
     "preco": "40",
     "peso": "medio",
-    "categoria": "marcial"
+    "categoria": "marcial",
+    "protecao": "3"
   },
   {
     "item": "Adaga",
