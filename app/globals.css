@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Voltaire&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap");
 
 /* Portado quase 1:1 do <style> de "sistema-cardigan-fichas - Copia.html". */
 
@@ -959,9 +959,6 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
   .form-actions{ flex-direction:column-reverse; }
   .form-actions .btn{ width:100%; }
 }
-
-/* Fonte única em todo o app, por cima de qualquer fonte específica definida acima */
-*{ font-family: 'Voltaire', sans-serif !important; }
 
 /* --- Extras do app web (login/registro/erro), fora do CSS original --- */
 .auth-page{ max-width:420px; margin:60px auto; padding:0 16px; }
