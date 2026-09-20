@@ -41,8 +41,8 @@ export function AddEquipmentDialog({
   const [selArmas, setSelArmas] = useState<Set<number>>(new Set());
   const [selArmaduras, setSelArmaduras] = useState<Set<number>>(new Set());
 
-  const [novaArma, setNovaArma] = useState({ item: "", dano: "", propriedades: "", preco: "", peso: "medio" });
-  const [novaArmadura, setNovaArmadura] = useState({ item: "", parte: "", armadura: "", preco: "", peso: "medio" });
+  const [novaArma, setNovaArma] = useState({ item: "", dano: "", propriedades: "", preco: "", peso: "medio", descricao: "" });
+  const [novaArmadura, setNovaArmadura] = useState({ item: "", parte: "", armadura: "", preco: "", peso: "medio", descricao: "" });
   const [novoGenerico, setNovoGenerico] = useState({ item: "", efeito: "", preco: "", peso: "leve", quantidade: "1" });
 
   const partesArmadura = useMemo(() => Array.from(new Set(ARMOR_LIBRARY.map((a) => a.parte))), []);
@@ -197,13 +197,22 @@ export function AddEquipmentDialog({
               ))}
             </select>
           </div>
-          <div className="field" style={{ marginBottom: 14, textAlign: "left" }}>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Preço (opcional)</label>
             <input
               type="text"
               value={novaArma.preco}
               placeholder="Ex: 20"
               onChange={(e) => setNovaArma((v) => ({ ...v, preco: e.target.value }))}
+            />
+          </div>
+          <div className="field" style={{ marginBottom: 14, textAlign: "left" }}>
+            <label>Descrição</label>
+            <textarea
+              style={{ width: "100%", minHeight: 70 }}
+              value={novaArma.descricao}
+              placeholder="O que é / história / detalhes..."
+              onChange={(e) => setNovaArma((v) => ({ ...v, descricao: e.target.value }))}
             />
           </div>
           <div className="modal-options">
@@ -264,13 +273,22 @@ export function AddEquipmentDialog({
               ))}
             </select>
           </div>
-          <div className="field" style={{ marginBottom: 14, textAlign: "left" }}>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Preço (opcional)</label>
             <input
               type="text"
               value={novaArmadura.preco}
               placeholder="Ex: 25"
               onChange={(e) => setNovaArmadura((v) => ({ ...v, preco: e.target.value }))}
+            />
+          </div>
+          <div className="field" style={{ marginBottom: 14, textAlign: "left" }}>
+            <label>Descrição</label>
+            <textarea
+              style={{ width: "100%", minHeight: 70 }}
+              value={novaArmadura.descricao}
+              placeholder="O que é / história / detalhes..."
+              onChange={(e) => setNovaArmadura((v) => ({ ...v, descricao: e.target.value }))}
             />
           </div>
           <div className="modal-options">

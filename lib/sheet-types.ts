@@ -40,6 +40,7 @@ export type Arma = {
   propriedades: string;
   preco: string;
   peso?: string;
+  descricao?: string;
   equipado: boolean;
   durabilidadeAtual: number;
   durabilidadeMax: number;
@@ -54,6 +55,7 @@ export type Armadura = {
   armadura: string;
   preco: string;
   peso?: string;
+  descricao?: string;
   equipado: boolean;
   durabilidadeAtual: number;
   durabilidadeMax: number;

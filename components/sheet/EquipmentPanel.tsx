@@ -331,6 +331,7 @@ export function EquipmentPanel({
         <tr className="item-info-row" key={`${key}-props`}>
           <td colSpan={colSpan}>
             <div className="item-info-box">
+              {a.descricao && <div className="item-info-line">{a.descricao}</div>}
               <div className="item-info-line">
                 <b>Preço:</b> {a.preco || "—"}
               </div>
@@ -358,6 +359,7 @@ export function EquipmentPanel({
         <tr className="item-info-row" key={`${key}-info`}>
           <td colSpan={colSpan}>
             <div className="item-info-box">
+              {a.descricao && <div className="item-info-line">{a.descricao}</div>}
               <div className="item-info-line">
                 <b>Parte do corpo:</b> {a.parte || "—"}
               </div>

@@ -34,6 +34,9 @@ export function EditItemDialog({
   const [propriedades, setPropriedades] = useState(target.tipo === "arma" ? target.data.propriedades : "");
   const [parte, setParte] = useState(target.tipo === "armadura" ? target.data.parte : "");
   const [armadura, setArmadura] = useState(target.tipo === "armadura" ? target.data.armadura : "");
+  const [descricao, setDescricao] = useState(
+    target.tipo === "arma" || target.tipo === "armadura" ? target.data.descricao || "" : ""
+  );
   const [efeito, setEfeito] = useState(target.tipo === "generico" ? target.data.efeito : "");
   const [durabilidadeMax, setDurabilidadeMax] = useState(
     target.tipo === "arma" || target.tipo === "armadura" ? String(target.data.durabilidadeMax) : ""
@@ -46,9 +49,9 @@ export function EditItemDialog({
       const novoMax = Math.max(0, parseInt(durabilidadeMax, 10) || 0);
       const durabilidadeAtual = Math.min(target.data.durabilidadeAtual, novoMax);
       if (target.tipo === "arma") {
-        onSave({ item: item.trim(), dano, propriedades, preco, peso, durabilidadeMax: novoMax, durabilidadeAtual });
+        onSave({ item: item.trim(), dano, propriedades, preco, peso, descricao, durabilidadeMax: novoMax, durabilidadeAtual });
       } else {
-        onSave({ item: item.trim(), parte, armadura, preco, peso, durabilidadeMax: novoMax, durabilidadeAtual });
+        onSave({ item: item.trim(), parte, armadura, preco, peso, descricao, durabilidadeMax: novoMax, durabilidadeAtual });
       }
     } else {
       onSave({ item: item.trim(), efeito, preco, peso });
@@ -80,6 +83,15 @@ export function EditItemDialog({
             <label>Durabilidade Máxima</label>
             <input type="number" min={0} value={durabilidadeMax} onChange={(e) => setDurabilidadeMax(e.target.value)} />
           </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>Descrição</label>
+            <textarea
+              style={{ width: "100%", minHeight: 70 }}
+              value={descricao}
+              placeholder="O que é / história / detalhes..."
+              onChange={(e) => setDescricao(e.target.value)}
+            />
+          </div>
         </>
       )}
 
@@ -96,6 +108,15 @@ export function EditItemDialog({
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Durabilidade Máxima</label>
             <input type="number" min={0} value={durabilidadeMax} onChange={(e) => setDurabilidadeMax(e.target.value)} />
+          </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>Descrição</label>
+            <textarea
+              style={{ width: "100%", minHeight: 70 }}
+              value={descricao}
+              placeholder="O que é / história / detalhes..."
+              onChange={(e) => setDescricao(e.target.value)}
+            />
           </div>
         </>
       )}
