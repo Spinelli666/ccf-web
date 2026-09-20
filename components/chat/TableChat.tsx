@@ -82,10 +82,6 @@ export function TableChat({ mesaId }: { mesaId: string }) {
     const socket = getSocket(mesaId);
     const onNew = (msg: ChatMessage) => {
       setMessages((prev) => [...prev.slice(-199), msg]);
-      requestAnimationFrame(() => {
-        const el = listRef.current;
-        if (el) el.scrollTop = el.scrollHeight;
-      });
     };
     const onDeleted = (id: string) => setMessages((prev) => prev.filter((m) => m.id !== id));
     const onCleared = () => setMessages([]);
@@ -104,6 +100,14 @@ export function TableChat({ mesaId }: { mesaId: string }) {
       clearInterval(interval);
     };
   }, [mesaId]);
+
+  // Rola pro fim sempre que a lista de mensagens muda (histórico carregado, nova
+  // mensagem chegou, deleção, limpar tudo) — depender do state em vez de chamar a
+  // partir do handler do socket garante que já rodou depois do React commitar o DOM.
+  useEffect(() => {
+    const el = listRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages]);
 
   function clearAll() {
     setShowClear(false);

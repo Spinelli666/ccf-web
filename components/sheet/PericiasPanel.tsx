@@ -7,6 +7,18 @@ import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { getSocket } from "@/lib/socket-client";
 import type { FullSheetData, Pericia } from "@/lib/sheet-types";
 
+const PERICIA_ORDER = [
+  "Precisão",
+  "Evasão",
+  "Força",
+  "Destreza",
+  "Vigor",
+  "Furtividade",
+  "Persuasão",
+  "Inteligência",
+  "Psionismo",
+];
+
 export function PericiasPanel({
   sheet,
   isMine,
@@ -21,6 +33,15 @@ export function PericiasPanel({
   isPrivate: boolean;
 }) {
   const [rollingIdx, setRollingIdx] = useState<number | null>(null);
+
+  const ordemExibicao = [
+    ...PERICIA_ORDER.map((nome) =>
+      sheet.pericias.findIndex((p) => p.nome.trim().toLowerCase() === nome.toLowerCase())
+    ).filter((i) => i !== -1),
+    ...sheet.pericias
+      .map((_, i) => i)
+      .filter((i) => !PERICIA_ORDER.some((nome) => nome.toLowerCase() === sheet.pericias[i].nome.trim().toLowerCase())),
+  ];
 
   function setPericia(i: number, field: keyof Pericia, value: string) {
     const next = sheet.pericias.slice();
@@ -53,7 +74,9 @@ export function PericiasPanel({
     <div className="section">
       <h2>Perícias</h2>
       <div className="pericias-grid">
-        {sheet.pericias.map((p, i) => (
+        {ordemExibicao.map((i) => {
+          const p = sheet.pericias[i];
+          return (
           <div key={i} className={`pericia-row ${num(p.valor) === 0 ? "zero" : ""}`}>
             <span className="n">{p.nome}</span>
             <span className="pericia-right">
@@ -85,7 +108,8 @@ export function PericiasPanel({
               </button>
             </span>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {rollingIdx !== null && (

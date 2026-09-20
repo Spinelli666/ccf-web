@@ -414,7 +414,7 @@ export function EquipmentPanel({
         <div className="box">
           <div className="val">
             {slotsUsados}
-            {invMax ? ` / ${invMax}` : ""}
+            {invMax ? ` | ${invMax}` : ""}
           </div>
           <div className="lbl">Espaços de Inventário</div>
         </div>
