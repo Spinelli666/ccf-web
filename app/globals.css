@@ -136,9 +136,9 @@ body{
   .app-shell{ flex-direction:column; }
   .layout{ padding: 20px 18px 60px; }
   .page-inner{ padding: 20px 18px 60px; }
-  .side-nav{ width:100% !important; height:auto; position:static; box-shadow:none; }
+  .side-nav{ width:100% !important; height:auto !important; position:static !important; box-shadow:none; }
   .side-nav.collapsed{ width:100% !important; }
-  .combat-col{ width:100% !important; height:auto; position:static; box-shadow:none; }
+  .combat-col{ width:100% !important; height:auto !important; position:static !important; box-shadow:none; }
   .combat-col.collapsed{ width:100% !important; }
   .main-col{ max-width:none; }
   .topbar{ padding: 12px 18px; }
