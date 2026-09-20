@@ -178,7 +178,7 @@ export function AbilitiesPanel({
 
       {sheet.racaTitulo && (
         <>
-          <h3 className="form-section-title" style={{ color: "var(--maroon)", fontFamily: "Cinzel,serif", fontSize: 13 }}>
+          <h3 className="form-section-title" style={{ color: "var(--maroon)", fontSize: 13 }}>
             Raça — {sheet.racaTitulo}
           </h3>
           {sheet.racaHabilidades.map((h, i) => {
@@ -218,7 +218,7 @@ export function AbilitiesPanel({
 
       {sheet.classeTitulo && (
         <>
-          <h3 style={{ color: "var(--maroon)", fontFamily: "Cinzel,serif", fontSize: 13, marginTop: 18 }}>
+          <h3 style={{ color: "var(--maroon)", fontSize: 13, marginTop: 18 }}>
             Habilidades de Classe{" "}
             {sheet.classePH && <span className="ph-tag">— {sheet.classePH} PH totais</span>}
           </h3>
