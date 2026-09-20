@@ -42,7 +42,7 @@ export function EffectsPanel({
 
   return (
     <div className="section">
-      <h2>Efeitos Ativos</h2>
+      <h2>Efeitos</h2>
       {sheet.efeitosAtivos.length > 0 ? (
         <table className="sheet-table">
           <thead>

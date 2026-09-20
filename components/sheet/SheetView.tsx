@@ -198,10 +198,10 @@ export function SheetView({
         </div>
         <div className="sheet-tab-content">
           {tab === "Perícias" && (
-            <>
-              <PericiasPanel sheet={sheet} isMine={isMine} onChange={patch} mesaId={mesaId} isPrivate={priv} />
+            <div className="pericias-efeitos-row">
               <EffectsPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />
-            </>
+              <PericiasPanel sheet={sheet} isMine={isMine} onChange={patch} mesaId={mesaId} isPrivate={priv} />
+            </div>
           )}
           {tab === "Equipamentos" && (
             <EquipmentPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} mesaId={mesaId} isPrivate={priv} />
