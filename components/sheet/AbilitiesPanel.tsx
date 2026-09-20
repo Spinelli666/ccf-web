@@ -327,9 +327,9 @@ export function AbilitiesPanel({
                   <Fragment key={i}>
                     <tr className="indent">
                       {nomeCell}
-                      <td>{h.tipo}</td>
-                      <td>{h.custo}</td>
-                      <td>
+                      <td className="col-tight">{h.tipo}</td>
+                      <td className="col-tight">{h.custo}</td>
+                      <td className="col-tight">
                         {isMine && h.custoPE !== "" && h.custoPE !== undefined && (
                           <label className="chk-inline">
                             <input
@@ -359,9 +359,9 @@ export function AbilitiesPanel({
                   <Fragment key={i}>
                     <tr>
                       {nomeCell}
-                      <td>{h.tipo}</td>
-                      <td>{h.custo}</td>
-                      <td>
+                      <td className="col-tight">{h.tipo}</td>
+                      <td className="col-tight">{h.custo}</td>
+                      <td className="col-tight">
                         {isMine && (
                           <div className="ability-controls">
                             {h.temContador && (

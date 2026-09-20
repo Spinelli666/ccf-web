@@ -577,7 +577,7 @@ body{
 
 .ability{ margin-bottom:10px; font-size:14px; line-height:1.5; }
 .ability-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
-.ability-controls{ display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.ability-controls{ display:flex; gap:8px; align-items:center; justify-content:center; flex-shrink:0; }
 .ability b{ color: var(--maroon); }
 
 .ability-name-toggle{ cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
