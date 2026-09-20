@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
-import type { Arma, Armadura, Remedio } from "@/lib/sheet-types";
+import { getPericiaBonuses } from "@/lib/derived";
+import type { Arma, Armadura, PericiaBonusItem, Remedio } from "@/lib/sheet-types";
 
 const PESO_OPCOES = [
   { value: "leve", label: "Leve" },
@@ -50,11 +51,8 @@ export function EditItemDialog({
   const [inventarioBonus, setInventarioBonus] = useState(
     target.tipo === "armadura" ? target.data.inventarioBonus || "" : ""
   );
-  const [periciaBonusNome, setPericiaBonusNome] = useState(
-    target.tipo === "armadura" ? target.data.periciaBonusNome || "" : ""
-  );
-  const [periciaBonusValor, setPericiaBonusValor] = useState(
-    target.tipo === "armadura" ? target.data.periciaBonusValor || "" : ""
+  const [periciaBonuses, setPericiaBonuses] = useState<PericiaBonusItem[]>(
+    target.tipo === "armadura" ? getPericiaBonuses(target.data) : []
   );
   const [deslocamentoBonus, setDeslocamentoBonus] = useState(
     target.tipo === "armadura" ? target.data.deslocamentoBonus || "" : ""
@@ -68,6 +66,20 @@ export function EditItemDialog({
     target.tipo === "arma" || target.tipo === "armadura" ? String(target.data.durabilidadeMax) : ""
   );
   const [confirmarRemover, setConfirmarRemover] = useState(false);
+
+  function addPericiaBonus() {
+    setPericiaBonuses((prev) => [...prev, { pericia: PERICIA_NOMES[0], valor: "1" }]);
+  }
+  function updatePericiaBonus(i: number, field: keyof PericiaBonusItem, value: string) {
+    setPericiaBonuses((prev) => {
+      const next = prev.slice();
+      next[i] = { ...next[i], [field]: value };
+      return next;
+    });
+  }
+  function removePericiaBonus(i: number) {
+    setPericiaBonuses((prev) => prev.filter((_, idx) => idx !== i));
+  }
 
   function salvar() {
     if (!item.trim()) return;
@@ -85,8 +97,9 @@ export function EditItemDialog({
           peso,
           descricao,
           inventarioBonus,
-          periciaBonusNome,
-          periciaBonusValor,
+          periciaBonuses: periciaBonuses.filter((b) => b.pericia.trim()),
+          periciaBonusNome: undefined,
+          periciaBonusValor: undefined,
           deslocamentoBonus,
           peBonus,
           durabilidadeMax: novoMax,
@@ -120,7 +133,7 @@ export function EditItemDialog({
             <input type="text" value={propriedades} onChange={(e) => setPropriedades(e.target.value)} />
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Proteção quando equipada (opcional — ex: Escudo)</label>
+            <label>Proteção quando equipada (opcional)</label>
             <input
               type="text"
               value={protecao}
@@ -155,7 +168,7 @@ export function EditItemDialog({
             <input type="text" value={armadura} onChange={(e) => setArmadura(e.target.value)} />
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Espaços de Inventário extra quando equipada (opcional — ex: Mochila)</label>
+            <label>Espaços de Inventário extra quando equipada (opcional)</label>
             <input
               type="text"
               value={inventarioBonus}
@@ -164,7 +177,7 @@ export function EditItemDialog({
             />
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Deslocamento extra quando equipada (opcional — ex: Botas Leves)</label>
+            <label>Deslocamento extra quando equipada (opcional)</label>
             <input
               type="text"
               value={deslocamentoBonus}
@@ -173,31 +186,38 @@ export function EditItemDialog({
             />
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>PE extra quando equipada (opcional — ex: Botas Confortáveis)</label>
+            <label>PE extra quando equipada (opcional)</label>
             <input type="text" value={peBonus} placeholder="Ex: 1" onChange={(e) => setPeBonus(e.target.value)} />
           </div>
-          <div className="field-row" style={{ marginBottom: 10 }}>
-            <div className="field" style={{ textAlign: "left" }}>
-              <label>Bônus de perícia quando equipada (opcional)</label>
-              <select value={periciaBonusNome} onChange={(e) => setPericiaBonusNome(e.target.value)}>
-                <option value="">Nenhuma</option>
-                {PERICIA_NOMES.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field" style={{ textAlign: "left" }}>
-              <label>Valor do bônus</label>
-              <input
-                type="text"
-                value={periciaBonusValor}
-                placeholder="Ex: 1"
-                disabled={!periciaBonusNome}
-                onChange={(e) => setPericiaBonusValor(e.target.value)}
-              />
-            </div>
+          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
+            <label>Bônus de perícia quando equipada (opcional — pode adicionar mais de uma)</label>
+            {periciaBonuses.map((b, i) => (
+              <div className="repeat-row" key={i}>
+                <div className="field">
+                  <select value={b.pericia} onChange={(e) => updatePericiaBonus(i, "pericia", e.target.value)}>
+                    {PERICIA_NOMES.map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <input
+                    type="text"
+                    value={b.valor}
+                    placeholder="Ex: 1"
+                    onChange={(e) => updatePericiaBonus(i, "valor", e.target.value)}
+                  />
+                </div>
+                <button type="button" className="btn ghost small" onClick={() => removePericiaBonus(i)}>
+                  🗑️
+                </button>
+              </div>
+            ))}
+            <button type="button" className="add-row-btn" onClick={addPericiaBonus}>
+              + Adicionar bônus de perícia
+            </button>
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
             <label>Durabilidade Máxima</label>

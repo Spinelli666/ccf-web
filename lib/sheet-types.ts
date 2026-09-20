@@ -52,6 +52,8 @@ export type Arma = {
   quantidade?: string;
 };
 
+export type PericiaBonusItem = { pericia: string; valor: string };
+
 export type Armadura = {
   parte: string;
   item: string;
@@ -61,8 +63,11 @@ export type Armadura = {
   descricao?: string;
   // Ex: Mochila/Cinto com Bolsas — aumenta os Espaços de Inventário quando equipada.
   inventarioBonus?: string;
-  // Ex: Óculos (+1 Inteligência), Capuz · Bandana / Roupa Escura (+1 Furtividade),
-  // Amuleto Divino (+1 Psionismo) — bônus numérico numa perícia específica quando equipada.
+  // Ex: Óculos (+1 Inteligência), Roupa Escura (+1 Furtividade + 1 Precisão) — um item
+  // pode dar bônus em mais de uma perícia ao mesmo tempo quando equipado.
+  periciaBonuses?: PericiaBonusItem[];
+  // Campos legados (pré-multi-bônus) — mantidos só pra ler fichas antigas já salvas;
+  // ver getPericiaBonuses() em lib/derived.ts. Não usar em código novo.
   periciaBonusNome?: string;
   periciaBonusValor?: string;
   // Ex: Botas Leves (+1 Deslocamento).

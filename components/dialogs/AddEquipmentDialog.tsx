@@ -68,7 +68,14 @@ export function AddEquipmentDialog({
   function handleAdd() {
     onAdd({
       armas: Array.from(selArmas).map((i) => ({ ...WEAPONS_LIBRARY[i], equipado: false })),
-      armaduras: Array.from(selArmaduras).map((i) => ({ ...ARMOR_LIBRARY[i], equipado: false })),
+      armaduras: Array.from(selArmaduras).map((i) => {
+        const a = ARMOR_LIBRARY[i];
+        return {
+          ...a,
+          periciaBonuses: "periciaBonuses" in a ? a.periciaBonuses.map((b) => ({ ...b })) : undefined,
+          equipado: false,
+        };
+      }),
       remedios: [],
     });
   }
@@ -188,7 +195,7 @@ export function AddEquipmentDialog({
             />
           </div>
           <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Proteção quando equipada (opcional — ex: Escudo)</label>
+            <label>Proteção quando equipada (opcional)</label>
             <input
               type="text"
               value={novaArma.protecao}

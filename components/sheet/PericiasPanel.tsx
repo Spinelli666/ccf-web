@@ -1,23 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { num, equippedArmorPericiaBonus } from "@/lib/derived";
+import { num, equippedArmorPericiaBonus, PERICIA_ORDER } from "@/lib/derived";
 import { rollWithMode, formatRollDice, rollCritClass, type RollModeKey } from "@/lib/dice";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { getSocket } from "@/lib/socket-client";
 import type { FullSheetData, Pericia } from "@/lib/sheet-types";
-
-const PERICIA_ORDER = [
-  "Precisão",
-  "Evasão",
-  "Força",
-  "Destreza",
-  "Vigor",
-  "Furtividade",
-  "Persuasão",
-  "Inteligência",
-  "Psionismo",
-];
 
 export function PericiasPanel({
   sheet,

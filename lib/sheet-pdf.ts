@@ -1,7 +1,7 @@
 // Monta um PDF de verdade (texto selecionável, não uma imagem/print da tela) com o
 // estado atual da ficha — espelha os cálculos derivados usados em StatsPanel/EquipmentPanel.
 import { jsPDF } from "jspdf";
-import { computeDerived, equippedArmorSum, num, clamp } from "@/lib/derived";
+import { computeDerived, equippedArmorSum, equippedArmorPericiaBonus, getPericiaBonuses, orderPericias, num, clamp } from "@/lib/derived";
 import type { FullSheetData } from "@/lib/sheet-types";
 
 const PAGE_W = 595.28;
@@ -50,6 +50,17 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
     doc.setLineWidth(1);
     doc.line(MARGIN, y, PAGE_W - MARGIN, y);
     y += 16;
+  }
+
+  // Sub-título dentro de uma seção (ex: "Armas" / "Armaduras" dentro de "Equipamento") —
+  // evita que uma lista longa quebre de página sem nenhuma indicação do que é.
+  function subheading(text: string) {
+    ensureSpace(28);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...INK_SOFT);
+    doc.text(sanitizeForPdf(text).toUpperCase(), MARGIN, y);
+    y += 14;
   }
 
   function keyValueRow(pairs: [string, string][]) {
@@ -142,29 +153,34 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
   ]);
   spacer(4);
 
-  // --- Perícias ---
+  // --- Perícias --- (mesma ordem fixa usada em PericiasPanel, pra ficar consistente com a UI)
   heading("Perícias");
-  const half = Math.ceil(sheet.pericias.length / 2);
-  const colL = sheet.pericias.slice(0, half);
-  const colR = sheet.pericias.slice(half);
+  const periciasOrdenadas = orderPericias(sheet.pericias);
+  const half = Math.ceil(periciasOrdenadas.length / 2);
+  const colL = periciasOrdenadas.slice(0, half);
+  const colR = periciasOrdenadas.slice(half);
   const rowH = 15;
   ensureSpace(rowH * Math.max(colL.length, colR.length));
   const yPericias = y;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...INK);
-  colL.forEach((p, i) => {
+  function periciaLine(p: (typeof periciasOrdenadas)[number]) {
     const bonusTxt = num(p.bonus) ? ` (+${p.bonus})` : "";
-    doc.text(sanitizeForPdf(`${p.nome}: ${p.valor}${bonusTxt}`), MARGIN, yPericias + i * rowH);
+    const equipBonus = equippedArmorPericiaBonus(sheet.armaduras, p.nome);
+    const equipTxt = equipBonus ? ` +${equipBonus} equip.` : "";
+    return `${p.nome}: ${p.valor}${bonusTxt}${equipTxt}`;
+  }
+  colL.forEach((p, i) => {
+    doc.text(sanitizeForPdf(periciaLine(p)), MARGIN, yPericias + i * rowH);
   });
   colR.forEach((p, i) => {
-    const bonusTxt = num(p.bonus) ? ` (+${p.bonus})` : "";
-    doc.text(sanitizeForPdf(`${p.nome}: ${p.valor}${bonusTxt}`), MARGIN + CONTENT_W / 2, yPericias + i * rowH);
+    doc.text(sanitizeForPdf(periciaLine(p)), MARGIN + CONTENT_W / 2, yPericias + i * rowH);
   });
   y = yPericias + Math.max(colL.length, colR.length) * rowH + 10;
 
-  // --- Efeitos ativos ---
-  heading("Efeitos Ativos");
+  // --- Efeitos ---
+  heading("Efeitos");
   paragraph(sheet.efeitosAtivos.length ? sheet.efeitosAtivos.join(", ") : "Nenhum efeito ativo.");
   spacer(6);
 
@@ -190,6 +206,19 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
     });
   }
 
+  // Bônus extras de uma Armadura (inventário/deslocamento/PE/perícia) num texto só, pra
+  // exibir junto do item — mesmos campos mostrados no detalhe do EquipmentPanel.
+  function armaduraExtras(a: FullSheetData["armaduras"][number]): string {
+    const extras: string[] = [];
+    if (num(a.inventarioBonus, 0) > 0) extras.push(`+${num(a.inventarioBonus, 0)} Espaços de Inventário`);
+    if (num(a.deslocamentoBonus, 0) > 0) extras.push(`+${num(a.deslocamentoBonus, 0)} Deslocamento`);
+    if (num(a.peBonus, 0) > 0) extras.push(`+${num(a.peBonus, 0)} PE`);
+    getPericiaBonuses(a).forEach((b) => {
+      if (num(b.valor, 0) > 0) extras.push(`+${num(b.valor, 0)} ${b.pericia}`);
+    });
+    return extras.length ? ` · ${extras.join(" · ")}` : "";
+  }
+
   // --- Equipamento ---
   heading("Equipamento");
   const armasEquipadas = sheet.armas.filter((a) => a.item && a.equipado);
@@ -197,14 +226,24 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
   if (armasEquipadas.length === 0 && armadurasEquipadas.length === 0) {
     paragraph("Nada equipado.");
   } else {
-    armasEquipadas.forEach((a) => {
-      paragraph(
-        `Arma: ${a.item} — Dano ${a.dano}${a.propriedades && a.propriedades !== "—" ? ` · ${a.propriedades}` : ""} · Durab. ${a.durabilidadeAtual}/${a.durabilidadeMax}`
-      );
-    });
-    armadurasEquipadas.forEach((a) => {
-      paragraph(`Armadura: ${a.item} (${a.parte}) — Armadura ${a.armadura} · Durab. ${a.durabilidadeAtual}/${a.durabilidadeMax}`);
-    });
+    if (armasEquipadas.length) {
+      subheading("Armas");
+      armasEquipadas.forEach((a) => {
+        const protecaoTxt = num(a.protecao, 0) > 0 ? ` · +${num(a.protecao, 0)} Armadura quando equipada` : "";
+        paragraph(
+          `${a.item} — Dano ${a.dano}${a.propriedades && a.propriedades !== "—" ? ` · ${a.propriedades}` : ""}${protecaoTxt} · Durab. ${a.durabilidadeAtual}/${a.durabilidadeMax}`
+        );
+      });
+      spacer(4);
+    }
+    if (armadurasEquipadas.length) {
+      subheading("Armaduras");
+      armadurasEquipadas.forEach((a) => {
+        paragraph(
+          `${a.item} (${a.parte}) — Armadura ${a.armadura}${armaduraExtras(a)} · Durab. ${a.durabilidadeAtual}/${a.durabilidadeMax}`
+        );
+      });
+    }
   }
   spacer(6);
 
@@ -216,15 +255,36 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
   if (armasInv.length === 0 && armadurasInv.length === 0 && remedios.length === 0) {
     paragraph("Inventário vazio.");
   } else {
-    armasInv.forEach((a) => paragraph(`• ${a.item} — Dano ${a.dano}`));
-    armadurasInv.forEach((a) => paragraph(`• ${a.item} (${a.parte}) — Armadura ${a.armadura}`));
-    remedios.forEach((r) => paragraph(`• ${r.item}${r.efeito ? ` — ${r.efeito}` : ""}`));
+    if (armasInv.length) {
+      subheading("Armas");
+      armasInv.forEach((a) => paragraph(`• ${a.item} — Dano ${a.dano}`));
+      spacer(4);
+    }
+    if (armadurasInv.length) {
+      subheading("Armaduras");
+      armadurasInv.forEach((a) => paragraph(`• ${a.item} (${a.parte}) — Armadura ${a.armadura}${armaduraExtras(a)}`));
+      spacer(4);
+    }
+    if (remedios.length) {
+      subheading("Itens");
+      remedios.forEach((r) => paragraph(`• ${r.item}${r.efeito ? ` — ${r.efeito}` : ""}`));
+    }
   }
   spacer(6);
 
   // --- Biografia ---
   heading("Biografia");
   paragraph(sheet.biografia || "Sem biografia cadastrada.");
+
+  // --- Rodapé (número de página) ---
+  const totalPaginas = doc.getNumberOfPages();
+  for (let i = 1; i <= totalPaginas; i++) {
+    doc.setPage(i);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...INK_SOFT);
+    doc.text(`Página ${i} de ${totalPaginas}`, PAGE_W - MARGIN, PAGE_H - 20, { align: "right" });
+  }
 
   return doc;
 }

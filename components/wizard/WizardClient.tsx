@@ -456,10 +456,10 @@ export function WizardClient({ mesaId, races }: { mesaId: string; races: RaceOpt
             <AddEquipmentDialog
               onCancel={() => setShowAddEq(false)}
               onAdd={({ armas: novasArmas, armaduras: novasArmaduras, remedios: novosRemedios }) => {
-                setArmas((prev) => [...prev, ...novasArmas.map((a) => ({ ...a, equipado: true, durabilidadeAtual: 0, durabilidadeMax: 0 }))]);
+                setArmas((prev) => [...prev, ...novasArmas.map((a) => ({ ...a, equipado: true, durabilidadeAtual: 3, durabilidadeMax: 3 }))]);
                 setArmaduras((prev) => [
                   ...prev,
-                  ...novasArmaduras.map((a) => ({ ...a, equipado: true, durabilidadeAtual: 0, durabilidadeMax: 0 })),
+                  ...novasArmaduras.map((a) => ({ ...a, equipado: true, durabilidadeAtual: 3, durabilidadeMax: 3 })),
                 ]);
                 setRemedios((prev) => [...prev, ...novosRemedios]);
                 setShowAddEq(false);

@@ -14,8 +14,7 @@ export const ARMOR_LIBRARY = [
     "armadura": "—",
     "preco": "30",
     "peso": "leve",
-    "periciaBonusNome": "Inteligência",
-    "periciaBonusValor": "1"
+    "periciaBonuses": [{ "pericia": "Inteligência", "valor": "1" }]
   },
   {
     "parte": "Cabeça",
@@ -23,8 +22,7 @@ export const ARMOR_LIBRARY = [
     "armadura": "—",
     "preco": "30",
     "peso": "leve",
-    "periciaBonusNome": "Furtividade",
-    "periciaBonusValor": "1"
+    "periciaBonuses": [{ "pericia": "Furtividade", "valor": "1" }]
   },
   {
     "parte": "Cabeça",
@@ -74,8 +72,7 @@ export const ARMOR_LIBRARY = [
     "armadura": "—",
     "preco": "30",
     "peso": "leve",
-    "periciaBonusNome": "Furtividade",
-    "periciaBonusValor": "1"
+    "periciaBonuses": [{ "pericia": "Furtividade", "valor": "1" }]
   },
   {
     "parte": "Torso",
@@ -298,8 +295,7 @@ export const ARMOR_LIBRARY = [
     "armadura": "—",
     "preco": "40",
     "peso": "leve",
-    "periciaBonusNome": "Psionismo",
-    "periciaBonusValor": "1"
+    "periciaBonuses": [{ "pericia": "Psionismo", "valor": "1" }]
   },
   {
     "parte": "Acessórios",

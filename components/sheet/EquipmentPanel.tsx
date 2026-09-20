@@ -1,7 +1,15 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { computeDerived, equippedArmorSum, equippedWeaponProtectionSum, equippedArmorInventoryBonus, num, clamp } from "@/lib/derived";
+import {
+  computeDerived,
+  equippedArmorSum,
+  equippedWeaponProtectionSum,
+  equippedArmorInventoryBonus,
+  getPericiaBonuses,
+  num,
+  clamp,
+} from "@/lib/derived";
 import { rollWithMode, formatRollDice, type RollModeKey } from "@/lib/dice";
 import { getSocket } from "@/lib/socket-client";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
@@ -375,6 +383,7 @@ export function EquipmentPanel({
   }
 
   function armorInfoRow(idx: number, a: Armadura, key: string, colSpan: number) {
+    const periciaBonuses = getPericiaBonuses(a);
     return (
       expanded.has(key) && (
         <tr className="item-info-row" key={`${key}-info`}>
@@ -387,6 +396,26 @@ export function EquipmentPanel({
               <div className="item-info-line">
                 <b>Preço:</b> {a.preco || "—"}
               </div>
+              {num(a.inventarioBonus, 0) > 0 && (
+                <div className="item-info-line">
+                  <b>📦 Inventário quando equipada:</b> +{num(a.inventarioBonus, 0)} Espaços
+                </div>
+              )}
+              {num(a.deslocamentoBonus, 0) > 0 && (
+                <div className="item-info-line">
+                  <b>⚡ Deslocamento quando equipada:</b> +{num(a.deslocamentoBonus, 0)}m
+                </div>
+              )}
+              {num(a.peBonus, 0) > 0 && (
+                <div className="item-info-line">
+                  <b>🔥 PE quando equipada:</b> +{num(a.peBonus, 0)}
+                </div>
+              )}
+              {periciaBonuses.map((b, i) => (
+                <div className="item-info-line" key={`pb-${i}`}>
+                  <b>🎯 Perícia quando equipada:</b> +{num(b.valor, 0)} {b.pericia}
+                </div>
+              ))}
             </div>
           </td>
         </tr>

@@ -1,7 +1,31 @@
 // Ported from the original Cardigan Artifact (computeDerived / getPericiaVal).
 // Keep in sync with module/data/*.mjs formulas in the Foundry system if the ruleset changes.
 
-import type { Arma, Armadura, HabilidadeClasse } from "@/lib/sheet-types";
+import type { Arma, Armadura, HabilidadeClasse, PericiaBonusItem } from "@/lib/sheet-types";
+
+// Ordem de exibição fixa das Perícias — usada tanto no painel (PericiasPanel) quanto no
+// PDF exportado, pra manter os dois consistentes.
+export const PERICIA_ORDER = [
+  "Precisão",
+  "Evasão",
+  "Força",
+  "Destreza",
+  "Vigor",
+  "Furtividade",
+  "Persuasão",
+  "Inteligência",
+  "Psionismo",
+];
+
+export function orderPericias<T extends { nome: string }>(pericias: T[]): T[] {
+  const ordenadas = PERICIA_ORDER.map((nome) =>
+    pericias.find((p) => p.nome.trim().toLowerCase() === nome.toLowerCase())
+  ).filter((p): p is T => !!p);
+  const resto = pericias.filter(
+    (p) => !PERICIA_ORDER.some((nome) => nome.toLowerCase() === p.nome.trim().toLowerCase())
+  );
+  return [...ordenadas, ...resto];
+}
 
 export type Pericia = { nome: string; valor: string | number };
 
@@ -103,13 +127,27 @@ function equippedArmorPeBonus(armaduras: Armadura[] | undefined): number {
   return armaduras.filter((a) => a.equipado).reduce((sum, a) => sum + num(a.peBonus, 0), 0);
 }
 
+// Um item de Armadura pode dar bônus em mais de uma perícia ao mesmo tempo (ex: Roupa
+// Escura poderia dar +1 Furtividade e +1 Precisão). Lê o campo novo (periciaBonuses,
+// array) com fallback pro campo legado singular (periciaBonusNome/periciaBonusValor) de
+// fichas salvas antes dessa mudança.
+export function getPericiaBonuses(
+  a: Pick<Armadura, "periciaBonuses" | "periciaBonusNome" | "periciaBonusValor">
+): PericiaBonusItem[] {
+  if (a.periciaBonuses && a.periciaBonuses.length) return a.periciaBonuses;
+  if (a.periciaBonusNome) return [{ pericia: a.periciaBonusNome, valor: a.periciaBonusValor || "0" }];
+  return [];
+}
+
 // Ex: Óculos (+1 Inteligência), Amuleto Divino (+1 Psionismo) — bônus de uma perícia
 // específica quando equipada. Não entra em computeDerived (só importa na hora de rolar
 // aquela perícia), usado por PericiasPanel.
 export function equippedArmorPericiaBonus(armaduras: Armadura[], periciaNome: string): number {
   return armaduras
-    .filter((a) => a.equipado && a.periciaBonusNome?.trim().toLowerCase() === periciaNome.trim().toLowerCase())
-    .reduce((sum, a) => sum + num(a.periciaBonusValor, 0), 0);
+    .filter((a) => a.equipado)
+    .flatMap((a) => getPericiaBonuses(a))
+    .filter((b) => b.pericia.trim().toLowerCase() === periciaNome.trim().toLowerCase())
+    .reduce((sum, b) => sum + num(b.valor, 0), 0);
 }
 
 export function computeDerived(s: SheetData): DerivedStats {
