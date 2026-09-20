@@ -205,14 +205,14 @@ body{
 .chat-log-del:hover{ opacity:1; }
 .chat-card-head{ display:flex; align-items:center; gap:7px; margin-bottom:5px; }
 .chat-card-avatar{
-  width:24px; height:24px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  width:38px; height:38px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
   object-fit:cover;
 }
 .chat-card-avatar-letter{
   border-radius:50%; border:1px solid var(--maroon);
-  font-family:'Cinzel',serif; font-size:10px; font-weight:700; color:var(--btn-text); background: var(--maroon);
+  font-family:'Cinzel',serif; font-size:15px; font-weight:700; color:var(--btn-text); background: var(--maroon);
 }
-.chat-card-who{ font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.5px; color:var(--maroon); text-transform:uppercase; flex:1; min-width:0; }
+.chat-card-who{ font-family:'Cinzel',serif; font-size:12.5px; letter-spacing:.5px; color:var(--maroon); text-transform:uppercase; flex:1; min-width:0; }
 .chat-card-time{ font-size:10px; color:var(--muted); flex-shrink:0; }
 .chat-card-text{
   font-size:13px; color:var(--ink); word-break:break-word;
