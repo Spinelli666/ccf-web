@@ -1179,10 +1179,33 @@ a.link{ color:var(--blue); }
   .sheet-scale table.sheet-table td.name{ white-space:nowrap; }
 }
 
-/* O chat aberto (340px, à direita) flutua por cima do conteúdo; em tela larga
-   a coluna central abre espaço pra ele em vez de ficar coberta. Abaixo disso a
-   ficha ficaria espremida demais, então ele continua flutuando por cima. O painel
-   de combate sempre flutua por cima (sem reservar espaço). */
-@media (min-width: 1500px){
+/* Painéis abertos (combate à esquerda, chat à direita) flutuam por cima do
+   conteúdo; no desktop a coluna central abre espaço pra eles — a ficha fica ao
+   lado dos painéis, nunca embaixo. O combate só abre espaço a partir de 1181px
+   (abaixo disso flutua por cima). No celular (≤880px) os painéis empilham. */
+@media (min-width: 1181px){
+  .app-shell:has(.combat-col:not(.collapsed)) .layout{ padding-left: calc(32px + 226px); }
+}
+@media (min-width: 881px){
   .app-shell:has(.chat-popover) .layout{ padding-right: calc(32px + 340px); }
+}
+@media (min-width: 881px) and (max-width: 1180px){
+  .app-shell:has(.chat-popover) .layout{ padding-right: calc(20px + 340px); }
+}
+/* Desktop apertado (notebook com combate + chat abertos): encolhe mais e deixa
+   a tabela larga rolar de lado, com o nome da habilidade numa linha só. */
+@media (min-width: 881px){
+  @container main-col (max-width: 620px){
+    .sheet-scale{ zoom:.75; }
+    .sheet-scale table.sheet-table td.name{ white-space:nowrap; }
+  }
+  /* Bem estreito (≈ largura de celular): mesmo arranjo do layout de celular. */
+  @container main-col (max-width: 480px){
+    .sheet-scale .stat-grid{ grid-template-columns: repeat(2,1fr); }
+    .sheet-scale .resource-grid{ grid-template-columns: 1fr; }
+    .sheet-scale .survival-grid{ grid-template-columns: 1fr 1fr; }
+    .sheet-scale .frame{ padding:18px 12px; }
+    .sheet-scale .sheet-head h1{ font-size:30px; }
+    .sheet-scale .sheet-actions, .sheet-scale .sheet-actions > div{ flex-wrap:wrap; gap:8px; }
+  }
 }
