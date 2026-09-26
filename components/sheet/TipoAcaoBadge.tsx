@@ -24,10 +24,9 @@ export function TipoAcaoBadge({ tipo }: { tipo: string }) {
   const foco = selos.find((s) => s.key === "foco");
   return (
     <span className="tipo-acao" title={tipo}>
-      {acoes.map((s, i) => (
-        <span key={s.key} className="tipo-acao-grupo">
-          {i > 0 && <span className="tipo-acao-sep">/</span>}
-          <span className={`tipo-selo tipo-${s.key}`}>{s.label}</span>
+      {acoes.map((s) => (
+        <span key={s.key} className={`tipo-selo tipo-${s.key}`}>
+          {s.label}
         </span>
       ))}
       {foco && <span className="tipo-selo tipo-foco">{foco.label}</span>}
