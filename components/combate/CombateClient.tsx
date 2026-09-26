@@ -65,6 +65,7 @@ export function CombateClient({
   const [showIniciar, setShowIniciar] = useState(false);
   const [showAdicionar, setShowAdicionar] = useState(false);
   const [showEncerrar, setShowEncerrar] = useState(false);
+  const [editIni, setEditIni] = useState<{ id: string; valor: string } | null>(null);
   const [sheetsAtuais, setSheetsAtuais] = useState<SheetLite[]>(sheets);
 
   useEffect(() => {
@@ -140,6 +141,64 @@ export function CombateClient({
 
   function toggleStatus(participanteId: string, mostrarStatus: boolean) {
     getSocket(mesaId).emit("combat:toggle-status", { participanteId, mostrarStatus });
+  }
+
+  function salvarIniciativa() {
+    if (!editIni) return;
+    const alvo = editIni;
+    setEditIni(null);
+    const atual = combate?.participantes.find((p) => p.id === alvo.id)?.iniciativa;
+    if (alvo.valor.trim() === "" || Number(alvo.valor) === atual) return;
+    getSocket(mesaId).emit(
+      "combat:set-iniciativa",
+      { participanteId: alvo.id, valor: alvo.valor },
+      (ack?: { ok: boolean; error?: string }) => {
+        if (ack && !ack.ok && ack.error) alert(ack.error);
+      }
+    );
+  }
+
+  // Valor da iniciativa: o Mestre clica pra editar (mesmo depois da ordem decidida).
+  function valorIniciativa(p: { id: string; iniciativa: number | null }, empatado: boolean) {
+    if (editIni?.id === p.id) {
+      return (
+        <input
+          type="number"
+          className="combat-iniciativa-input"
+          autoFocus
+          value={editIni.valor}
+          onChange={(e) => setEditIni({ id: p.id, valor: e.target.value })}
+          onBlur={salvarIniciativa}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") salvarIniciativa();
+            if (e.key === "Escape") setEditIni(null);
+          }}
+        />
+      );
+    }
+    const conteudo = (
+      <>
+        {empatado ? "⚖️" : "🎲"} {p.iniciativa ?? "—"}
+      </>
+    );
+    const cls = `combat-iniciativa-val${empatado ? " is-empate" : ""}`;
+    if (!isGM) {
+      return (
+        <span className={cls} title={empatado ? "Empate — precisa rolar de novo" : undefined}>
+          {conteudo}
+        </span>
+      );
+    }
+    return (
+      <button
+        type="button"
+        className={`${cls} combat-iniciativa-edit`}
+        title="Alterar iniciativa"
+        onClick={() => setEditIni({ id: p.id, valor: p.iniciativa === null ? "" : String(p.iniciativa) })}
+      >
+        {conteudo} <span className="combat-iniciativa-pencil">✏️</span>
+      </button>
+    );
   }
 
   function mover(index: number, direcao: -1 | 1) {
@@ -251,9 +310,7 @@ export function CombateClient({
                   <div className="combat-card-bottom">
                     {empatado ? (
                       <span className="combat-iniciativa-empate">
-                        <span className="combat-iniciativa-val is-empate" title="Empate — precisa rolar de novo">
-                          ⚖️ {p.iniciativa}
-                        </span>
+                        {valorIniciativa(p, true)}
                         {podeRolar ? (
                           <button type="button" className="btn small" onClick={() => rolarIniciativa(p.id)}>
                             Desempatar 1d20
@@ -265,7 +322,7 @@ export function CombateClient({
                         )}
                       </span>
                     ) : p.iniciativa !== null ? (
-                      <span className="combat-iniciativa-val">🎲 {p.iniciativa}</span>
+                      valorIniciativa(p, false)
                     ) : podeRolar ? (
                       <button type="button" className="btn small secondary" onClick={() => rolarIniciativa(p.id)}>
                         Rolar 1d20

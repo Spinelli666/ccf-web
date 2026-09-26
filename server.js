@@ -300,6 +300,68 @@ app.prepare().then(async () => {
       }
     });
 
+    // Mestre ajusta o valor da iniciativa na mão (mesmo depois da ordem decidida). Continua
+    // valendo a regra de não repetir valor; a ordem é refeita mantendo o turno de quem está ativo.
+    socket.on("combat:set-iniciativa", async (payload, ack) => {
+      try {
+        if (!socket.data.isGM) return ack && ack({ ok: false, error: "Apenas o mestre pode alterar a iniciativa." });
+        const valor = parseInt(payload?.valor, 10);
+        if (!Number.isInteger(valor) || valor < -99 || valor > 999) {
+          return ack && ack({ ok: false, error: "Valor de iniciativa inválido." });
+        }
+        const combate = await prisma.combate.findUnique({
+          where: { mesaId: socket.data.mesaId },
+          include: { participantes: { orderBy: { ordem: "asc" } } },
+        });
+        if (!combate) return ack && ack({ ok: false, error: "Nenhum combate ativo." });
+        const participante = combate.participantes.find((p) => p.id === String(payload?.participanteId));
+        if (!participante) return ack && ack({ ok: false, error: "Participante não encontrado." });
+        if (participante.iniciativa === valor) return ack && ack({ ok: true });
+        const repetido = combate.participantes.find((p) => p.id !== participante.id && p.iniciativa === valor);
+        if (repetido) {
+          return ack && ack({ ok: false, error: `${repetido.nome} já está com iniciativa ${valor} — não pode repetir.` });
+        }
+
+        const ativoId = combate.participantes[combate.turnoAtualIndex]?.id;
+        const atualizados = combate.participantes.map((p) => (p.id === participante.id ? { ...p, iniciativa: valor } : p));
+        await prisma.combateParticipante.update({ where: { id: participante.id }, data: { iniciativa: valor } });
+
+        const temEmpate = atualizados.some(
+          (p) => p.iniciativa !== null && atualizados.some((o) => o.id !== p.id && o.iniciativa === p.iniciativa)
+        );
+        if (atualizados.every((p) => p.iniciativa !== null) && !temEmpate) {
+          const ordenados = [...atualizados].sort(
+            (a, b) => (b.iniciativa ?? 0) - (a.iniciativa ?? 0) || a.ordem - b.ordem
+          );
+          await Promise.all(
+            ordenados.map((p, i) => prisma.combateParticipante.update({ where: { id: p.id }, data: { ordem: i } }))
+          );
+          const novoIndex = ordenados.findIndex((p) => p.id === ativoId);
+          if (novoIndex >= 0 && novoIndex !== combate.turnoAtualIndex) {
+            await prisma.combate.update({ where: { id: combate.id }, data: { turnoAtualIndex: novoIndex } });
+          }
+        }
+
+        const logMsg = await prisma.chatMessage.create({
+          data: {
+            mesaId: socket.data.mesaId,
+            authorId: socket.data.user.id,
+            authorName: socket.data.user.name || socket.data.user.username,
+            kind: "log",
+            text: `🎩 O Mestre alterou a iniciativa de ${participante.nome}: ${participante.iniciativa ?? "—"} → ${valor}`,
+          },
+        });
+        io.to(room).emit("chat:new", logMsg);
+
+        const state = await getCombateState(socket.data.mesaId);
+        io.to(room).emit("combat:state", state);
+        if (ack) ack({ ok: true, state });
+      } catch (err) {
+        console.error("combat:set-iniciativa failed", err);
+        if (ack) ack({ ok: false, error: "failed" });
+      }
+    });
+
     socket.on("combat:roll-iniciativa", async (payload, ack) => {
       try {
         const combate = await prisma.combate.findUnique({ where: { mesaId: socket.data.mesaId } });

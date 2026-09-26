@@ -31,6 +31,7 @@ export type LogView = {
 type Rule = { re: RegExp; icon: string; tone: LogTone; banner?: boolean; split?: "colon" | "list" };
 
 const RULES: Rule[] = [
+  { re: /^O Mestre alterou a iniciativa/, icon: "🎩", tone: "turno", banner: true },
   { re: /^Empate na iniciativa/, icon: "⚖️", tone: "turno", banner: true },
   { re: /^Rodada \d+ começou|^Voltou pra Rodada/, icon: "🔔", tone: "turno", banner: true },
   { re: /^Agora é o turno de|^Voltou o turno/, icon: "▶️", tone: "turno", banner: true },
