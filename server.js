@@ -47,6 +47,31 @@ async function getCombateState(mesaId) {
   };
 }
 
+// Início do turno de um personagem: zera os Pontos de Ação usados na ficha dele, avisa as
+// telas abertas da ficha (sheet:patch, pra não sobrescreverem com o valor velho) e loga no chat.
+async function restaurarPontosAcao(io, room, socket, participante) {
+  if (!participante?.sheetId) return;
+  const sheet = await prisma.sheet.findUnique({ where: { id: participante.sheetId } });
+  if (!sheet) return;
+  const data = sheet.data && typeof sheet.data === "object" ? sheet.data : {};
+  const total = Math.min(12, Math.max(1, parseInt(data.acaoTotal, 10) || 4));
+  const acaoBoxes = Array.from({ length: total }, () => false);
+  await prisma.sheet.update({ where: { id: sheet.id }, data: { data: { ...data, acaoBoxes } } });
+  io.to(room).emit("sheet:patch", { sheetId: sheet.id, patch: { acaoBoxes } });
+  const logMsg = await prisma.chatMessage.create({
+    data: {
+      mesaId: socket.data.mesaId,
+      authorId: socket.data.user.id,
+      authorName: socket.data.user.name || socket.data.user.username,
+      characterName: sheet.name,
+      sheetPrivate: sheet.private,
+      kind: "log",
+      text: `🔸 Pontos de Ação restaurados (${total}/${total})`,
+    },
+  });
+  io.to(room).emit("chat:new", logMsg);
+}
+
 const hostname = "localhost";
 const port = parseInt(process.env.PORT || "3000", 10);
 
@@ -480,6 +505,7 @@ app.prepare().then(async () => {
           });
           io.to(room).emit("chat:new", logMsg);
         }
+        await restaurarPontosAcao(io, room, socket, novoAtivo);
 
         const state = await getCombateState(socket.data.mesaId);
         io.to(room).emit("combat:state", state);

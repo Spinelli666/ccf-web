@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useDebouncedSave } from "@/lib/use-debounced-save";
 import { getSocket } from "@/lib/socket-client";
@@ -52,6 +52,19 @@ export function SheetView({
   const canManage = isOwner || isGM;
 
   useDebouncedSave(sheetId, sheet.name || sheetName, sheet, isMine);
+
+  // O servidor mexe direto na ficha em alguns casos (ex: Pontos de Ação restaurados no início
+  // do turno) e avisa por socket — aplica aqui pra tela não salvar por cima com o valor velho.
+  useEffect(() => {
+    const socket = getSocket(mesaId);
+    const onPatch = (msg: { sheetId: string; patch: Partial<FullSheetData> }) => {
+      if (msg?.sheetId === sheetId) setSheet((prev) => ({ ...prev, ...msg.patch }));
+    };
+    socket.on("sheet:patch", onPatch);
+    return () => {
+      socket.off("sheet:patch", onPatch);
+    };
+  }, [mesaId, sheetId]);
 
   function patch(p: Partial<FullSheetData>) {
     setSheet((prev) => ({ ...prev, ...p }));

@@ -27,7 +27,7 @@ export function orderPericias<T extends { nome: string }>(pericias: T[]): T[] {
   return [...ordenadas, ...resto];
 }
 
-export type Pericia = { nome: string; valor: string | number };
+export type Pericia = { nome: string; valor: string | number; bonus?: string | number };
 
 export type SheetStats = {
   pvBonus?: string | number;
@@ -71,6 +71,12 @@ export function num(v: unknown, fallback = 0): number {
 
 export function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v));
+}
+
+/** Valor da perícia + o campo de bônus dela (ex: Destreza 4 + bônus 2 = 6). */
+export function getPericiaTotal(s: SheetData, nome: string): number {
+  const p = (s.pericias || []).find((pp) => pp.nome.trim().toLowerCase() === nome.toLowerCase());
+  return p ? num(p.valor) + num(p.bonus, 0) : 0;
 }
 
 export function getPericiaVal(s: SheetData, nome: string): number {
@@ -160,6 +166,8 @@ export function computeDerived(s: SheetData): DerivedStats {
   const nivel = Math.max(1, num(s.nivel, 1));
   const forca = getPericiaVal(s, "Força");
   const destreza = getPericiaVal(s, "Destreza");
+  // Deslocamento (+1m a cada 2) e Acerto Crítico (-1 a cada 3) contam Destreza + bônus.
+  const destrezaTotal = getPericiaTotal(s, "Destreza");
   const vigor = getPericiaVal(s, "Vigor");
   const fraturas = clamp(num(s.fraturas, 0), 0, 5);
   const stats = s.stats || {};
@@ -169,10 +177,10 @@ export function computeDerived(s: SheetData): DerivedStats {
   );
   const peMax = 10 + 1 * vigor + 1 * (nivel - 1) + num(stats.peBonus, 0) + equippedArmorPeBonus(s.armaduras);
   const armaduraNatural = Math.floor(forca / 2) + num(stats.armaduraNaturalBonus, 0);
-  const deslocamento = 5 + Math.floor(destreza / 2) + num(stats.deslocamentoBonus, 0) + equippedArmorDeslocamentoBonus(s.armaduras);
+  const deslocamento = 5 + Math.floor(destrezaTotal / 2) + num(stats.deslocamentoBonus, 0) + equippedArmorDeslocamentoBonus(s.armaduras);
   const colecionadorII = temAprimoramentoAtivo(s.classeHabilidades, "Colecionador", "Aprimoramento II");
   const inventario = 15 + Math.floor(forca / 2) + num(stats.inventarioBonus, 0) + (colecionadorII ? 10 : 0);
-  const critRange = Math.max(2, 20 - Math.floor(destreza / 3));
+  const critRange = Math.max(2, 20 - Math.floor(destrezaTotal / 3));
   return {
     nivel,
     forca,
