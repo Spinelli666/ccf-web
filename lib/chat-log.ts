@@ -2,6 +2,10 @@
 // frase principal, detalhes e a barra de PV/PE. Os logs continuam sendo texto puro no banco
 // (inclusive o histórico antigo) — a estrutura é derivada aqui, na hora de renderizar.
 
+import { EFFECTS_CATALOG } from "@/data/effects";
+
+const EFFECT_ICONS = EFFECTS_CATALOG as Record<string, { icone?: string }>;
+
 export type LogTone =
   | "dano"
   | "cura"
@@ -108,6 +112,14 @@ export function formatLog(text: string, characterName: string | null): LogView {
   }
 
   body = capitalize(body.replace(/\.$/, "").trim());
+
+  // Efeito recebido/removido: o emoji do efeito vai junto do nome ("🐍 Envenenado").
+  if (rule?.tone === "efeito") {
+    body = body.replace(/"([^"]+)"/, (m, nomeEfeito: string) => {
+      const icone = EFFECT_ICONS[nomeEfeito]?.icone;
+      return icone ? `"${icone} ${nomeEfeito}"` : m;
+    });
+  }
 
   return {
     icon: rule?.icon ?? "📜",
