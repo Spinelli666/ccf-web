@@ -127,6 +127,12 @@ function equippedArmorPeBonus(armaduras: Armadura[] | undefined): number {
   return armaduras.filter((a) => a.equipado).reduce((sum, a) => sum + num(a.peBonus, 0), 0);
 }
 
+// PV máximo extra de itens de Armadura equipados. Somado dentro de computeDerived.
+function equippedArmorPvBonus(armaduras: Armadura[] | undefined): number {
+  if (!armaduras) return 0;
+  return armaduras.filter((a) => a.equipado).reduce((sum, a) => sum + num(a.pvBonus, 0), 0);
+}
+
 // Um item de Armadura pode dar bônus em mais de uma perícia ao mesmo tempo (ex: Roupa
 // Escura poderia dar +1 Furtividade e +1 Precisão). Lê o campo novo (periciaBonuses,
 // array) com fallback pro campo legado singular (periciaBonusNome/periciaBonusValor) de
@@ -159,7 +165,7 @@ export function computeDerived(s: SheetData): DerivedStats {
   const stats = s.stats || {};
   const pvMax = Math.max(
     0,
-    50 + 10 * vigor + 5 * (nivel - 1) + num(stats.pvBonus, 0) - 5 * fraturas
+    50 + 10 * vigor + 5 * (nivel - 1) + num(stats.pvBonus, 0) + equippedArmorPvBonus(s.armaduras) - 5 * fraturas
   );
   const peMax = 10 + 1 * vigor + 1 * (nivel - 1) + num(stats.peBonus, 0) + equippedArmorPeBonus(s.armaduras);
   const armaduraNatural = Math.floor(forca / 2) + num(stats.armaduraNaturalBonus, 0);

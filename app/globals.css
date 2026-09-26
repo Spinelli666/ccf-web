@@ -832,6 +832,36 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
 .add-row-btn:hover{ background: rgba(255,183,92,0.15); }
 .add-row-center{ display:flex; justify-content:center; }
 .btn.emoji-btn{ font-size:16px; line-height:20px; padding:4px 8px; }
+/* Botões de classe (emoji) acima da tabela de habilidades */
+.classe-emoji-buttons{ justify-content:center; }
+.classe-emoji-btn{ font-size:18px; line-height:24px; padding:6px 14px; opacity:.5; }
+.classe-emoji-btn.active{ opacity:1; }
+
+/* Formulário de edição de item/habilidade (diálogos largos em grade) */
+.item-form{ display:flex; flex-direction:column; gap:16px; text-align:left; }
+.item-form-section{ display:flex; flex-direction:column; gap:10px; }
+.item-form-section-title{ font-family:'Cinzel',serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--maroon); border-bottom:1px solid var(--gold-line); padding-bottom:6px; }
+.item-form-grid{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; }
+.item-form-grid-4{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
+.item-form-grid .field{ min-width:0; }
+.item-form-grid .span-2{ grid-column:span 2; }
+.item-form-grid .span-3{ grid-column:1 / -1; }
+.item-form .field select{ width:100%; }
+.item-form .field input:disabled{ opacity:.5; }
+.item-form-check{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); font-family:'Cinzel',serif; align-self:end; padding-bottom:10px; }
+.item-form-sublabel{ font-size:11px; color:var(--ink-soft); font-family:'Cinzel',serif; letter-spacing:1px; }
+.item-form-pericias{ display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.item-form-pericia-row{ display:grid; grid-template-columns:minmax(0, 1fr) 80px auto; gap:8px; align-items:center; width:100%; }
+.item-form-pericia-row input{ font-family:'EB Garamond', serif; font-size:15px; padding:8px 10px; border:1px solid var(--gold-line); border-radius:3px; background:var(--input-bg); color:var(--ink); min-width:0; }
+.item-form-footer, .item-form-confirm{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; border-top:1px solid var(--gold-line); padding-top:14px; }
+.item-form-confirm span{ color:var(--ink-soft); font-size:14px; }
+.item-form-footer-actions{ display:flex; gap:8px; align-items:center; margin-left:auto; }
+.item-form-remove{ color:#c96a55; border-color:#8a3a2a; }
+@media (max-width: 600px){
+  .item-form-grid, .item-form-grid-4{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .item-form-grid .span-2{ grid-column:1 / -1; }
+  .item-form-footer-actions{ width:100%; justify-content:flex-end; }
+}
 
 .table-collapse-head{
   display:flex; align-items:center; gap:6px; width:100%; text-align:left;

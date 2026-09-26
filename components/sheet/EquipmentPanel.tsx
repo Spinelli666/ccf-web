@@ -408,6 +408,11 @@ export function EquipmentPanel({
                   <b>⚡ Deslocamento quando equipada:</b> +{num(a.deslocamentoBonus, 0)}m
                 </div>
               )}
+              {num(a.pvBonus, 0) > 0 && (
+                <div className="item-info-line">
+                  <b>❤️ PV quando equipada:</b> +{num(a.pvBonus, 0)}
+                </div>
+              )}
               {num(a.peBonus, 0) > 0 && (
                 <div className="item-info-line">
                   <b>🔥 PE quando equipada:</b> +{num(a.peBonus, 0)}

@@ -206,7 +206,7 @@ export function SheetView({
           {tab === "Equipamentos" && (
             <EquipmentPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} mesaId={mesaId} isPrivate={priv} />
           )}
-          {tab === "Habilidades" && <AbilitiesPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />}
+          {tab === "Habilidades" && <AbilitiesPanel sheet={sheet} sheetId={sheetId} isMine={isMine} onChange={patch} onLog={logToChat} />}
           {tab === "Profissões" && <div className="derived-note">Em breve.</div>}
           {tab === "Biografia" && (
             <>

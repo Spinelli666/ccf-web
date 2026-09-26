@@ -74,6 +74,8 @@ export type Armadura = {
   deslocamentoBonus?: string;
   // Ex: Botas Confortáveis (+1 PE).
   peBonus?: string;
+  // PV máximo extra enquanto equipada — mesmo esquema do peBonus.
+  pvBonus?: string;
   equipado: boolean;
   durabilidadeAtual: number;
   durabilidadeMax: number;

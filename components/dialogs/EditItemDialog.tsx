@@ -24,6 +24,9 @@ const PERICIA_NOMES = [
   "Psionismo",
 ];
 
+// Sugestões pro campo "Parte do corpo" (continua aceitando texto livre).
+const PARTES_CORPO = ["Cabeça", "Torso", "Braços", "Pernas", "Pés", "Acessórios"];
+
 export type EditTarget =
   | { tipo: "arma"; idx: number; data: Arma }
   | { tipo: "armadura"; idx: number; data: Armadura }
@@ -58,6 +61,7 @@ export function EditItemDialog({
     target.tipo === "armadura" ? target.data.deslocamentoBonus || "" : ""
   );
   const [peBonus, setPeBonus] = useState(target.tipo === "armadura" ? target.data.peBonus || "" : "");
+  const [pvBonus, setPvBonus] = useState(target.tipo === "armadura" ? target.data.pvBonus || "" : "");
   const [descricao, setDescricao] = useState(
     target.tipo === "arma" || target.tipo === "armadura" ? target.data.descricao || "" : ""
   );
@@ -102,6 +106,7 @@ export function EditItemDialog({
           periciaBonusValor: undefined,
           deslocamentoBonus,
           peBonus,
+          pvBonus,
           durabilidadeMax: novoMax,
           durabilidadeAtual,
         });
@@ -112,88 +117,132 @@ export function EditItemDialog({
   }
 
   const titulo = target.tipo === "arma" ? "Editar Arma" : target.tipo === "armadura" ? "Editar Armadura" : "Editar Item Genérico";
+  const icone = target.tipo === "arma" ? "🗡️" : target.tipo === "armadura" ? "🛡️" : "🎒";
+
+  const campoPeso = (
+    <div className="field">
+      <label>Peso</label>
+      <select value={peso} onChange={(e) => setPeso(e.target.value)}>
+        {PESO_OPCOES.map((p) => (
+          <option key={p.value} value={p.value}>
+            {p.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+  const campoPreco = (
+    <div className="field">
+      <label>Preço</label>
+      <input type="text" value={preco} placeholder="Opcional" onChange={(e) => setPreco(e.target.value)} />
+    </div>
+  );
+  const campoDurabilidade = (
+    <div className="field">
+      <label>Durabilidade Máx.</label>
+      <input type="number" min={0} value={durabilidadeMax} onChange={(e) => setDurabilidadeMax(e.target.value)} />
+    </div>
+  );
+  const campoDescricao = (texto: string, setTexto: (v: string) => void) => (
+    <div className="field span-3">
+      <label>Descrição</label>
+      <textarea rows={3} value={texto} placeholder="O que é / história / detalhes..." onChange={(e) => setTexto(e.target.value)} />
+    </div>
+  );
 
   return (
-    <Modal onClose={onCancel}>
-      <div className="modal-title">{titulo}</div>
-
-      <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-        <label>Nome</label>
-        <input type="text" value={item} autoFocus onChange={(e) => setItem(e.target.value)} />
+    <Modal onClose={onCancel} wide>
+      <div className="modal-title">
+        {icone} {titulo}
       </div>
 
-      {target.tipo === "arma" && (
-        <>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Dano</label>
-            <input type="text" value={dano} onChange={(e) => setDano(e.target.value)} />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Propriedades</label>
-            <input type="text" value={propriedades} onChange={(e) => setPropriedades(e.target.value)} />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Proteção quando equipada (opcional)</label>
-            <input
-              type="text"
-              value={protecao}
-              placeholder="Ex: 3"
-              onChange={(e) => setProtecao(e.target.value)}
-            />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Durabilidade Máxima</label>
-            <input type="number" min={0} value={durabilidadeMax} onChange={(e) => setDurabilidadeMax(e.target.value)} />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Descrição</label>
-            <textarea
-              style={{ width: "100%", minHeight: 70 }}
-              value={descricao}
-              placeholder="O que é / história / detalhes..."
-              onChange={(e) => setDescricao(e.target.value)}
-            />
-          </div>
-        </>
-      )}
+      <div className="item-form">
+        <div className="item-form-section">
+          <div className="item-form-section-title">Geral</div>
+          <div className="item-form-grid">
+            <div className="field span-3">
+              <label>Nome</label>
+              <input type="text" value={item} autoFocus onChange={(e) => setItem(e.target.value)} />
+            </div>
 
-      {target.tipo === "armadura" && (
-        <>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Parte do corpo</label>
-            <input type="text" value={parte} onChange={(e) => setParte(e.target.value)} />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Armadura</label>
-            <input type="text" value={armadura} onChange={(e) => setArmadura(e.target.value)} />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Espaços de Inventário extra quando equipada (opcional)</label>
-            <input
-              type="text"
-              value={inventarioBonus}
-              placeholder="Ex: 10"
-              onChange={(e) => setInventarioBonus(e.target.value)}
-            />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Deslocamento extra quando equipada (opcional)</label>
-            <input
-              type="text"
-              value={deslocamentoBonus}
-              placeholder="Ex: 1"
-              onChange={(e) => setDeslocamentoBonus(e.target.value)}
-            />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>PE extra quando equipada (opcional)</label>
-            <input type="text" value={peBonus} placeholder="Ex: 1" onChange={(e) => setPeBonus(e.target.value)} />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Bônus de perícia quando equipada (opcional — pode adicionar mais de uma)</label>
-            {periciaBonuses.map((b, i) => (
-              <div className="repeat-row" key={i}>
+            {target.tipo === "arma" && (
+              <>
                 <div className="field">
+                  <label>Dano</label>
+                  <input type="text" value={dano} onChange={(e) => setDano(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Proteção equipada</label>
+                  <input type="text" value={protecao} placeholder="Ex: 3" onChange={(e) => setProtecao(e.target.value)} />
+                </div>
+                {campoDurabilidade}
+                <div className="field span-3">
+                  <label>Propriedades</label>
+                  <input type="text" value={propriedades} onChange={(e) => setPropriedades(e.target.value)} />
+                </div>
+              </>
+            )}
+
+            {target.tipo === "armadura" && (
+              <>
+                <div className="field">
+                  <label>Parte do corpo</label>
+                  <input type="text" list="partes-corpo" value={parte} onChange={(e) => setParte(e.target.value)} />
+                  <datalist id="partes-corpo">
+                    {PARTES_CORPO.map((p) => (
+                      <option key={p} value={p} />
+                    ))}
+                  </datalist>
+                </div>
+                <div className="field">
+                  <label>Armadura</label>
+                  <input type="text" value={armadura} onChange={(e) => setArmadura(e.target.value)} />
+                </div>
+                {campoDurabilidade}
+              </>
+            )}
+
+            {campoPeso}
+            {campoPreco}
+          </div>
+        </div>
+
+        {target.tipo === "armadura" && (
+          <div className="item-form-section">
+            <div className="item-form-section-title">Bônus quando equipada (opcional)</div>
+            <div className="item-form-grid item-form-grid-4">
+              <div className="field">
+                <label>❤️ PV</label>
+                <input type="text" value={pvBonus} placeholder="Ex: 5" onChange={(e) => setPvBonus(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>🔥 PE</label>
+                <input type="text" value={peBonus} placeholder="Ex: 1" onChange={(e) => setPeBonus(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>⚡ Deslocamento</label>
+                <input
+                  type="text"
+                  value={deslocamentoBonus}
+                  placeholder="Ex: 1"
+                  onChange={(e) => setDeslocamentoBonus(e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label>📦 Inventário</label>
+                <input
+                  type="text"
+                  value={inventarioBonus}
+                  placeholder="Ex: 10"
+                  onChange={(e) => setInventarioBonus(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="item-form-pericias">
+              <label className="item-form-sublabel">🎯 Bônus de perícia</label>
+              {periciaBonuses.map((b, i) => (
+                <div className="item-form-pericia-row" key={i}>
                   <select value={b.pericia} onChange={(e) => updatePericiaBonus(i, "pericia", e.target.value)}>
                     {PERICIA_NOMES.map((n) => (
                       <option key={n} value={n}>
@@ -201,94 +250,64 @@ export function EditItemDialog({
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="field">
                   <input
                     type="text"
                     value={b.valor}
                     placeholder="Ex: 1"
                     onChange={(e) => updatePericiaBonus(i, "valor", e.target.value)}
                   />
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    title="Remover bônus"
+                    aria-label="Remover bônus"
+                    onClick={() => removePericiaBonus(i)}
+                  >
+                    🗑️
+                  </button>
                 </div>
-                <button type="button" className="btn ghost small" onClick={() => removePericiaBonus(i)}>
-                  🗑️
-                </button>
-              </div>
-            ))}
-            <button type="button" className="add-row-btn" onClick={addPericiaBonus}>
-              + Adicionar bônus de perícia
-            </button>
+              ))}
+              <button type="button" className="add-row-btn" onClick={addPericiaBonus}>
+                + Adicionar bônus de perícia
+              </button>
+            </div>
           </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Durabilidade Máxima</label>
-            <input type="number" min={0} value={durabilidadeMax} onChange={(e) => setDurabilidadeMax(e.target.value)} />
-          </div>
-          <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-            <label>Descrição</label>
-            <textarea
-              style={{ width: "100%", minHeight: 70 }}
-              value={descricao}
-              placeholder="O que é / história / detalhes..."
-              onChange={(e) => setDescricao(e.target.value)}
-            />
-          </div>
-        </>
-      )}
+        )}
 
-      {target.tipo === "generico" && (
-        <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-          <label>Descrição</label>
-          <textarea style={{ width: "100%", minHeight: 70 }} value={efeito} onChange={(e) => setEfeito(e.target.value)} />
-        </div>
-      )}
-
-      <div className="field" style={{ marginBottom: 10, textAlign: "left" }}>
-        <label>Peso</label>
-        <select value={peso} onChange={(e) => setPeso(e.target.value)}>
-          {PESO_OPCOES.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="field" style={{ marginBottom: 14, textAlign: "left" }}>
-        <label>Preço (opcional)</label>
-        <input type="text" value={preco} onChange={(e) => setPreco(e.target.value)} />
-      </div>
-
-      <div className="modal-options">
-        <button type="button" className="btn" disabled={!item.trim()} onClick={salvar}>
-          ✅ Salvar
-        </button>
-        <button type="button" className="btn ghost small" onClick={onCancel}>
-          Cancelar
-        </button>
-      </div>
-
-      {confirmarRemover ? (
-        <div className="modal-message" style={{ marginTop: 14 }}>
-          Remover &quot;{target.data.item}&quot; de vez?
-          <div className="modal-options" style={{ marginTop: 8 }}>
-            <button type="button" className="btn danger" onClick={onRemove}>
-              🗑️ Confirmar Remoção
-            </button>
-            <button type="button" className="btn ghost small" onClick={() => setConfirmarRemover(false)}>
-              Cancelar
-            </button>
+        <div className="item-form-section">
+          <div className="item-form-grid">
+            {target.tipo === "generico" ? campoDescricao(efeito, setEfeito) : campoDescricao(descricao, setDescricao)}
           </div>
         </div>
-      ) : (
-        <button
-          type="button"
-          className="btn ghost small"
-          style={{ marginTop: 14, color: "#8a3a2a", borderColor: "#8a3a2a" }}
-          onClick={() => setConfirmarRemover(true)}
-        >
-          🗑️ Remover Item
-        </button>
-      )}
+
+        {confirmarRemover ? (
+          <div className="item-form-confirm">
+            <span>Remover &quot;{target.data.item}&quot; de vez?</span>
+            <div className="item-form-footer-actions">
+              <button type="button" className="btn ghost small" onClick={() => setConfirmarRemover(false)}>
+                Cancelar
+              </button>
+              <button type="button" className="btn danger small" onClick={onRemove}>
+                🗑️ Confirmar Remoção
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="item-form-footer">
+            <button type="button" className="btn ghost small item-form-remove" onClick={() => setConfirmarRemover(true)}>
+              🗑️ Remover Item
+            </button>
+            <div className="item-form-footer-actions">
+              <button type="button" className="btn ghost small" onClick={onCancel}>
+                Cancelar
+              </button>
+              <button type="button" className="btn" disabled={!item.trim()} onClick={salvar}>
+                ✅ Salvar
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </Modal>
   );
 }

@@ -1,15 +1,65 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useSyncExternalStore } from "react";
 import { num, clamp } from "@/lib/derived";
 import { computeDerived } from "@/lib/derived";
-import { AUTO_GRANT_ABILITIES, CLASSES_ORDENADAS, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
+import { AUTO_GRANT_ABILITIES, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
 import { EffectText } from "@/components/sheet/EffectText";
 import { AcaoDialog } from "@/components/dialogs/AcaoDialog";
+import { EditHabilidadeDialog } from "@/components/dialogs/EditHabilidadeDialog";
+import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import type { DerivedStats } from "@/lib/derived";
 import type { FullSheetData, HabilidadeClasse, HabilidadeRaca } from "@/lib/sheet-types";
 
 const ALL_AUTO_GRANT_NAMES = Object.values(AUTO_GRANT_ABILITIES).flat();
+
+// Botões de classe acima da tabela de habilidades (ordem e ícones pedidos pro jogo).
+const CLASSE_BOTOES: { classe: string; icone: string }[] = [
+  { classe: "Guerreiro", icone: "⚔️🔴" },
+  { classe: "Andarilho", icone: "🏹🟢" },
+  { classe: "Ladino", icone: "🗡️🟣" },
+  { classe: "Feiticeiro", icone: "🌀🔵" },
+];
+
+// A seleção de classes visíveis é só uma preferência de visualização de quem está
+// olhando a ficha — fica no localStorage do navegador, por ficha.
+function storageKey(sheetId: string) {
+  return `ccf:habilidades-classes:${sheetId}`;
+}
+const classesListeners = new Set<() => void>();
+function subscribeClasses(listener: () => void) {
+  classesListeners.add(listener);
+  return () => classesListeners.delete(listener);
+}
+// Guarda em memória também, pra seleção funcionar mesmo sem localStorage (aba privada etc.).
+const classesMemoria = new Map<string, string>();
+function lerClassesRaw(sheetId: string): string | null {
+  try {
+    const raw = window.localStorage.getItem(storageKey(sheetId));
+    if (raw !== null) return raw;
+  } catch {
+    // sem localStorage — cai pro valor em memória
+  }
+  return classesMemoria.get(sheetId) ?? null;
+}
+function parseClasses(raw: string | null): string[] | null {
+  try {
+    const parsed = raw ? JSON.parse(raw) : null;
+    return Array.isArray(parsed) ? parsed.filter((c): c is string => typeof c === "string") : null;
+  } catch {
+    return null;
+  }
+}
+function salvarClasses(sheetId: string, classes: string[]) {
+  const raw = JSON.stringify(classes);
+  classesMemoria.set(sheetId, raw);
+  try {
+    window.localStorage.setItem(storageKey(sheetId), raw);
+  } catch {
+    // sem localStorage — fica só em memória
+  }
+  classesListeners.forEach((l) => l());
+}
 
 // Racial do Anão ("Sangue Fervente"): 1 uso/dia base +1 a cada 2 pontos de Vigor
 // (o texto da regra pede pra "ajustar os usos por dia conforme o Vigor"; calculamos
@@ -23,16 +73,31 @@ function usosDiariosEfetivo(h: HabilidadeRaca, derived: DerivedStats): number {
 
 export function AbilitiesPanel({
   sheet,
+  sheetId,
   isMine,
   onChange,
   onLog,
 }: {
   sheet: FullSheetData;
+  sheetId: string;
   isMine: boolean;
   onChange: (patch: Partial<FullSheetData>) => void;
   onLog: (text: string) => void;
 }) {
-  const [classeFiltro, setClasseFiltro] = useState("Todas");
+  // Classes marcadas nos botões acima da tabela. Sem nada salvo, começa com as classes
+  // que o personagem já tem, pra tabela não aparecer vazia na primeira vez.
+  const classesRaw = useSyncExternalStore(
+    subscribeClasses,
+    () => lerClassesRaw(sheetId),
+    () => null
+  );
+  const classesSelecionadas =
+    parseClasses(classesRaw) ??
+    CLASSE_BOTOES.map((b) => b.classe).filter((c) =>
+      sheet.classeHabilidades.some((h) => !h.indent && findAbilityClass(h.nome) === c)
+    );
+  const [editandoIdx, setEditandoIdx] = useState<number | null>(null);
+  const [excluindoIdx, setExcluindoIdx] = useState<number | null>(null);
   const [expandidas, setExpandidas] = useState<Set<number>>(new Set());
   const [showAcao, setShowAcao] = useState(false);
   const [erroAcao, setErroAcao] = useState<string | null>(null);
@@ -48,6 +113,48 @@ export function AbilitiesPanel({
     const next = sheet.classeHabilidades.slice();
     next[i] = { ...next[i], ...patch };
     onChange({ classeHabilidades: next });
+  }
+
+  function toggleClasse(classe: string) {
+    const next = classesSelecionadas.includes(classe)
+      ? classesSelecionadas.filter((c) => c !== classe)
+      : [...classesSelecionadas, classe];
+    salvarClasses(sheetId, next);
+  }
+
+  // Excluir uma habilidade base leva junto os aprimoramentos dela (linhas indentadas
+  // logo abaixo) — senão eles "grudariam" na habilidade de cima.
+  function qtdAprimoramentosAbaixo(i: number): number {
+    if (sheet.classeHabilidades[i]?.indent) return 0;
+    let n = 0;
+    for (let k = i + 1; k < sheet.classeHabilidades.length && sheet.classeHabilidades[k].indent; k++) n++;
+    return n;
+  }
+  function excluirHabilidade(i: number) {
+    const h = sheet.classeHabilidades[i];
+    const extras = qtdAprimoramentosAbaixo(i);
+    const next = sheet.classeHabilidades.filter((_, k) => k < i || k > i + extras);
+    onChange({ classeHabilidades: next });
+    onLog(`${nome} removeu ${h.indent ? "o aprimoramento" : "a habilidade"} "${h.nome}" da ficha.`);
+    setExcluindoIdx(null);
+    setExpandidas(new Set());
+  }
+  function salvarEdicao(i: number, patch: Partial<HabilidadeClasse>) {
+    updateClasse(i, patch);
+    setEditandoIdx(null);
+  }
+
+  function linhaBotoes(i: number) {
+    return (
+      <>
+        <button type="button" className="icon-btn" title="Editar" aria-label="Editar" onClick={() => setEditandoIdx(i)}>
+          ✏️
+        </button>
+        <button type="button" className="icon-btn" title="Excluir" aria-label="Excluir" onClick={() => setExcluindoIdx(i)}>
+          🗑️
+        </button>
+      </>
+    );
   }
 
   function usarRaca(i: number) {
@@ -155,16 +262,16 @@ export function AbilitiesPanel({
 
   // Cada linha não-indentada infere sua classe pelo catálogo; uma linha indentada
   // (aprimoramento) herda a classe da habilidade base logo acima — igual ao original.
-  let currentClasseInfer: string | null = null;
-  const classePairsComClasse = sheet.classeHabilidades.map((h, i) => {
-    if (!h.indent) currentClasseInfer = findAbilityClass(h.nome) || "Outras";
-    return { h, i, classe: currentClasseInfer as string };
-  });
-  const classesPresentes = [...CLASSES_ORDENADAS, "Outras"].filter((c) =>
-    classePairsComClasse.some((p) => p.classe === c)
+  const classePairsComClasse: { h: HabilidadeClasse; i: number; classe: string }[] = [];
+  for (let i = 0; i < sheet.classeHabilidades.length; i++) {
+    const h = sheet.classeHabilidades[i];
+    const anterior = classePairsComClasse[i - 1]?.classe ?? "Outras";
+    classePairsComClasse.push({ h, i, classe: h.indent ? anterior : findAbilityClass(h.nome) || "Outras" });
+  }
+  // Habilidades fora do catálogo ("Outras") aparecem junto sempre que alguma classe estiver marcada.
+  const classePairsFiltrados = classePairsComClasse.filter(
+    (p) => classesSelecionadas.includes(p.classe) || (p.classe === "Outras" && classesSelecionadas.length > 0)
   );
-  const classePairsFiltrados =
-    classeFiltro === "Todas" ? classePairsComClasse : classePairsComClasse.filter((p) => p.classe === classeFiltro);
 
   const phPorClasse: Record<string, number> = {};
   classePairsComClasse.forEach(({ h, classe }) => {
@@ -269,28 +376,30 @@ export function AbilitiesPanel({
             </div>
           )}
 
-          {classesPresentes.length > 1 && (
-            <div className="classe-filter-buttons">
-              <button
-                type="button"
-                className={`wizard-class-btn small ${classeFiltro === "Todas" ? "active" : ""}`}
-                onClick={() => setClasseFiltro("Todas")}
-              >
-                Todas
-              </button>
-              {classesPresentes.map((c) => (
+          <div className="classe-filter-buttons classe-emoji-buttons">
+            {CLASSE_BOTOES.map(({ classe, icone }) => {
+              const ativa = classesSelecionadas.includes(classe);
+              return (
                 <button
-                  key={c}
+                  key={classe}
                   type="button"
-                  className={`wizard-class-btn small ${classeFiltro === c ? "active" : ""}`}
-                  onClick={() => setClasseFiltro(c)}
+                  className={`wizard-class-btn classe-emoji-btn ${ativa ? "active" : ""}`}
+                  title={classe}
+                  aria-label={classe}
+                  aria-pressed={ativa}
+                  onClick={() => toggleClasse(classe)}
                 >
-                  {c}
+                  {icone}
                 </button>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
 
+          {classesSelecionadas.length === 0 ? (
+            <div className="derived-note" style={{ textAlign: "center" }}>
+              Selecione uma classe acima para ver as habilidades.
+            </div>
+          ) : (
           <div className="sheet-table-wrap">
           <table className="sheet-table">
             <thead>
@@ -330,7 +439,9 @@ export function AbilitiesPanel({
                       <td className="col-tight">{h.tipo}</td>
                       <td className="col-tight">{h.custo}</td>
                       <td className="col-tight">
-                        {isMine && h.custoPE !== "" && h.custoPE !== undefined && (
+                        {isMine && (
+                        <div className="ability-controls">
+                        {h.custoPE !== "" && h.custoPE !== undefined && (
                           <label className="chk-inline">
                             <input
                               type="checkbox"
@@ -344,6 +455,9 @@ export function AbilitiesPanel({
                             />{" "}
                             aprendido
                           </label>
+                        )}
+                        {linhaBotoes(i)}
+                        </div>
                         )}
                       </td>
                     </tr>
@@ -392,6 +506,7 @@ export function AbilitiesPanel({
                             <button type="button" className="btn small secondary" onClick={() => usarClasse(i)}>
                               Usar{effectiveCost(i) ? ` (-${effectiveCost(i)}⚡)` : ""}
                             </button>
+                            {linhaBotoes(i)}
                           </div>
                         )}
                       </td>
@@ -426,7 +541,33 @@ export function AbilitiesPanel({
             </tbody>
           </table>
           </div>
+          )}
         </>
+      )}
+
+      {editandoIdx !== null && sheet.classeHabilidades[editandoIdx] && (
+        <EditHabilidadeDialog
+          habilidade={sheet.classeHabilidades[editandoIdx]}
+          onSave={(patch) => salvarEdicao(editandoIdx, patch)}
+          onCancel={() => setEditandoIdx(null)}
+        />
+      )}
+      {excluindoIdx !== null && sheet.classeHabilidades[excluindoIdx] && (
+        <ConfirmDialog
+          title="Excluir habilidade"
+          message={
+            qtdAprimoramentosAbaixo(excluindoIdx) > 0
+              ? `Excluir "${sheet.classeHabilidades[excluindoIdx].nome}" e ${
+                  qtdAprimoramentosAbaixo(excluindoIdx) === 1
+                    ? "o aprimoramento dela"
+                    : `os ${qtdAprimoramentosAbaixo(excluindoIdx)} aprimoramentos dela`
+                } da ficha?`
+              : `Excluir "${sheet.classeHabilidades[excluindoIdx].nome}" da ficha?`
+          }
+          confirmLabel="🗑️ Excluir"
+          onConfirm={() => excluirHabilidade(excluindoIdx)}
+          onCancel={() => setExcluindoIdx(null)}
+        />
       )}
 
       {showAcao && <AcaoDialog onEscolher={escolherAcao} onCancel={() => setShowAcao(false)} />}

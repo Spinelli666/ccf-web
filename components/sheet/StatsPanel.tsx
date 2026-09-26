@@ -424,7 +424,7 @@ export function StatsPanel({
           ))}
           {isMine && (
             <button type="button" className="btn ghost small" style={{ marginTop: 10, width: "100%" }} onClick={() => setShowRest(true)}>
-              😴 Descanso
+              💤 Descanso
             </button>
           )}
         </div>

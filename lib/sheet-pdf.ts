@@ -212,6 +212,7 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
     const extras: string[] = [];
     if (num(a.inventarioBonus, 0) > 0) extras.push(`+${num(a.inventarioBonus, 0)} Espaços de Inventário`);
     if (num(a.deslocamentoBonus, 0) > 0) extras.push(`+${num(a.deslocamentoBonus, 0)} Deslocamento`);
+    if (num(a.pvBonus, 0) > 0) extras.push(`+${num(a.pvBonus, 0)} PV`);
     if (num(a.peBonus, 0) > 0) extras.push(`+${num(a.peBonus, 0)} PE`);
     getPericiaBonuses(a).forEach((b) => {
       if (num(b.valor, 0) > 0) extras.push(`+${num(b.valor, 0)} ${b.pericia}`);
