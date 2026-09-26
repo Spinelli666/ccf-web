@@ -1459,3 +1459,39 @@ a.link{ color:var(--blue); }
 .tipo-reacao{ --c:#6fc3e0; }
 .tipo-passiva{ --c:#6cc07a; }
 .tipo-foco{ --c:#c49bf0; }
+
+/* Campo Tipo do Editar Habilidade (abre o diálogo de tipos) */
+.tipo-field{
+  display:flex; align-items:center; min-height:38px; width:100%; text-align:left; cursor:pointer;
+  padding:6px 10px; border:1px solid var(--gold-line); border-radius:3px; background:var(--input-bg); color:var(--ink);
+}
+.tipo-field:hover{ border-color: var(--gold); }
+.tipo-field:focus-visible{ outline:2px solid var(--blue); outline-offset:1px; }
+.tipo-field-vazio{ font-family:'EB Garamond',serif; font-size:15px; font-style:italic; color:var(--muted); }
+
+/* Diálogo de escolha dos tipos */
+.tipo-opcoes{ display:flex; flex-direction:column; gap:6px; margin:10px 0 4px; text-align:left; }
+.tipo-opcoes-sub{
+  margin-top:12px; font-family:'Cinzel',serif; font-size:10.5px; letter-spacing:1.2px;
+  text-transform:uppercase; color:var(--muted); text-align:left;
+}
+.tipo-opcao{
+  --c: var(--gold);
+  display:flex; align-items:center; gap:10px; width:100%; cursor:pointer; text-align:left;
+  padding:8px 10px; border-radius:6px; border:1px solid var(--gold-line); background:var(--input-bg); color:var(--ink);
+}
+.tipo-opcao:hover{ border-color: color-mix(in srgb, var(--c) 70%, transparent); }
+.tipo-opcao.active{ border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }
+.tipo-opcao-check{
+  flex-shrink:0; width:20px; height:20px; border-radius:4px; display:flex; align-items:center; justify-content:center;
+  border:1px solid color-mix(in srgb, var(--c) 70%, transparent); color:var(--btn-text); font-size:13px; font-weight:700;
+}
+.tipo-opcao.active .tipo-opcao-check{ background: var(--c); }
+.tipo-opcao-text{ display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-width:0; }
+.tipo-opcao-desc{ font-size:12.5px; color:var(--ink-soft); }
+.tipo-preview{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:14px; padding:8px 10px;
+  border-radius:6px; background: rgba(0,0,0,.18); border:1px dashed var(--gold-line); font-size:13px; color:var(--ink-soft);
+}
+.tipo-preview-lbl{ font-family:'Cinzel',serif; font-size:10.5px; letter-spacing:.8px; text-transform:uppercase; }
+.tipo-acoes-footer{ flex-direction:row; justify-content:flex-end; margin-top:14px; }

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { TipoAcaoDialog } from "@/components/dialogs/TipoAcaoDialog";
+import { TipoAcaoBadge } from "@/components/sheet/TipoAcaoBadge";
 import type { HabilidadeClasse } from "@/lib/sheet-types";
 
 export function EditHabilidadeDialog({
@@ -20,6 +22,7 @@ export function EditHabilidadeDialog({
   const [efeito, setEfeito] = useState(habilidade.efeito);
   const [temContador, setTemContador] = useState(habilidade.temContador);
   const [contadorMax, setContadorMax] = useState(habilidade.contadorMax || "");
+  const [escolhendoTipo, setEscolhendoTipo] = useState(false);
 
   function salvar() {
     if (!nome.trim()) return;
@@ -36,6 +39,7 @@ export function EditHabilidadeDialog({
   }
 
   return (
+    <>
     <Modal onClose={onCancel} wide>
       <div className="modal-title">{habilidade.indent ? "Editar Aprimoramento" : "Editar Habilidade"}</div>
       <div className="item-form">
@@ -46,7 +50,9 @@ export function EditHabilidadeDialog({
           </div>
           <div className="field">
             <label>Tipo</label>
-            <input type="text" value={tipo} placeholder="Ex: Ação Longa" onChange={(e) => setTipo(e.target.value)} />
+            <button type="button" className="tipo-field" title="Escolher o tipo da ação" onClick={() => setEscolhendoTipo(true)}>
+              {tipo.trim() ? <TipoAcaoBadge tipo={tipo} /> : <span className="tipo-field-vazio">Escolher tipo…</span>}
+            </button>
           </div>
           <div className="field">
             <label>Custo (texto exibido)</label>
@@ -92,5 +98,16 @@ export function EditHabilidadeDialog({
         </div>
       </div>
     </Modal>
+    {escolhendoTipo && (
+      <TipoAcaoDialog
+        tipo={tipo}
+        onConfirm={(t) => {
+          setTipo(t);
+          setEscolhendoTipo(false);
+        }}
+        onCancel={() => setEscolhendoTipo(false)}
+      />
+    )}
+    </>
   );
 }
