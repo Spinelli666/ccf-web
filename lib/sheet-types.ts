@@ -50,6 +50,9 @@ export type Arma = {
   // Só faz sentido enquanto desequipada (pilha no Inventário) — equipar tira 1 da pilha
   // e cria uma cópia equipada avulsa; ao equipar a pilha some.
   quantidade?: string;
+  // Atributo escolhido como bônus de dano opcional ("Força", "Destreza", "Psionismo") —
+  // fica gravado na arma pra não se perder ao trocar de aba.
+  atributoDano?: string;
 };
 
 export type PericiaBonusItem = { pericia: string; valor: string };

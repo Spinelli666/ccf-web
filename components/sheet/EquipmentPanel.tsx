@@ -62,7 +62,6 @@ export function EquipmentPanel({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [openTables, setOpenTables] = useState<Set<string>>(new Set());
   const [attackIdx, setAttackIdx] = useState<number | null>(null);
-  const [attrByIdx, setAttrByIdx] = useState<Record<number, string>>({});
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
   const [excluindo, setExcluindo] = useState<EditTarget | null>(null);
 
@@ -77,9 +76,15 @@ export function EquipmentPanel({
   function danoComBonus(idx: number, a: Arma): string {
     const raw = parseFloat(a.dano);
     if (isNaN(raw)) return a.dano;
-    const attrOpt = atributoOpts.find((o) => o.nome === attrByIdx[idx]);
+    const attrOpt = atributoOpts.find((o) => o.nome === a.atributoDano);
     if (!attrOpt) return a.dano;
     return String(raw + attrOpt.valor);
+  }
+
+  function setAtributoDano(i: number, valor: string) {
+    const next = sheet.armas.slice();
+    next[i] = { ...next[i], atributoDano: valor || undefined };
+    onChange({ armas: next });
   }
 
   function qtdDe(item: { quantidade?: string }): number {
@@ -294,7 +299,7 @@ export function EquipmentPanel({
     if (attackIdx === null) return;
     const idx = attackIdx;
     const a = sheet.armas[idx];
-    const attrOpt = atributoOpts.find((o) => o.nome === attrByIdx[idx]);
+    const attrOpt = atributoOpts.find((o) => o.nome === a.atributoDano);
     const rollInfo = rollWithMode(20, mode);
     const natural = rollInfo.picked;
     const isCrit = natural >= derived.critRange;
@@ -526,9 +531,9 @@ export function EquipmentPanel({
                             <div className="attack-cell">
                               <select
                                 className="attr-select"
-                                value={attrByIdx[idx] || ""}
+                                value={a.atributoDano || ""}
                                 title="Bônus de dano opcional — o ataque já soma Precisão automaticamente"
-                                onChange={(e) => setAttrByIdx((prev) => ({ ...prev, [idx]: e.target.value }))}
+                                onChange={(e) => setAtributoDano(idx, e.target.value)}
                               >
                                 <option value="">Sem bônus de dano</option>
                                 {atributoOpts.map((o) => (
