@@ -1179,13 +1179,10 @@ a.link{ color:var(--blue); }
   .sheet-scale table.sheet-table td.name{ white-space:nowrap; }
 }
 
-/* Painéis abertos (combate à esquerda, chat à direita) flutuam por cima do
-   conteúdo; em tela larga a coluna central abre espaço pra eles em vez de ficar
-   coberta. Abaixo desses limites (notebook pequeno, tablet, celular) a ficha
-   ficaria espremida demais, então eles continuam flutuando por cima. */
-@media (min-width: 1181px){
-  .app-shell:has(.combat-col:not(.collapsed)) .layout{ padding-left: calc(32px + 226px); }
-}
+/* O chat aberto (340px, à direita) flutua por cima do conteúdo; em tela larga
+   a coluna central abre espaço pra ele em vez de ficar coberta. Abaixo disso a
+   ficha ficaria espremida demais, então ele continua flutuando por cima. O painel
+   de combate sempre flutua por cima (sem reservar espaço). */
 @media (min-width: 1500px){
   .app-shell:has(.chat-popover) .layout{ padding-right: calc(32px + 340px); }
 }
