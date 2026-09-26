@@ -830,6 +830,8 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
 .remove-btn{ background:none; border:none; color:#8a3a2a; font-size:20px; cursor:pointer; line-height:1; padding:6px; }
 .add-row-btn{ font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; background:none; border:1px dashed var(--gold-line); color:var(--maroon); padding:8px 14px; border-radius:3px; cursor:pointer; }
 .add-row-btn:hover{ background: rgba(255,183,92,0.15); }
+.add-row-center{ display:flex; justify-content:center; }
+.btn.emoji-btn{ font-size:16px; line-height:20px; padding:4px 8px; }
 
 .table-collapse-head{
   display:flex; align-items:center; gap:6px; width:100%; text-align:left;

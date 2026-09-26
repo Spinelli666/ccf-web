@@ -6,8 +6,9 @@ import { getSocket } from "@/lib/socket-client";
 import { parseDiceCommand, rollDiceCommand, rollCritClass, timeAgo } from "@/lib/dice";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
+import { useRollVisibility, setRollVisibility, type RollVisibility } from "@/lib/roll-visibility";
 
-type Visibility = "public" | "private" | "gm";
+type Visibility = RollVisibility;
 
 type ChatMessage = {
   id: string;
@@ -62,7 +63,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
   const [input, setInput] = useState("");
   const [, forceTick] = useState(0);
   const [showClear, setShowClear] = useState(false);
-  const [visibility, setVisibility] = useState<Visibility>("public");
+  const visibility = useRollVisibility();
   // Em celular o painel do chat cobre a tela quase inteira (fixed, largura ~viewport) —
   // começa fechado nesse caso pra não esconder a ficha, igual a SideNav/CombateClient.
   const isNarrow = useIsNarrowViewport(880);
@@ -261,7 +262,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
           className="chat-visibility-select"
           value={visibility}
           title="Quem pode ver as próximas rolagens/mensagens enviadas daqui"
-          onChange={(e) => setVisibility(e.target.value as Visibility)}
+          onChange={(e) => setRollVisibility(e.target.value as Visibility)}
         >
           {VISIBILITY_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>

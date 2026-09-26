@@ -12,6 +12,7 @@ import {
 } from "@/lib/derived";
 import { rollWithMode, formatRollDice, type RollModeKey } from "@/lib/dice";
 import { getSocket } from "@/lib/socket-client";
+import { getRollVisibility } from "@/lib/roll-visibility";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { AddEquipmentDialog } from "@/components/dialogs/AddEquipmentDialog";
 import { EditItemDialog, type EditTarget } from "@/components/dialogs/EditItemDialog";
@@ -306,6 +307,7 @@ export function EquipmentPanel({
       characterName: sheet.name,
       characterAvatarUrl: sheet.avatarUrl || undefined,
       isPrivate,
+      visibility: getRollVisibility(),
     });
     setAttackIdx(null);
   }
@@ -456,9 +458,11 @@ export function EquipmentPanel({
       </div>
 
       {isMine && (
-        <button type="button" className="add-row-btn" style={{ marginBottom: 14 }} onClick={() => setShowAdd(true)}>
-          + Adicionar Equipamento
-        </button>
+        <div className="add-row-center" style={{ marginBottom: 14 }}>
+          <button type="button" className="add-row-btn" onClick={() => setShowAdd(true)}>
+            + Adicionar Equipamento
+          </button>
+        </div>
       )}
 
       {equipHtmlVisible && (
@@ -507,16 +511,28 @@ export function EquipmentPanel({
                                   </option>
                                 ))}
                               </select>
-                              <button type="button" className="btn small secondary" onClick={() => setAttackIdx(idx)}>
-                                Atacar
+                              <button
+                                type="button"
+                                className="btn small secondary emoji-btn"
+                                title="Atacar"
+                                aria-label="Atacar"
+                                onClick={() => setAttackIdx(idx)}
+                              >
+                                ⚔️
                               </button>
                             </div>
                           )}
                         </td>
                         <td className="col-tight">
                           {isMine && (
-                            <button type="button" className="btn ghost small" onClick={() => desequiparArma(idx)}>
-                              Desequipar
+                            <button
+                              type="button"
+                              className="btn ghost small emoji-btn"
+                              title="Desequipar"
+                              aria-label="Desequipar"
+                              onClick={() => desequiparArma(idx)}
+                            >
+                              📤
                             </button>
                           )}
                         </td>
@@ -571,8 +587,14 @@ export function EquipmentPanel({
                           <td className="col-tight">{durabField("armaduras", idx, a)}</td>
                           <td className="col-tight">
                             {isMine && (
-                              <button type="button" className="btn ghost small" onClick={() => desequiparArmadura(idx)}>
-                                Desequipar
+                              <button
+                                type="button"
+                                className="btn ghost small emoji-btn"
+                                title="Desequipar"
+                                aria-label="Desequipar"
+                                onClick={() => desequiparArmadura(idx)}
+                              >
+                                📤
                               </button>
                             )}
                           </td>

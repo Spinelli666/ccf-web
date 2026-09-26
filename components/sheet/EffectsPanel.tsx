@@ -43,6 +43,13 @@ export function EffectsPanel({
   return (
     <div className="section">
       <h2>Efeitos</h2>
+      {isMine && (
+        <div className="add-row-center" style={{ marginBottom: 12 }}>
+          <button type="button" className="add-row-btn" onClick={() => setShowPicker(true)}>
+            + Adicionar Efeito
+          </button>
+        </div>
+      )}
       {sheet.efeitosAtivos.length > 0 ? (
         <table className="sheet-table">
           <thead>
@@ -90,12 +97,6 @@ export function EffectsPanel({
       ) : (
         <div className="derived-note">Nenhum efeito ativo no momento.</div>
       )}
-      {isMine && (
-        <button type="button" className="add-row-btn" style={{ marginTop: 12 }} onClick={() => setShowPicker(true)}>
-          + Adicionar Efeito
-        </button>
-      )}
-
       {showPicker && (
         <EffectPickerDialog activeList={sheet.efeitosAtivos} onSelect={add} onCancel={() => setShowPicker(false)} />
       )}
