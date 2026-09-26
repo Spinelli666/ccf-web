@@ -237,7 +237,7 @@ body{
   word-break:break-word; white-space:pre-line; line-height:1.6;
 }
 .chat-dice-highlight{ font-weight:800; color:var(--maroon); }
-.chat-card.is-private, .chat-log-line.is-private{ filter:grayscale(70%); opacity:.75; }
+.chat-card.is-private, .chat-log-line.is-private{ filter:grayscale(35%); opacity:.9; }
 .chat-card-total-box{
   display:flex; align-items:center; justify-content:center;
   background: rgba(255,183,92,0.08); border:1px solid var(--gold-line); border-radius:4px; padding:6px;
@@ -832,6 +832,7 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
 .add-row-btn:hover{ background: rgba(255,183,92,0.15); }
 .add-row-center{ display:flex; justify-content:center; }
 .btn.emoji-btn{ font-size:16px; line-height:20px; padding:4px 8px; }
+.emoji-btn-cost{ font-family:inherit; font-size:11px; margin-left:4px; vertical-align:middle; }
 /* Botões de classe (emoji) acima da tabela de habilidades */
 .classe-emoji-buttons{ justify-content:center; }
 .classe-emoji-btn{ font-size:18px; line-height:24px; padding:6px 14px; opacity:.5; }
@@ -1033,3 +1034,115 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
 .auth-page{ max-width:420px; margin:60px auto; padding:0 16px; }
 .auth-error{ background:rgba(138,58,42,0.15); border:1px solid #8a3a2a; color:#f3d9d9; border-radius:4px; padding:10px 14px; font-size:13px; margin-bottom:14px; }
 a.link{ color:var(--blue); }
+
+/* ==========================================================================
+   Feedback de toque/clique (estilo iOS / One UI): o botão encolhe um pouco ao
+   pressionar e volta ao soltar. Afunda rápido (.07s) e volta um pouco mais
+   devagar (.18s), pra parecer "físico" sem chamar atenção.
+
+   Receitas fixas — todo botão novo deve entrar em UMA destas listas, não
+   inventar valores próprios:
+     1. Primário cheio ........ scale(.95) + escurece levemente
+     2. Secundário com borda .. scale(.95) + fundo dourado translúcido
+     3. Destrutivo com borda .. scale(.95) + fundo vermelho translúcido
+     4. Destrutivo cheio ...... scale(.95) + escurece um pouco mais
+     5. Ícone / botão pequeno . scale(.90) + fundo translúcido (vermelho se destrutivo)
+     6. Linha/bloco largo ..... scale(.98) + fundo dourado translúcido
+        (5% num elemento de 700px+ seria um tranco; 2% dá o mesmo deslocamento
+        visual em pixels que os botões normais)
+   Botões destrutivos que usam classe neutra (.btn.ghost, .icon-btn) levam a
+   marca `.is-danger` só pra receber o toque vermelho.
+   Este bloco fica no fim do arquivo de propósito: vence os :hover de mesma
+   especificidade definidos acima (ex.: .btn:hover translateY).
+   ========================================================================== */
+:root{
+  --press-ease: cubic-bezier(.2, .8, .2, 1);
+  --press-release: .18s;
+  --press-down: .07s;
+  --press-tint: rgba(255,183,92,0.18);
+  --press-tint-danger: rgba(138,58,42,0.16);
+}
+
+/* Base comum: transição + remove o flash azul do toque no mobile */
+.btn, .chat-fab,
+.wizard-class-btn, .modal-opt-btn, .add-row-btn, .dice-quick-btn, .cat-chip, .tag-btn,
+.effect-chip, .sheet-tab-btn, .item-name-btn, .effect-dano-btn,
+.icon-btn, .rail-toggle, .counter-btn, .dice-btn, .combat-reorder-mini button,
+.acao-erro-close, .chat-clear-btn, .chat-log-del, .chat-card-del, .combat-row-del,
+.card-del-btn, .remove-btn,
+.folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar{
+  transition:
+    transform var(--press-release) var(--press-ease),
+    background-color .12s ease, border-color .12s ease, color .12s ease,
+    opacity .12s ease, box-shadow .12s ease, filter .12s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+:is(.btn, .chat-fab,
+    .wizard-class-btn, .modal-opt-btn, .add-row-btn, .dice-quick-btn, .cat-chip, .tag-btn,
+    .effect-chip, .sheet-tab-btn, .item-name-btn, .effect-dano-btn,
+    .icon-btn, .rail-toggle, .counter-btn, .dice-btn, .combat-reorder-mini button,
+    .acao-erro-close, .chat-clear-btn, .chat-log-del, .chat-card-del, .combat-row-del,
+    .card-del-btn, .remove-btn,
+    .folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar):active:not(:disabled){
+  transition-duration: var(--press-down);
+}
+
+/* 1. Primário cheio */
+.btn:not(.secondary):not(.ghost):not(.danger):not(.emoji-btn):active:not(:disabled){
+  transform: scale(.95); filter: brightness(.92);
+}
+
+/* 2. Secundário com borda (inclui chips/abas/opções; os .active cheios só escurecem) */
+.btn.secondary:not(.emoji-btn):not(.is-danger):active:not(:disabled),
+.btn.ghost:not(.emoji-btn):not(.is-danger):active:not(:disabled),
+:is(.wizard-class-btn, .modal-opt-btn, .add-row-btn, .dice-quick-btn, .cat-chip, .tag-btn,
+    .effect-chip, .sheet-tab-btn, .item-name-btn):not(.classe-emoji-btn):active:not(:disabled){
+  transform: scale(.95); background-color: var(--press-tint);
+}
+:is(.wizard-class-btn, .cat-chip, .effect-chip).active:not(.classe-emoji-btn):active:not(:disabled){
+  background-color: var(--maroon); filter: brightness(.92);
+}
+
+/* 3. Destrutivo com borda */
+.btn.ghost.is-danger:active:not(:disabled),
+.btn.secondary.is-danger:active:not(:disabled),
+.effect-dano-btn:active:not(:disabled){
+  transform: scale(.95); background-color: var(--press-tint-danger);
+}
+
+/* 4. Destrutivo cheio */
+.btn.danger:active:not(:disabled){
+  transform: scale(.95); filter: brightness(.88);
+}
+
+/* 5. Ícone / botão pequeno */
+:is(.icon-btn, .rail-toggle, .counter-btn, .dice-btn, .combat-reorder-mini button,
+    .acao-erro-close, .btn.emoji-btn, .wizard-class-btn.classe-emoji-btn):active:not(:disabled){
+  transform: scale(.90); background-color: var(--press-tint);
+}
+:is(.icon-btn.is-danger, .chat-clear-btn, .chat-log-del, .chat-card-del, .combat-row-del,
+    .card-del-btn, .remove-btn, .btn.emoji-btn.is-danger):active:not(:disabled){
+  transform: scale(.90); background-color: var(--press-tint-danger);
+}
+.wizard-class-btn.classe-emoji-btn.active:active:not(:disabled){ background-color: var(--maroon); filter: brightness(.92); }
+.chat-fab:active{ transform: scale(.90); filter: brightness(.92); } /* ícone, mas cheio */
+
+/* 6. Linha/bloco largo */
+:is(.folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row):active:not(:disabled){
+  transform: scale(.98); background-color: var(--press-tint);
+}
+.sheet-avatar:active:not(:disabled){ transform: scale(.98); }
+
+/* Quem prefere menos movimento: sem encolher, só o toque de cor */
+@media (prefers-reduced-motion: reduce){
+  :is(.btn, .chat-fab,
+      .wizard-class-btn, .modal-opt-btn, .add-row-btn, .dice-quick-btn, .cat-chip, .tag-btn,
+      .effect-chip, .sheet-tab-btn, .item-name-btn, .effect-dano-btn,
+      .icon-btn, .rail-toggle, .counter-btn, .dice-btn, .combat-reorder-mini button,
+      .acao-erro-close, .chat-clear-btn, .chat-log-del, .chat-card-del, .combat-row-del,
+      .card-del-btn, .remove-btn,
+      .folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar):active{
+    transform: none !important;
+  }
+}

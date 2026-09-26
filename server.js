@@ -107,7 +107,10 @@ app.prepare().then(async () => {
       try {
         const user = socket.data.user;
         const kind = payload?.kind === "roll" ? "roll" : payload?.kind === "log" ? "log" : "text";
-        const visibility = ["public", "private", "gm"].includes(payload?.visibility) ? payload.visibility : "public";
+        const pedida = ["public", "private", "gm"].includes(payload?.visibility) ? payload.visibility : "public";
+        // Rolagem/log de ficha privada nunca sai pública: segue a regra da Rolagem Privada
+        // (só o autor vê). Se o jogador escolheu "pro Mestre", continua indo pro Mestre também.
+        const visibility = payload?.isPrivate && pedida === "public" ? "private" : pedida;
         const message = await prisma.chatMessage.create({
           data: {
             mesaId: socket.data.mesaId,

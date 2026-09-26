@@ -141,7 +141,7 @@ export function GalleryClient({
                 </button>
                 <button
                   type="button"
-                  className="icon-btn"
+                  className="icon-btn is-danger"
                   title="Apagar pasta"
                   onClick={(e) => {
                     e.stopPropagation();

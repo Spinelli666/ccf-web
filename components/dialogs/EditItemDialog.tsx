@@ -258,7 +258,7 @@ export function EditItemDialog({
                   />
                   <button
                     type="button"
-                    className="icon-btn"
+                    className="icon-btn is-danger"
                     title="Remover bônus"
                     aria-label="Remover bônus"
                     onClick={() => removePericiaBonus(i)}
@@ -294,7 +294,7 @@ export function EditItemDialog({
           </div>
         ) : (
           <div className="item-form-footer">
-            <button type="button" className="btn ghost small item-form-remove" onClick={() => setConfirmarRemover(true)}>
+            <button type="button" className="btn ghost small is-danger item-form-remove" onClick={() => setConfirmarRemover(true)}>
               🗑️ Remover Item
             </button>
             <div className="item-form-footer-actions">

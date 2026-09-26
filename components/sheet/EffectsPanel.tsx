@@ -83,8 +83,14 @@ export function EffectsPanel({
                         </button>
                       )}
                       {isMine && (
-                        <button type="button" className="btn ghost small" onClick={() => remove(nomeEfeito)}>
-                          Remover
+                        <button
+                          type="button"
+                          className="btn ghost small emoji-btn is-danger"
+                          title="Remover"
+                          aria-label="Remover"
+                          onClick={() => remove(nomeEfeito)}
+                        >
+                          🗑️
                         </button>
                       )}
                     </div>

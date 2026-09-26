@@ -834,11 +834,13 @@ export function EquipmentPanel({
                           {isMine && (
                             <button
                               type="button"
-                              className="btn small secondary"
+                              className="btn small secondary emoji-btn"
+                              title="Usar"
+                              aria-label="Usar"
                               disabled={max > 0 && r.usosGastos >= max}
                               onClick={() => usarRemedio(idx)}
                             >
-                              Usar
+                              ✨
                             </button>
                           )}
                         </td>

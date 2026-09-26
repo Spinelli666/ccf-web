@@ -150,7 +150,7 @@ export function AbilitiesPanel({
         <button type="button" className="icon-btn" title="Editar" aria-label="Editar" onClick={() => setEditandoIdx(i)}>
           ✏️
         </button>
-        <button type="button" className="icon-btn" title="Excluir" aria-label="Excluir" onClick={() => setExcluindoIdx(i)}>
+        <button type="button" className="icon-btn is-danger" title="Excluir" aria-label="Excluir" onClick={() => setExcluindoIdx(i)}>
           🗑️
         </button>
       </>
@@ -304,10 +304,12 @@ export function AbilitiesPanel({
                       <button
                         type="button"
                         className={`tag-btn ${h.usosGastos < max ? "avail" : "used"}`}
+                        title="Usar"
+                        aria-label="Usar"
                         disabled={h.usosGastos >= max}
                         onClick={() => usarRaca(i)}
                       >
-                        Usar
+                        ✨
                       </button>
                       {h.usosGastos > 0 && (
                         <button type="button" className="tag-btn" onClick={() => updateRaca(i, { usosGastos: 0 })}>
@@ -503,8 +505,14 @@ export function AbilitiesPanel({
                                 </button>
                               </div>
                             )}
-                            <button type="button" className="btn small secondary" onClick={() => usarClasse(i)}>
-                              Usar{effectiveCost(i) ? ` (-${effectiveCost(i)}⚡)` : ""}
+                            <button
+                              type="button"
+                              className="btn small secondary emoji-btn"
+                              title={effectiveCost(i) ? `Usar (-${effectiveCost(i)}⚡)` : "Usar"}
+                              aria-label="Usar"
+                              onClick={() => usarClasse(i)}
+                            >
+                              ✨{effectiveCost(i) ? <span className="emoji-btn-cost">-{effectiveCost(i)}⚡</span> : null}
                             </button>
                             {linhaBotoes(i)}
                           </div>
