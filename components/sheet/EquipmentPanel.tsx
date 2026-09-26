@@ -13,6 +13,7 @@ import {
 import { rollWithMode, formatRollDice, type RollModeKey } from "@/lib/dice";
 import { getSocket } from "@/lib/socket-client";
 import { getRollVisibility } from "@/lib/roll-visibility";
+import { isMaxRoll } from "@/lib/max-roll";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { AddEquipmentDialog } from "@/components/dialogs/AddEquipmentDialog";
 import { EditItemDialog, type EditTarget } from "@/components/dialogs/EditItemDialog";
@@ -300,7 +301,7 @@ export function EquipmentPanel({
     const idx = attackIdx;
     const a = sheet.armas[idx];
     const attrOpt = atributoOpts.find((o) => o.nome === a.atributoDano);
-    const rollInfo = rollWithMode(20, mode);
+    const rollInfo = rollWithMode(20, mode, isMaxRoll());
     const natural = rollInfo.picked;
     const isCrit = natural >= derived.critRange;
     const isFumble = natural === 1;

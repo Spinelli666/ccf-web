@@ -4,8 +4,8 @@ import { useSyncExternalStore } from "react";
 
 /**
  * Interruptor de "rolagem no máximo" — só aparece pra conta Spinelli (ver MAX_ROLL_USERNAME).
- * Ligado, os dados das rolagens do chat, Perícias, Descanso e Iniciativa saem no valor máximo
- * (os bônus somam normal). Ataque e Julgamento não são afetados. Fica só em memória:
+ * Ligado, os dados das rolagens do chat, Perícias, Ataque, Descanso e Iniciativa saem no valor
+ * máximo (os bônus somam normal). O Julgamento não é afetado. Fica só em memória:
  * desliga sozinho ao recarregar a página.
  */
 export const MAX_ROLL_USERNAME = "spinelli";
