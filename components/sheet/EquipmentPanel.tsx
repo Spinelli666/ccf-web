@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import {
   computeDerived,
   equippedArmorSum,
@@ -16,6 +16,7 @@ import { getRollVisibility } from "@/lib/roll-visibility";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { AddEquipmentDialog } from "@/components/dialogs/AddEquipmentDialog";
 import { EditItemDialog, type EditTarget } from "@/components/dialogs/EditItemDialog";
+import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import { PROPRIEDADES_ARMAS_INFO } from "@/data/weapons";
 import type { Arma, Armadura, Remedio, FullSheetData } from "@/lib/sheet-types";
 
@@ -63,6 +64,7 @@ export function EquipmentPanel({
   const [attackIdx, setAttackIdx] = useState<number | null>(null);
   const [attrByIdx, setAttrByIdx] = useState<Record<number, string>>({});
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
+  const [excluindo, setExcluindo] = useState<EditTarget | null>(null);
 
   const derived = computeDerived(sheet);
   function periciaValor(nome: string): number {
@@ -255,18 +257,37 @@ export function EquipmentPanel({
     setEditTarget(null);
   }
 
+  function removerItem(alvo: EditTarget) {
+    const nome = alvo.data.item;
+    const equipado = alvo.tipo !== "generico" && !!(alvo.data as Arma | Armadura).equipado;
+    if (alvo.tipo === "arma") {
+      onChange({ armas: sheet.armas.filter((_, i) => i !== alvo.idx) });
+    } else if (alvo.tipo === "armadura") {
+      onChange({ armaduras: sheet.armaduras.filter((_, i) => i !== alvo.idx) });
+    } else {
+      onChange({ remedios: sheet.remedios.filter((_, i) => i !== alvo.idx) });
+    }
+    onLog(`${sheet.name || "Personagem"} removeu "${nome}" do ${equipado ? "Equipamento" : "Inventário"}.`);
+  }
+
   function removerItemEditado() {
     if (!editTarget) return;
-    const nome = editTarget.data.item;
-    if (editTarget.tipo === "arma") {
-      onChange({ armas: sheet.armas.filter((_, i) => i !== editTarget.idx) });
-    } else if (editTarget.tipo === "armadura") {
-      onChange({ armaduras: sheet.armaduras.filter((_, i) => i !== editTarget.idx) });
-    } else {
-      onChange({ remedios: sheet.remedios.filter((_, i) => i !== editTarget.idx) });
-    }
-    onLog(`${sheet.name || "Personagem"} removeu "${nome}" do Inventário.`);
+    removerItem(editTarget);
     setEditTarget(null);
+  }
+
+  function acoesItem(tipo: EditTarget["tipo"], idx: number, data: Arma | Armadura | Remedio): ReactNode {
+    const alvo = { tipo, idx, data } as EditTarget;
+    return (
+      <div className="item-row-actions">
+        <button type="button" className="icon-btn" title="Editar" aria-label="Editar" onClick={() => setEditTarget(alvo)}>
+          ✏️
+        </button>
+        <button type="button" className="icon-btn is-danger" title="Excluir" aria-label="Excluir" onClick={() => setExcluindo(alvo)}>
+          🗑️
+        </button>
+      </div>
+    );
   }
 
   function doAttack(mode: RollModeKey) {
@@ -542,16 +563,7 @@ export function EquipmentPanel({
                           )}
                         </td>
                         <td className="col-tight">
-                          {isMine && (
-                            <button
-                              type="button"
-                              className="icon-btn"
-                              title="Editar"
-                              onClick={() => setEditTarget({ tipo: "arma", idx, data: a })}
-                            >
-                              ✏️
-                            </button>
-                          )}
+                          {isMine && acoesItem("arma", idx, a)}
                         </td>
                       </tr>
                       {weaponPropsRow(idx, a, `w-${idx}`, 6)}
@@ -604,16 +616,7 @@ export function EquipmentPanel({
                             )}
                           </td>
                           <td className="col-tight">
-                            {isMine && (
-                              <button
-                                type="button"
-                                className="icon-btn"
-                                title="Editar"
-                                onClick={() => setEditTarget({ tipo: "armadura", idx, data: a })}
-                              >
-                                ✏️
-                              </button>
-                            )}
+                            {isMine && acoesItem("armadura", idx, a)}
                           </td>
                         </tr>
                         {armorInfoRow(idx, a, `a-${idx}`, 5)}
@@ -686,16 +689,7 @@ export function EquipmentPanel({
                           )}
                         </td>
                         <td className="col-tight">
-                          {isMine && (
-                            <button
-                              type="button"
-                              className="icon-btn"
-                              title="Editar"
-                              onClick={() => setEditTarget({ tipo: "arma", idx, data: a })}
-                            >
-                              ✏️
-                            </button>
-                          )}
+                          {isMine && acoesItem("arma", idx, a)}
                         </td>
                       </tr>
                       {weaponPropsRow(idx, a, `wi-${idx}`, 6)}
@@ -759,16 +753,7 @@ export function EquipmentPanel({
                           )}
                         </td>
                         <td className="col-tight">
-                          {isMine && (
-                            <button
-                              type="button"
-                              className="icon-btn"
-                              title="Editar"
-                              onClick={() => setEditTarget({ tipo: "armadura", idx, data: a })}
-                            >
-                              ✏️
-                            </button>
-                          )}
+                          {isMine && acoesItem("armadura", idx, a)}
                         </td>
                       </tr>
                       {armorInfoRow(idx, a, `ai-${idx}`, 6)}
@@ -845,16 +830,7 @@ export function EquipmentPanel({
                           )}
                         </td>
                         <td className="col-tight">
-                          {isMine && (
-                            <button
-                              type="button"
-                              className="icon-btn"
-                              title="Editar"
-                              onClick={() => setEditTarget({ tipo: "generico", idx, data: r })}
-                            >
-                              ✏️
-                            </button>
-                          )}
+                          {isMine && acoesItem("generico", idx, r)}
                         </td>
                       </tr>
                       {genericoInfoRow(idx, r, `g-${idx}`, 6)}
@@ -903,6 +879,19 @@ export function EquipmentPanel({
           title={`Atacar com "${sheet.armas[attackIdx].item}" — como?`}
           onSelect={(mode) => doAttack(mode)}
           onCancel={() => setAttackIdx(null)}
+        />
+      )}
+
+      {excluindo && (
+        <ConfirmDialog
+          title="Excluir item"
+          message={`Excluir "${excluindo.data.item}" da ficha? Essa ação não pode ser desfeita.`}
+          confirmLabel="Excluir"
+          onConfirm={() => {
+            removerItem(excluindo);
+            setExcluindo(null);
+          }}
+          onCancel={() => setExcluindo(null)}
         />
       )}
 

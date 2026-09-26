@@ -7,6 +7,7 @@ import { parseDiceCommand, rollDiceCommand, rollCritClass, timeAgo } from "@/lib
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
 import { useRollVisibility, setRollVisibility, type RollVisibility } from "@/lib/roll-visibility";
+import { formatLog, type LogMeter } from "@/lib/chat-log";
 
 type Visibility = RollVisibility;
 
@@ -55,6 +56,34 @@ function renderFormula(text: string) {
     );
   });
   return nodes;
+}
+
+// Nomes entre aspas (itens, habilidades, efeitos) viram destaque, sem as aspas.
+function renderLogText(text: string) {
+  return text.split(/"([^"]+)"/).map((part, i) =>
+    i % 2 === 1 ? (
+      <b key={i} className="chat-event-hl">
+        {part}
+      </b>
+    ) : (
+      part
+    )
+  );
+}
+
+function LogMeterBar({ meter }: { meter: LogMeter }) {
+  const pct = meter.max > 0 ? Math.max(0, Math.min(1, meter.atual / meter.max)) : 0;
+  return (
+    <div className={`chat-event-meter is-${meter.label.toLowerCase()}${meter.atual <= 0 ? " is-zero" : ""}`}>
+      <span className="chat-event-meter-label">{meter.label}</span>
+      <span className="chat-event-meter-track">
+        <span className="chat-event-meter-fill" style={{ width: `${pct * 100}%` }} />
+      </span>
+      <span className="chat-event-meter-val">
+        {meter.atual}/{meter.max}
+      </span>
+    </div>
+  );
 }
 
 export function TableChat({ mesaId }: { mesaId: string }) {
@@ -143,6 +172,98 @@ export function TableChat({ mesaId }: { mesaId: string }) {
     if (e.key === "Enter") send(input);
   }
 
+  function deleteButton(item: ChatMessage, className: string) {
+    if (item.authorId !== session?.user?.id) return null;
+    return (
+      <button
+        type="button"
+        className={className}
+        title="Excluir"
+        aria-label="Excluir"
+        onClick={() => getSocket(mesaId).emit("chat:delete", item.id)}
+      >
+        🗑️
+      </button>
+    );
+  }
+
+  function renderLog(item: ChatMessage) {
+    const view = formatLog(item.text, item.characterName);
+    const time = timeAgo(new Date(item.createdAt).getTime());
+    if (view.banner) {
+      return (
+        <div key={item.id} className="chat-banner" title={time}>
+          <span className="chat-banner-text">
+            {view.icon} {renderLogText(view.body)}
+          </span>
+          {deleteButton(item, "chat-log-del")}
+        </div>
+      );
+    }
+    return (
+      <div key={item.id} className={`chat-event tone-${view.tone}${item.sheetPrivate ? " is-private" : ""}`}>
+        <span className="chat-event-icon" aria-hidden="true">
+          {view.icon}
+        </span>
+        <div className="chat-event-main">
+          <div className="chat-event-head">
+            <span className="chat-event-who">
+              {item.sheetPrivate && <span title="Ficha privada">🔒 </span>}
+              {item.characterName || item.authorName}
+            </span>
+            <span className="chat-event-time">{time}</span>
+          </div>
+          <div className="chat-event-body">{renderLogText(view.body)}</div>
+          {view.details.length > 0 &&
+            (view.details.length > 1 ? (
+              <div className="chat-event-chips">
+                {view.details.map((d, i) => (
+                  <span key={i} className="chat-event-chip">
+                    {renderLogText(d)}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="chat-event-detail">{renderLogText(view.details[0])}</div>
+            ))}
+          {view.meter && <LogMeterBar meter={view.meter} />}
+        </div>
+        {deleteButton(item, "chat-log-del")}
+      </div>
+    );
+  }
+
+  function renderText(item: ChatMessage) {
+    const who = item.characterName || item.authorName;
+    const mine = item.authorId === session?.user?.id;
+    return (
+      <div key={item.id} className={`chat-msg${mine ? " is-mine" : ""}${item.sheetPrivate ? " is-private" : ""}`}>
+        {item.characterAvatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="chat-msg-avatar" src={item.characterAvatarUrl} alt="" />
+        ) : (
+          <span className="chat-msg-avatar chat-msg-avatar-letter">{who.charAt(0).toUpperCase()}</span>
+        )}
+        <div className="chat-msg-main">
+          <div className="chat-msg-head">
+            <span className="chat-msg-who">{who}</span>
+            {item.characterName && item.characterName !== item.authorName && (
+              <span className="chat-msg-player">{item.authorName}</span>
+            )}
+            {item.visibility !== "public" && (
+              <span className={`chat-card-visibility chat-card-visibility-${item.visibility}`}>
+                {VISIBILITY_LABELS[item.visibility]}
+              </span>
+            )}
+            <span className="chat-msg-time">{timeAgo(new Date(item.createdAt).getTime())}</span>
+          </div>
+          <div className="chat-msg-bubble">{item.text}</div>
+        </div>
+        {deleteButton(item, "chat-log-del")}
+      </div>
+    );
+  }
+
   if (!open) {
     return (
       <button type="button" className="chat-fab" title="Abrir chat da mesa" onClick={() => setOpen(true)}>
@@ -188,26 +309,11 @@ export function TableChat({ mesaId }: { mesaId: string }) {
         ) : (
           messages.map((item) =>
             item.kind === "log" ? (
-              <div key={item.id} className={`chat-log-line${item.sheetPrivate ? " is-private" : ""}`}>
-                <span className="chat-log-icon">📜</span>
-                <span className="chat-log-text">{item.text}</span>
-                <span className="chat-log-time">{timeAgo(new Date(item.createdAt).getTime())}</span>
-                {item.authorId === session?.user?.id && (
-                  <button
-                    type="button"
-                    className="chat-log-del"
-                    title="Excluir"
-                    onClick={() => getSocket(mesaId).emit("chat:delete", item.id)}
-                  >
-                    🗑️
-                  </button>
-                )}
-              </div>
+              renderLog(item)
+            ) : item.kind === "text" ? (
+              renderText(item)
             ) : (
-              <div
-                key={item.id}
-                className={`chat-card ${item.kind === "roll" ? "is-roll" : ""}${item.sheetPrivate ? " is-private" : ""}`}
-              >
+              <div key={item.id} className={`chat-card is-roll${item.sheetPrivate ? " is-private" : ""}`}>
                 {item.authorId === session?.user?.id && (
                   <button
                     type="button"
@@ -233,17 +339,11 @@ export function TableChat({ mesaId }: { mesaId: string }) {
                 <div className={`chat-card-visibility chat-card-visibility-${item.visibility}`}>
                   {VISIBILITY_LABELS[item.visibility]}
                 </div>
-                {item.kind === "roll" ? (
-                  <>
-                    <div className="chat-card-formula">{renderFormula(item.text)}</div>
-                    {item.total !== null && (
-                      <div className="chat-card-total-box">
-                        <span className={`chat-card-total ${item.critClass || ""}`}>{item.total}</span>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="chat-card-text">{item.text}</div>
+                <div className="chat-card-formula">{renderFormula(item.text)}</div>
+                {item.total !== null && (
+                  <div className="chat-card-total-box">
+                    <span className={`chat-card-total ${item.critClass || ""}`}>{item.total}</span>
+                  </div>
                 )}
               </div>
             )
