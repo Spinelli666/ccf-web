@@ -512,7 +512,7 @@ export function AbilitiesPanel({
                               aria-label="Usar"
                               onClick={() => usarClasse(i)}
                             >
-                              ✨{effectiveCost(i) ? <span className="emoji-btn-cost">-{effectiveCost(i)}⚡</span> : null}
+                              ✨
                             </button>
                             {linhaBotoes(i)}
                           </div>

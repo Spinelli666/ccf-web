@@ -832,7 +832,6 @@ table.sheet-table td.name{ font-weight:600; min-width:120px; }
 .add-row-btn:hover{ background: rgba(255,183,92,0.15); }
 .add-row-center{ display:flex; justify-content:center; }
 .btn.emoji-btn{ font-size:16px; line-height:20px; padding:4px 8px; }
-.emoji-btn-cost{ font-family:inherit; font-size:11px; margin-left:4px; vertical-align:middle; }
 /* Botões de classe (emoji) acima da tabela de habilidades */
 .classe-emoji-buttons{ justify-content:center; }
 .classe-emoji-btn{ font-size:18px; line-height:24px; padding:6px 14px; opacity:.5; }
@@ -1153,4 +1152,40 @@ a.link{ color:var(--blue); }
 .tab, .navlink, .card, .ability-name-toggle):active{
     transform: none !important;
   }
+}
+
+/* ==========================================================================
+   Ficha compacta e escalonada pelo espaço disponível
+   --------------------------------------------------------------------------
+   Os tamanhos da ficha são todos em px; em vez de reescrever cada um, a ficha
+   inteira (.sheet-scale, em SheetView) recebe `zoom` por degraus. Os degraus
+   olham a largura da coluna central (container query), não a da tela — assim
+   contam também a escala do Windows (125% = 1920 vira 1536), a janela não
+   maximizada e os painéis de combate/chat abertos.
+   ========================================================================== */
+.main-col{ container: main-col / inline-size; }
+/* No celular (.app-shell em coluna) a .layout tem margin:auto e encolheria até o
+   conteúdo — com o container acima, isso vira largura zero. Força a largura cheia. */
+@media (max-width: 880px){ .layout{ width:100%; } }
+.main-col:has(.sheet-scale){ max-width:1000px; }
+.sheet-scale{ zoom:.9; }
+@container main-col (max-width: 900px){ .sheet-scale{ zoom:.85; } }
+@container main-col (max-width: 760px){ .sheet-scale{ zoom:.8; } }
+/* Celular: as tabelas largas (Habilidades) não cabem nem com zoom — elas rolam
+   de lado dentro do .sheet-table-wrap; o nome fica numa linha só em vez de
+   quebrar em pedacinhos. */
+@container main-col (max-width: 520px){
+  .sheet-scale{ zoom:.82; }
+  .sheet-scale table.sheet-table td.name{ white-space:nowrap; }
+}
+
+/* Painéis abertos (combate à esquerda, chat à direita) flutuam por cima do
+   conteúdo; em tela larga a coluna central abre espaço pra eles em vez de ficar
+   coberta. Abaixo desses limites (notebook pequeno, tablet, celular) a ficha
+   ficaria espremida demais, então eles continuam flutuando por cima. */
+@media (min-width: 1181px){
+  .app-shell:has(.combat-col:not(.collapsed)) .layout{ padding-left: calc(32px + 226px); }
+}
+@media (min-width: 1500px){
+  .app-shell:has(.chat-popover) .layout{ padding-right: calc(32px + 340px); }
 }

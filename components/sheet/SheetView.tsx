@@ -113,7 +113,7 @@ export function SheetView({
   }
 
   return (
-    <>
+    <div className="sheet-scale">
       <div className="sheet-actions">
         <button className="btn ghost" onClick={() => router.push(`/mesas/${mesaId}/gallery`)}>
           ← Voltar
@@ -288,6 +288,6 @@ export function SheetView({
           onCancel={() => setShowDelete(false)}
         />
       )}
-    </>
+    </div>
   );
 }
