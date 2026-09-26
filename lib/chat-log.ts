@@ -31,6 +31,7 @@ export type LogView = {
 type Rule = { re: RegExp; icon: string; tone: LogTone; banner?: boolean; split?: "colon" | "list" };
 
 const RULES: Rule[] = [
+  { re: /^Empate na iniciativa/, icon: "⚖️", tone: "turno", banner: true },
   { re: /^Rodada \d+ começou|^Voltou pra Rodada/, icon: "🔔", tone: "turno", banner: true },
   { re: /^Agora é o turno de|^Voltou o turno/, icon: "▶️", tone: "turno", banner: true },
   { re: /sofreu \d+ de dano/, icon: "🩸", tone: "dano" },
@@ -89,7 +90,7 @@ export function formatLog(text: string, characterName: string | null): LogView {
   const details: string[] = [];
 
   // Complementos depois de " — " (ex: absorção do Bônus de Vida, efeito do item usado).
-  const dash = body.indexOf(" — ");
+  const dash = rule?.banner ? -1 : body.indexOf(" — ");
   if (dash >= 0) {
     details.push(capitalize(body.slice(dash + 3).trim()));
     body = body.slice(0, dash);

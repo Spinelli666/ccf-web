@@ -312,6 +312,16 @@ app.prepare().then(async () => {
         const podeRolar = socket.data.isGM || participante.sheet?.ownerId === socket.data.user.id;
         if (!podeRolar) return ack && ack({ ok: false, error: "Você não controla esse personagem." });
 
+        // Regra: não pode haver dois valores iguais na iniciativa. Quem empatou rola de novo
+        // (só quem está empatado — um valor único não pode ser rerrolado).
+        const antes = await prisma.combateParticipante.findMany({ where: { combateId: combate.id } });
+        const desempate =
+          participante.iniciativa !== null &&
+          antes.some((p) => p.id !== participante.id && p.iniciativa === participante.iniciativa);
+        if (participante.iniciativa !== null && !desempate) {
+          return ack && ack({ ok: false, error: "Iniciativa já rolada." });
+        }
+
         const roll = Math.floor(Math.random() * 20) + 1;
         await prisma.combateParticipante.update({ where: { id: participante.id }, data: { iniciativa: roll } });
 
@@ -319,8 +329,11 @@ app.prepare().then(async () => {
           where: { combateId: combate.id },
           orderBy: { ordem: "asc" },
         });
+        const empatados = atualizados.filter(
+          (p) => p.iniciativa !== null && atualizados.some((o) => o.id !== p.id && o.iniciativa === p.iniciativa)
+        );
         const todosRolaram = atualizados.every((p) => p.iniciativa !== null);
-        if (todosRolaram) {
+        if (todosRolaram && empatados.length === 0) {
           const ordenados = [...atualizados].sort(
             (a, b) => (b.iniciativa ?? 0) - (a.iniciativa ?? 0) || a.ordem - b.ordem
           );
@@ -335,12 +348,26 @@ app.prepare().then(async () => {
             authorId: socket.data.user.id,
             authorName: socket.data.user.name || socket.data.user.username,
             kind: "roll",
-            text: `Iniciativa — ${participante.nome}: 1d20`,
+            text: `Iniciativa${desempate ? " (desempate)" : ""} — ${participante.nome}: 1d20`,
             total: roll,
             critClass: null,
           },
         });
         io.to(room).emit("chat:new", message);
+
+        const empateNovo = empatados.filter((p) => p.iniciativa === roll);
+        if (empateNovo.length > 1) {
+          const logMsg = await prisma.chatMessage.create({
+            data: {
+              mesaId: socket.data.mesaId,
+              authorId: socket.data.user.id,
+              authorName: socket.data.user.name || socket.data.user.username,
+              kind: "log",
+              text: `⚖️ Empate na iniciativa (${roll}): ${empateNovo.map((p) => p.nome).join(" e ")} — rolem de novo!`,
+            },
+          });
+          io.to(room).emit("chat:new", logMsg);
+        }
 
         const state = await getCombateState(socket.data.mesaId);
         io.to(room).emit("combat:state", state);

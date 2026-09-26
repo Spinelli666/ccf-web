@@ -204,6 +204,9 @@ export function CombateClient({
             )}
 
             {combate.participantes.map((p, i) => {
+              // Regra: dois valores iguais na iniciativa não valem — os empatados rolam de novo.
+              const empatado =
+                p.iniciativa !== null && combate.participantes.some((o) => o.id !== p.id && o.iniciativa === p.iniciativa);
               const sheet = p.sheetId ? sheetsPorId.get(p.sheetId) : undefined;
               const status = p.mostrarStatus && sheet ? statusFor(sheet.data) : null;
               const podeRolar = isGM || (!!p.sheetOwnerId && p.sheetOwnerId === currentUserId);
@@ -246,7 +249,22 @@ export function CombateClient({
                     </div>
                   )}
                   <div className="combat-card-bottom">
-                    {p.iniciativa !== null ? (
+                    {empatado ? (
+                      <span className="combat-iniciativa-empate">
+                        <span className="combat-iniciativa-val is-empate" title="Empate — precisa rolar de novo">
+                          ⚖️ {p.iniciativa}
+                        </span>
+                        {podeRolar ? (
+                          <button type="button" className="btn small" onClick={() => rolarIniciativa(p.id)}>
+                            Desempatar 1d20
+                          </button>
+                        ) : (
+                          <span className="derived-note" style={{ margin: 0 }}>
+                            empate, rolando de novo
+                          </span>
+                        )}
+                      </span>
+                    ) : p.iniciativa !== null ? (
                       <span className="combat-iniciativa-val">🎲 {p.iniciativa}</span>
                     ) : podeRolar ? (
                       <button type="button" className="btn small secondary" onClick={() => rolarIniciativa(p.id)}>
