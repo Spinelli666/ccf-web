@@ -1167,7 +1167,7 @@ a.link{ color:var(--blue); }
 /* No celular (.app-shell em coluna) a .layout tem margin:auto e encolheria até o
    conteúdo — com o container acima, isso vira largura zero. Força a largura cheia. */
 @media (max-width: 880px){ .layout{ width:100%; } }
-.main-col:has(.sheet-scale){ max-width:1000px; }
+.main-col:has(.sheet-scale){ max-width:800px; }
 .sheet-scale{ zoom:.9; }
 @container main-col (max-width: 900px){ .sheet-scale{ zoom:.85; } }
 @container main-col (max-width: 760px){ .sheet-scale{ zoom:.8; } }
