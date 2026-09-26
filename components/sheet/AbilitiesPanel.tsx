@@ -5,6 +5,7 @@ import { num, clamp } from "@/lib/derived";
 import { computeDerived } from "@/lib/derived";
 import { AUTO_GRANT_ABILITIES, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
 import { EffectText } from "@/components/sheet/EffectText";
+import { TipoAcaoBadge } from "@/components/sheet/TipoAcaoBadge";
 import { AcaoDialog } from "@/components/dialogs/AcaoDialog";
 import { EditHabilidadeDialog } from "@/components/dialogs/EditHabilidadeDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
@@ -165,12 +166,12 @@ export function AbilitiesPanel({
     onLog(`${nome} usou a habilidade racial "${h.nome}".`);
   }
 
-  // Se a habilidade base tiver um aprimoramento ativo logo abaixo com custo próprio,
-  // esse custo substitui o da habilidade base ao usar (mesma lógica do app original).
+  // Se a habilidade base tiver um aprimoramento logo abaixo com custo próprio, esse custo
+  // substitui o da habilidade base ao usar. Estar na tabela já significa aprendido.
   function effectiveCost(i: number): number {
     const h = sheet.classeHabilidades[i];
     const next = sheet.classeHabilidades[i + 1];
-    if (next && next.indent && next.ativo && next.custoPE !== "" && next.custoPE !== undefined) {
+    if (next && next.indent && next.custoPE !== "" && next.custoPE !== undefined) {
       return num(next.custoPE, num(h.custoPE, 0));
     }
     return num(h.custoPE, 0);
@@ -438,29 +439,12 @@ export function AbilitiesPanel({
                   <Fragment key={i}>
                     <tr className="indent">
                       {nomeCell}
-                      <td className="col-tight">{h.tipo}</td>
+                      <td className="col-tight">
+                        <TipoAcaoBadge tipo={h.tipo} />
+                      </td>
                       <td className="col-tight">{h.custo}</td>
                       <td className="col-tight">
-                        {isMine && (
-                        <div className="ability-controls">
-                        {h.custoPE !== "" && h.custoPE !== undefined && (
-                          <label className="chk-inline">
-                            <input
-                              type="checkbox"
-                              checked={!!h.ativo}
-                              onChange={(e) => {
-                                updateClasse(i, { ativo: e.target.checked });
-                                onLog(
-                                  `${nome} marcou "${h.nome}" como ${e.target.checked ? "aprendido" : "não aprendido"}`
-                                );
-                              }}
-                            />{" "}
-                            aprendido
-                          </label>
-                        )}
-                        {linhaBotoes(i)}
-                        </div>
-                        )}
+                        {isMine && <div className="ability-controls">{linhaBotoes(i)}</div>}
                       </td>
                     </tr>
                     {aberta && (
@@ -475,7 +459,9 @@ export function AbilitiesPanel({
                   <Fragment key={i}>
                     <tr>
                       {nomeCell}
-                      <td className="col-tight">{h.tipo}</td>
+                      <td className="col-tight">
+                        <TipoAcaoBadge tipo={h.tipo} />
+                      </td>
                       <td className="col-tight">{h.custo}</td>
                       <td className="col-tight">
                         {isMine && (

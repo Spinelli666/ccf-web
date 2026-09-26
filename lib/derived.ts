@@ -48,8 +48,8 @@ export type SheetData = {
   armaduras?: Armadura[];
 };
 
-// Procura um aprimoramento (linha indentada logo após a habilidade base) marcado como
-// ativo/aprendido — usado pra bônus derivados automáticos que dependem de aprimoramentos
+// Procura um aprimoramento (linha indentada logo após a habilidade base) na ficha —
+// estar na tabela já significa aprendido. Usado pra bônus derivados automáticos que dependem de aprimoramentos
 // específicos (ex: Colecionador II aumentando Espaços de Inventário).
 function temAprimoramentoAtivo(lista: HabilidadeClasse[] | undefined, base: string, aprimoramento: string): boolean {
   if (!lista) return false;
@@ -59,7 +59,7 @@ function temAprimoramentoAtivo(lista: HabilidadeClasse[] | undefined, base: stri
       dentroDaBase = h.nome === base;
       continue;
     }
-    if (dentroDaBase && h.nome === aprimoramento) return h.ativo !== false;
+    if (dentroDaBase && h.nome === aprimoramento) return true;
   }
   return false;
 }

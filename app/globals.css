@@ -1434,3 +1434,20 @@ a.link{ color:var(--blue); }
   .notes-page-input, .notes-page-name{ font-size:22px; flex-basis:100%; }
   .notes-editor, .notes-preview{ min-height:320px; }
 }
+
+/* Selos do tipo de ação das habilidades (CURTA · LONGA · REAÇÃO · PASSIVA · FOCO) */
+.tipo-acao{ display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.tipo-acao-grupo{ display:inline-flex; align-items:center; gap:3px; }
+.tipo-acao-sep{ color:var(--muted); font-size:11px; }
+.tipo-selo{
+  --c: var(--gold);
+  display:inline-block; font-family:'Cinzel',serif; font-size:9.5px; font-weight:700; letter-spacing:.7px;
+  text-transform:uppercase; line-height:1; padding:3px 6px 2px; border-radius:3px;
+  color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent);
+  border:1px solid color-mix(in srgb, var(--c) 60%, transparent);
+}
+.tipo-curta{ --c:#f0a040; }
+.tipo-longa{ --c:#e0685a; }
+.tipo-reacao{ --c:#6fc3e0; }
+.tipo-passiva{ --c:#6cc07a; }
+.tipo-foco{ --c:#c49bf0; }
