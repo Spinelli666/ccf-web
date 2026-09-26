@@ -1050,6 +1050,9 @@ a.link{ color:var(--blue); }
      6. Linha/bloco largo ..... scale(.98) + fundo dourado translúcido
         (5% num elemento de 700px+ seria um tranco; 2% dá o mesmo deslocamento
         visual em pixels que os botões normais)
+   Também valem pros clicáveis que não são <button>: abas .tab e nome de habilidade
+   .ability-name-toggle (<span>), links
+   da barra lateral .navlink e os cards .card de ficha/mesa (<div onClick>).
    Botões destrutivos que usam classe neutra (.btn.ghost, .icon-btn) levam a
    marca `.is-danger` só pra receber o toque vermelho.
    Este bloco fica no fim do arquivo de propósito: vence os :hover de mesma
@@ -1070,7 +1073,8 @@ a.link{ color:var(--blue); }
 .icon-btn, .rail-toggle, .counter-btn, .dice-btn, .combat-reorder-mini button,
 .acao-erro-close, .chat-clear-btn, .chat-log-del, .chat-card-del, .combat-row-del,
 .card-del-btn, .remove-btn,
-.folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar{
+.folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar,
+.tab, .navlink, .card, .ability-name-toggle{
   transition:
     transform var(--press-release) var(--press-ease),
     background-color .12s ease, border-color .12s ease, color .12s ease,
@@ -1084,7 +1088,8 @@ a.link{ color:var(--blue); }
     .icon-btn, .rail-toggle, .counter-btn, .dice-btn, .combat-reorder-mini button,
     .acao-erro-close, .chat-clear-btn, .chat-log-del, .chat-card-del, .combat-row-del,
     .card-del-btn, .remove-btn,
-    .folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar):active:not(:disabled){
+    .folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar,
+.tab, .navlink, .card, .ability-name-toggle):active:not(:disabled){
   transition-duration: var(--press-down);
 }
 
@@ -1097,7 +1102,7 @@ a.link{ color:var(--blue); }
 .btn.secondary:not(.emoji-btn):not(.is-danger):active:not(:disabled),
 .btn.ghost:not(.emoji-btn):not(.is-danger):active:not(:disabled),
 :is(.wizard-class-btn, .modal-opt-btn, .add-row-btn, .dice-quick-btn, .cat-chip, .tag-btn,
-    .effect-chip, .sheet-tab-btn, .item-name-btn):not(.classe-emoji-btn):active:not(:disabled){
+    .effect-chip, .sheet-tab-btn, .item-name-btn, .tab, .ability-name-toggle):not(.classe-emoji-btn):active:not(:disabled){
   transform: scale(.95); background-color: var(--press-tint);
 }
 :is(.wizard-class-btn, .cat-chip, .effect-chip).active:not(.classe-emoji-btn):active:not(:disabled){
@@ -1129,10 +1134,12 @@ a.link{ color:var(--blue); }
 .chat-fab:active{ transform: scale(.90); filter: brightness(.92); } /* ícone, mas cheio */
 
 /* 6. Linha/bloco largo */
-:is(.folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row):active:not(:disabled){
+:is(.folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .navlink):active:not(:disabled){
   transform: scale(.98); background-color: var(--press-tint);
 }
 .sheet-avatar:active:not(:disabled){ transform: scale(.98); }
+/* Cards clicáveis (ficha/mesa): não encolhe quando o toque é no botão 🗑️ de dentro */
+.card:active:not(:has(button:active)){ transform: scale(.98); }
 
 /* Quem prefere menos movimento: sem encolher, só o toque de cor */
 @media (prefers-reduced-motion: reduce){
@@ -1142,7 +1149,8 @@ a.link{ color:var(--blue); }
       .icon-btn, .rail-toggle, .counter-btn, .dice-btn, .combat-reorder-mini button,
       .acao-erro-close, .chat-clear-btn, .chat-log-del, .chat-card-del, .combat-row-del,
       .card-del-btn, .remove-btn,
-      .folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar):active{
+      .folder-head, .table-collapse-head, .rb-entry-head, .effect-picker-row, .sheet-avatar,
+.tab, .navlink, .card, .ability-name-toggle):active{
     transform: none !important;
   }
 }
