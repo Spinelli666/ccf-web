@@ -70,6 +70,7 @@ model Sheet {
   updatedAt DateTime @updatedAt
 
   combateParticipantes CombateParticipante[]
+  cadernos             Caderno[]
 
   @@index([ownerId])
   @@index([mesaId])
@@ -161,4 +162,34 @@ model CombateParticipante {
   mostrarStatus Boolean  @default(false)
 
   @@index([combateId])
+}
+
+// Cadernos de anotações de um personagem (ficha), com várias páginas em markdown.
+// Só o dono da ficha edita; cada caderno escolhe se é privado (só o dono lê) ou
+// público (quem pode ver a ficha também lê).
+model Caderno {
+  id        String          @id @default(cuid())
+  sheetId   String
+  sheet     Sheet           @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  titulo    String
+  publico   Boolean         @default(false)
+  ordem     Int             @default(0)
+  paginas   CadernoPagina[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([sheetId])
+}
+
+model CadernoPagina {
+  id        String   @id @default(cuid())
+  cadernoId String
+  caderno   Caderno  @relation(fields: [cadernoId], references: [id], onDelete: Cascade)
+  titulo    String
+  conteudo  String   @default("")
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cadernoId])
 }

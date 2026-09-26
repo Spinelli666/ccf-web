@@ -129,14 +129,17 @@ export function SheetView({
             {downloading ? "Gerando PDF..." : "📥 Baixar como PDF"}
           </button>
           {canManage && (
-            <>
-              <button className="btn ghost small" onClick={togglePrivate}>
-                {priv ? "🔒 Privada" : "🔓 Pública"}
-              </button>
-              <button className="btn danger" onClick={() => setShowDelete(true)}>
-                Apagar
-              </button>
-            </>
+            <button className="btn ghost small" onClick={togglePrivate}>
+              {priv ? "🔒 Privada" : "🔓 Pública"}
+            </button>
+          )}
+          <button className="btn ghost small" onClick={() => router.push(`/mesas/${mesaId}/sheets/${sheetId}/anotacoes`)}>
+            📓 Anotações
+          </button>
+          {canManage && (
+            <button className="btn danger" onClick={() => setShowDelete(true)}>
+              Apagar
+            </button>
           )}
         </div>
       </div>
