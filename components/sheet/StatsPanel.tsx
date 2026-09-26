@@ -465,11 +465,11 @@ export function StatsPanel({
                   value={pvDelta}
                   onChange={(e) => setPvDelta(e.target.value)}
                 />
-                <button type="button" className="btn small secondary" onClick={sofrerDano}>
-                  Sofrer dano
+                <button type="button" className="btn small secondary emoji-btn" title="Sofrer dano" aria-label="Sofrer dano" onClick={sofrerDano}>
+                  🩸
                 </button>
-                <button type="button" className="btn small" onClick={curarPv}>
-                  Curar
+                <button type="button" className="btn small emoji-btn" title="Curar" aria-label="Curar" onClick={curarPv}>
+                  ❤️‍🩹
                 </button>
               </div>
               <label className="chk-inline ignore-armor-label">
@@ -513,11 +513,11 @@ export function StatsPanel({
                 value={peDelta}
                 onChange={(e) => setPeDelta(e.target.value)}
               />
-              <button type="button" className="btn small secondary" onClick={gastarPe}>
-                Gastar
+              <button type="button" className="btn small secondary emoji-btn" title="Gastar" aria-label="Gastar" onClick={gastarPe}>
+                🪫
               </button>
-              <button type="button" className="btn small" onClick={recuperarPe}>
-                Recuperar
+              <button type="button" className="btn small emoji-btn" title="Recuperar" aria-label="Recuperar" onClick={recuperarPe}>
+                🔋
               </button>
             </div>
           )}

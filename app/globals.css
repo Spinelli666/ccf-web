@@ -1129,6 +1129,8 @@ a.link{ color:var(--blue); }
     .card-del-btn, .remove-btn, .btn.emoji-btn.is-danger):active:not(:disabled){
   transform: scale(.90); background-color: var(--press-tint-danger);
 }
+/* 5c. Ícone cheio (ex: ❤️‍🩹 Curar, 🔋 Recuperar): mantém o fundo, só escurece */
+.btn.emoji-btn:not(.secondary):not(.ghost):not(.danger):active:not(:disabled){ background-color: var(--maroon); filter: brightness(.92); }
 .wizard-class-btn.classe-emoji-btn.active:active:not(:disabled){ background-color: var(--maroon); filter: brightness(.92); }
 .chat-fab:active{ transform: scale(.90); filter: brightness(.92); } /* ícone, mas cheio */
 
