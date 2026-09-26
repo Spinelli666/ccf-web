@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { computeDerived, equippedArmorSum, equippedWeaponProtectionSum, num, clamp } from "@/lib/derived";
 import { rollDie } from "@/lib/dice";
+import { isMaxRoll } from "@/lib/max-roll";
 import { DescansoDialog } from "@/components/dialogs/DescansoDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import { LevelUpDialog } from "@/components/dialogs/LevelUpDialog";
@@ -184,7 +185,7 @@ export function StatsPanel({
     setShowRest(false);
     const dados = tipo === "curto" ? 1 : 2;
     const multVigor = tipo === "curto" ? 2 : 3;
-    const rolls = Array.from({ length: dados }, () => rollDie(20));
+    const rolls = Array.from({ length: dados }, () => rollDie(20, isMaxRoll()));
     const soma = rolls.reduce((a, b) => a + b, 0);
     const recuperado = soma + multVigor * derived.vigor;
     const novoPv = clamp(pvAtual + recuperado, -derived.pvMax, pvMaxTotal);

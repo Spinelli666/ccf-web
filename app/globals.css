@@ -342,6 +342,14 @@ body{
   background:var(--input-bg); color:var(--maroon); border-radius:4px; padding:6px 8px; margin-bottom:8px; cursor:pointer;
 }
 .chat-visibility-select:focus{ outline:2px solid var(--blue); outline-offset:1px; }
+.chat-visibility-row{ display:flex; gap:6px; align-items:flex-start; }
+.chat-visibility-row .chat-visibility-select{ flex:1; min-width:0; }
+.chat-maxroll-btn{
+  flex-shrink:0; width:30px; height:27px; border-radius:4px; cursor:pointer; font-size:12px; line-height:1;
+  border:1px solid var(--gold-line); background:var(--input-bg); filter:grayscale(1); opacity:.45;
+}
+.chat-maxroll-btn:hover{ opacity:.8; }
+.chat-maxroll-btn.active{ filter:none; opacity:1; border-color:var(--gold); background:rgba(255,183,92,.18); }
 .chat-input-row{ display:flex; gap:6px; }
 .chat-input-row input{
   flex:1; min-width:0; font-family:'EB Garamond', serif; font-size:13px; padding:8px 10px;

@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
 import { useRollVisibility, setRollVisibility, type RollVisibility } from "@/lib/roll-visibility";
 import { formatLog, type LogMeter } from "@/lib/chat-log";
+import { isMaxRoll, podeUsarMaxRoll, setMaxRoll, useMaxRoll } from "@/lib/max-roll";
 
 type Visibility = RollVisibility;
 
@@ -93,6 +94,8 @@ export function TableChat({ mesaId }: { mesaId: string }) {
   const [, forceTick] = useState(0);
   const [showClear, setShowClear] = useState(false);
   const visibility = useRollVisibility();
+  const maxRoll = useMaxRoll();
+  const mostraMaxRoll = podeUsarMaxRoll(session?.user?.username);
   // Em celular o painel do chat cobre a tela quase inteira (fixed, largura ~viewport) —
   // começa fechado nesse caso pra não esconder a ficha, igual a SideNav/CombateClient.
   const isNarrow = useIsNarrowViewport(880);
@@ -150,7 +153,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
     const socket = getSocket(mesaId);
     const dice = parseDiceCommand(raw);
     if (dice) {
-      const { total, text: breakdown } = rollDiceCommand(dice);
+      const { total, text: breakdown } = rollDiceCommand(dice, isMaxRoll());
       socket.emit("chat:send", {
         kind: "roll",
         text: `🎲 ${breakdown}`,
@@ -358,6 +361,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
             </button>
           ))}
         </div>
+        <div className="chat-visibility-row">
         <select
           className="chat-visibility-select"
           value={visibility}
@@ -370,6 +374,19 @@ export function TableChat({ mesaId }: { mesaId: string }) {
             </option>
           ))}
         </select>
+        {mostraMaxRoll && (
+          <button
+            type="button"
+            className={`chat-maxroll-btn${maxRoll ? " active" : ""}`}
+            title={maxRoll ? "Rolagens no máximo: ligado" : "Rolagens no máximo: desligado"}
+            aria-label="Rolagens no máximo"
+            aria-pressed={maxRoll}
+            onClick={() => setMaxRoll(!maxRoll)}
+          >
+            ⭐
+          </button>
+        )}
+        </div>
         <div className="chat-input-row">
           <input
             type="text"

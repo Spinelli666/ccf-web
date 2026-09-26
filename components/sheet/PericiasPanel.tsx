@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { num, equippedArmorPericiaBonus, PERICIA_ORDER } from "@/lib/derived";
 import { rollWithMode, formatRollDice, rollCritClass, type RollModeKey } from "@/lib/dice";
+import { isMaxRoll } from "@/lib/max-roll";
 import { ChoiceDialog } from "@/components/dialogs/ChoiceDialog";
 import { getSocket } from "@/lib/socket-client";
 import { getRollVisibility } from "@/lib/roll-visibility";
@@ -43,7 +44,7 @@ export function PericiasPanel({
     const p = sheet.pericias[rollingIdx];
     const periciaBonus = num(p.bonus, 0);
     const equipBonus = equippedArmorPericiaBonus(sheet.armaduras, p.nome);
-    const result = rollWithMode(20, mode);
+    const result = rollWithMode(20, mode, isMaxRoll());
     const total = result.picked + num(p.valor) + periciaBonus + equipBonus + bonusExtra;
     let breakdown = `${p.nome}: ${formatRollDice(20, result)} + ${num(p.valor)}`;
     if (periciaBonus) breakdown += ` + Bônus (${periciaBonus})`;

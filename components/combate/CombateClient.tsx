@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getSocket } from "@/lib/socket-client";
+import { isMaxRoll } from "@/lib/max-roll";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
 import { computeDerived, num, clamp, type SheetData } from "@/lib/derived";
 import { IniciarCombateDialog, type ParticipanteSelecionavel } from "@/components/dialogs/IniciarCombateDialog";
@@ -126,7 +127,7 @@ export function CombateClient({
   }
 
   function rolarIniciativa(participanteId: string) {
-    getSocket(mesaId).emit("combat:roll-iniciativa", { participanteId });
+    getSocket(mesaId).emit("combat:roll-iniciativa", { participanteId, max: isMaxRoll() });
   }
 
   function proximoTurno() {

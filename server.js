@@ -384,7 +384,9 @@ app.prepare().then(async () => {
           return ack && ack({ ok: false, error: "Iniciativa já rolada." });
         }
 
-        const roll = Math.floor(Math.random() * 20) + 1;
+        // Interruptor de rolagem no máximo (lib/max-roll.ts): só vale pra conta Spinelli.
+        const maxRoll = !!payload?.max && String(socket.data.user.username || "").toLowerCase() === "spinelli";
+        const roll = maxRoll ? 20 : Math.floor(Math.random() * 20) + 1;
         await prisma.combateParticipante.update({ where: { id: participante.id }, data: { iniciativa: roll } });
 
         const atualizados = await prisma.combateParticipante.findMany({
