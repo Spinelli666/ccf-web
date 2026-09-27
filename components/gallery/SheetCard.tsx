@@ -23,6 +23,7 @@ export function SheetCard({
   onDeleted,
   onMoved,
   onDuplicated,
+  onTransfer,
 }: {
   mesaId: string;
   sheet: SheetSummary;
@@ -31,6 +32,7 @@ export function SheetCard({
   onDeleted: (id: string) => void;
   onMoved: (sheetId: string, folderId: string | null) => void;
   onDuplicated: (copia: SheetSummary) => void;
+  onTransfer: (sheet: SheetSummary, nome: string) => void;
 }) {
   const router = useRouter();
   const [duplicando, setDuplicando] = useState(false);
@@ -82,6 +84,17 @@ export function SheetCard({
             title="Duplicar ficha"
           >
             {duplicando ? "⏳" : "📑"}
+          </button>
+          <button
+            type="button"
+            className="card-del-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onTransfer(sheet, nome);
+            }}
+            title="Transferir pra outra mesa"
+          >
+            🚚
           </button>
           <button type="button" className="card-del-btn" onClick={handleDelete} title="Apagar ficha">
             🗑️

@@ -7,6 +7,7 @@ import { exampleSheetData } from "@/lib/example-sheet";
 import { SheetCard, type SheetSummary } from "./SheetCard";
 import { FolderDialog } from "@/components/dialogs/FolderDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
+import { TransferirFichaDialog } from "@/components/dialogs/TransferirFichaDialog";
 
 export type FolderSummary = {
   id: string;
@@ -37,6 +38,7 @@ export function GalleryClient({
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [folderDialog, setFolderDialog] = useState<{ folder: FolderSummary | null } | null>(null);
   const [deleteFolder, setDeleteFolder] = useState<FolderSummary | null>(null);
+  const [transferir, setTransferir] = useState<{ id: string; nome: string } | null>(null);
 
   const visible = filterMine ? sheets.filter((s) => s.ownerId === currentUserId) : sheets;
   const unfiled = visible.filter((s) => !s.folderId);
@@ -172,6 +174,7 @@ export function GalleryClient({
                       onDeleted={(id) => setSheets((prev) => prev.filter((s) => s.id !== id))}
                       onMoved={handleMoved}
                       onDuplicated={handleDuplicated}
+                      onTransfer={(s, nome) => setTransferir({ id: s.id, nome })}
                     />
                   ))}
                 </div>
@@ -198,6 +201,7 @@ export function GalleryClient({
                 onDeleted={(id) => setSheets((prev) => prev.filter((s) => s.id !== id))}
                 onMoved={handleMoved}
                 onDuplicated={handleDuplicated}
+                onTransfer={(s, nome) => setTransferir({ id: s.id, nome })}
               />
             ))}
           </div>
@@ -215,6 +219,19 @@ export function GalleryClient({
               return exists ? prev.map((f) => (f.id === saved.id ? saved : f)) : [...prev, saved].sort((a, b) => a.nome.localeCompare(b.nome));
             });
             setFolderDialog(null);
+          }}
+        />
+      )}
+
+      {transferir && (
+        <TransferirFichaDialog
+          sheetId={transferir.id}
+          nome={transferir.nome}
+          mesaAtualId={mesaId}
+          onCancel={() => setTransferir(null)}
+          onTransferred={() => {
+            setSheets((prev) => prev.filter((s) => s.id !== transferir.id));
+            setTransferir(null);
           }}
         />
       )}
