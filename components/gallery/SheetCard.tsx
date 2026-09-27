@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { computeDerived, type SheetData } from "@/lib/derived";
 import type { FolderSummary } from "./GalleryClient";
@@ -21,6 +22,7 @@ export function SheetCard({
   folders,
   onDeleted,
   onMoved,
+  onDuplicated,
 }: {
   mesaId: string;
   sheet: SheetSummary;
@@ -28,8 +30,10 @@ export function SheetCard({
   folders: FolderSummary[];
   onDeleted: (id: string) => void;
   onMoved: (sheetId: string, folderId: string | null) => void;
+  onDuplicated: (copia: SheetSummary) => void;
 }) {
   const router = useRouter();
+  const [duplicando, setDuplicando] = useState(false);
   const derived = computeDerived(sheet.data || {});
   const meta = sheet.data as { name?: string; classeTitulo?: string; racaTitulo?: string; avatarUrl?: string } | undefined;
   const nome = meta?.name || sheet.name;
@@ -42,6 +46,18 @@ export function SheetCard({
     if (!confirm(`Apagar a ficha de ${nome}?`)) return;
     const res = await fetch(`/api/sheets/${sheet.id}`, { method: "DELETE" });
     if (res.ok) onDeleted(sheet.id);
+  }
+
+  async function handleDuplicate(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (duplicando) return;
+    setDuplicando(true);
+    try {
+      const res = await fetch(`/api/sheets/${sheet.id}/duplicate`, { method: "POST" });
+      if (res.ok) onDuplicated(await res.json());
+    } finally {
+      setDuplicando(false);
+    }
   }
 
   async function handleMove(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -57,9 +73,20 @@ export function SheetCard({
   return (
     <div className="frame card" onClick={() => router.push(`/mesas/${mesaId}/sheets/${sheet.id}`)}>
       {isMine && (
-        <button type="button" className="card-del-btn" onClick={handleDelete} title="Apagar ficha">
-          🗑️
-        </button>
+        <div className="card-actions">
+          <button
+            type="button"
+            className="card-del-btn"
+            onClick={handleDuplicate}
+            disabled={duplicando}
+            title="Duplicar ficha"
+          >
+            {duplicando ? "⏳" : "📑"}
+          </button>
+          <button type="button" className="card-del-btn" onClick={handleDelete} title="Apagar ficha">
+            🗑️
+          </button>
+        </div>
       )}
       {avatarUrl && (
         <div className="card-avatar">

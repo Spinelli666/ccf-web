@@ -58,6 +58,11 @@ export function GalleryClient({
     setSheets((prev) => prev.map((s) => (s.id === sheetId ? { ...s, folderId } : s)));
   }
 
+  function handleDuplicated(copia: SheetSummary) {
+    setSheets((prev) => [...prev, copia].sort((a, b) => a.name.localeCompare(b.name)));
+    if (copia.folderId) setOpenFolders((prev) => new Set(prev).add(copia.folderId!));
+  }
+
   async function handleDeleteFolder() {
     if (!deleteFolder) return;
     const res = await fetch(`/api/folders/${deleteFolder.id}`, { method: "DELETE" });
@@ -166,6 +171,7 @@ export function GalleryClient({
                       folders={folders.filter(canManageFolder)}
                       onDeleted={(id) => setSheets((prev) => prev.filter((s) => s.id !== id))}
                       onMoved={handleMoved}
+                      onDuplicated={handleDuplicated}
                     />
                   ))}
                 </div>
@@ -191,6 +197,7 @@ export function GalleryClient({
                 folders={folders.filter(canManageFolder)}
                 onDeleted={(id) => setSheets((prev) => prev.filter((s) => s.id !== id))}
                 onMoved={handleMoved}
+                onDuplicated={handleDuplicated}
               />
             ))}
           </div>
