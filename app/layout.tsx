@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { Voltaire } from "next/font/google";
 import "./globals.css";
 import { SessionProviderClient } from "@/components/providers/SessionProviderClient";
+
+// Fonte única do app, servida pelo próprio Next (o @import do Google Fonts no CSS era
+// descartado no build, e a página caía na sans-serif padrão).
+const voltaire = Voltaire({ weight: "400", subsets: ["latin"], variable: "--font-voltaire" });
 
 export const metadata: Metadata = {
   title: "Sistema Cardigan — Fichas",
@@ -15,11 +20,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
+    <html lang="pt-BR" className={voltaire.variable}>
       <body>
         <SessionProviderClient>{children}</SessionProviderClient>
       </body>
