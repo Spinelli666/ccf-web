@@ -169,13 +169,15 @@ export function computeDerived(s: SheetData): DerivedStats {
   // Deslocamento (+1m a cada 2) e Acerto Crítico (-1 a cada 3) contam Destreza + bônus.
   const destrezaTotal = getPericiaTotal(s, "Destreza");
   const vigor = getPericiaVal(s, "Vigor");
+  // PV (+10 por ponto) e PE (+1 por ponto) contam Vigor + bônus.
+  const vigorTotal = getPericiaTotal(s, "Vigor");
   const fraturas = clamp(num(s.fraturas, 0), 0, 5);
   const stats = s.stats || {};
   const pvMax = Math.max(
     0,
-    50 + 10 * vigor + 5 * (nivel - 1) + num(stats.pvBonus, 0) + equippedArmorPvBonus(s.armaduras) - 5 * fraturas
+    50 + 10 * vigorTotal + 5 * (nivel - 1) + num(stats.pvBonus, 0) + equippedArmorPvBonus(s.armaduras) - 5 * fraturas
   );
-  const peMax = 10 + 1 * vigor + 1 * (nivel - 1) + num(stats.peBonus, 0) + equippedArmorPeBonus(s.armaduras);
+  const peMax = 10 + 1 * vigorTotal + 1 * (nivel - 1) + num(stats.peBonus, 0) + equippedArmorPeBonus(s.armaduras);
   const armaduraNatural = Math.floor(forca / 2) + num(stats.armaduraNaturalBonus, 0);
   const deslocamento = 5 + Math.floor(destrezaTotal / 2) + num(stats.deslocamentoBonus, 0) + equippedArmorDeslocamentoBonus(s.armaduras);
   const colecionadorII = temAprimoramentoAtivo(s.classeHabilidades, "Colecionador", "Aprimoramento II");
