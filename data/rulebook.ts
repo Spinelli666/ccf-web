@@ -14,7 +14,7 @@ export const RULEBOOK_STATIC = [
   {
     "categoria": "Sistema Básico",
     "titulo": "Ações em Combate",
-    "texto": "No seu turno você tem **4 Pontos de Ação**.\n\n**Ação Curta (🔸)** — custa 1 ponto: Deslocamento (5m padrão, +1m a cada 2 de Destreza), Sacar/Equipar/Usar item, Conversar/Interagir, ou uma Habilidade Básica.\n\n**Ação Longa (🔸🔸)** — custa 2 pontos: Teste de Perícia, Atacar (testa Precisão contra Evasão — atacar uma 2ª vez no turno dá Desvantagem Imutável), ou uma Habilidade Forte.\n\n**Reação** — usada durante o turno de outro alvo, só **1 por rodada** (empate em Destreza decide quem age primeiro se dois usarem Reação na mesma Ação).\n\n**Passiva** — efeito sempre ativo, sem custo."
+    "texto": "No seu turno você tem **4 Pontos de Ação**.\n\n**Ação Curta (🔶)** — custa 1 ponto: Deslocamento (5m padrão, +1m a cada 2 de Destreza), Sacar/Equipar/Usar item, Conversar/Interagir, ou uma Habilidade Básica.\n\n**Ação Longa (🔶🔶)** — custa 2 pontos: Teste de Perícia, Atacar (testa Precisão contra Evasão — atacar uma 2ª vez no turno dá Desvantagem Imutável), ou uma Habilidade Forte.\n\n**Reação** — usada durante o turno de outro alvo, só **1 por rodada** (empate em Destreza decide quem age primeiro se dois usarem Reação na mesma Ação).\n\n**Passiva** — efeito sempre ativo, sem custo."
   },
   {
     "categoria": "Sistema Básico",

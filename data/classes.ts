@@ -5,7 +5,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Ruptura",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 4⚡",
+      "custo": "🔶🔶 · 4⚡",
       "custoPE": 4,
       "efeito": "Soma Força como Dano Extra. Ignora 1d12 Armadura do alvo e a danifica em -2 Durabilidade. Aplica Atordoado¹ Inevitável.",
       "aprimoramentos": [
@@ -27,7 +27,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Investida",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 3⚡",
+      "custo": "🔶🔶 · 3⚡",
       "custoPE": 3,
       "efeito": "Corre em linha reta atravessando/derrubando inimigos no caminho. +1 Dano Extra por metro percorrido até cada inimigo atingido. Pode Arremessar o último atingido.",
       "aprimoramentos": [
@@ -48,7 +48,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Ciclone de Aço",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 2⚡",
+      "custo": "🔶🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Com Arma Marcial, testa Precisão contra todos alvos ao redor no alcance da arma. Acertando 3+ inimigos, repete a habilidade sem custo com uma segunda Atacar.",
       "aprimoramentos": [
@@ -69,7 +69,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Golpe Perfeito",
       "tipo": "Ação Longa (Foco)",
-      "custo": "🔸🔸 Foco · 3⚡",
+      "custo": "🔶🔶 Foco · 3⚡",
       "custoPE": 3,
       "efeito": "Entra em Foco por uma rodada (sofrer/causar dano ou efeito negativo cancela). Próximo ataque: +1 Precisão e dobro da Força como Dano Extra.",
       "aprimoramentos": [
@@ -133,7 +133,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Levantar a Guarda",
       "tipo": "Ação Longa (Foco)",
-      "custo": "🔸🔸 Foco · 3⚡",
+      "custo": "🔶🔶 Foco · 3⚡",
       "custoPE": 3,
       "efeito": "Vantagem no próximo teste de Evasão. Reduz pela metade o próximo Dano recebido.",
       "aprimoramentos": [
@@ -155,7 +155,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Provocar",
       "tipo": "Ação Curta",
-      "custo": "🔸 · 1⚡",
+      "custo": "🔶 · 1⚡",
       "custoPE": 1,
       "efeito": "Testa Persuasão contra inimigos à vista; sucesso os provoca a atacar só você por 2 rodadas. Ganha 1d4 PV Temporário por inimigo provocado (removido ao fim; não reusa por 2 rodadas).",
       "aprimoramentos": [
@@ -176,7 +176,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Retribuição",
       "tipo": "Ação Curta (ativa passiva)",
-      "custo": "🔸",
+      "custo": "🔶",
       "custoPE": "",
       "efeito": "A cada dano recebido por você/aliado à vista, acumula 1 ponto (máx. 6). Ao causar dano, gaste pontos: cada um vira +2 Dano Extra.",
       "aprimoramentos": [
@@ -218,7 +218,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Recuperar o Fôlego",
       "tipo": "Ação Longa (Foco)",
-      "custo": "🔸🔸 Foco",
+      "custo": "🔶🔶 Foco",
       "custoPE": "",
       "efeito": "Sai da batalha por uma rodada para recuperar 1d20+2×Vigor em PV ou PE. Só pode ser usada uma vez por Descanso.",
       "aprimoramentos": [
@@ -239,7 +239,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Grito de Guerra",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 4⚡",
+      "custo": "🔶🔶 · 4⚡",
       "custoPE": 4,
       "efeito": "Testa Persuasão contra inimigos que podem ouvi-lo; sucesso aplica Intimidado³. Aliados adjacentes também recebem os bônus.",
       "aprimoramentos": [
@@ -262,7 +262,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Ladrão",
       "tipo": "Ação Curta (Foco)",
-      "custo": "🔸 Foco",
+      "custo": "🔶 Foco",
       "custoPE": "",
       "efeito": "Em Foco, recebe Vantagem em testes de Furtividade para Furtar, e libera Mão Leve sem custo extra (1d6 item aleatório ao furtar quem tocou/atacou; 1x por alvo, não funciona em PCs).",
       "aprimoramentos": [
@@ -304,7 +304,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Golpe Relâmpago",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 3⚡",
+      "custo": "🔶🔶 · 3⚡",
       "custoPE": 3,
       "efeito": "Com Arma Marcial Leve ou desarmado, ataque simples em todos inimigos à vista/alcance num único turno. Cada alvo reinicia seu Deslocamento. Soma Destreza como Dano Extra.",
       "aprimoramentos": [
@@ -325,7 +325,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Dança das Lâminas",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 3⚡",
+      "custo": "🔶🔶 · 3⚡",
       "custoPE": 3,
       "efeito": "Arremessa todas as Adagas acumuladas de uma vez, até 3 em cada inimigo no alcance. Recupera todas de um cadáver com Ação Curta, ou uma por vez de um alvo vivo.",
       "aprimoramentos": [
@@ -409,7 +409,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Desaparecer",
       "tipo": "Ação Curta",
-      "custo": "🔸 · 2⚡",
+      "custo": "🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Ao usar uma Bomba de Fumaça, dobra a área de efeito (14x14m/6 rodadas). Você e aliados ganham Infravisão dentro da fumaça, com Vantagem em Precisão contra afetados sem quebrar o estado Furtivo.",
       "aprimoramentos": [
@@ -451,7 +451,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Irritante",
       "tipo": "Ação Curta",
-      "custo": "🔸 · 4⚡",
+      "custo": "🔶 · 4⚡",
       "custoPE": 4,
       "efeito": "Testa Persuasão contra inimigos que podem ouvi-lo; sucesso os provoca a atacar só você por 2 rodadas. Ganha +1 Destreza temporária por inimigo provocado (removida ao fim; não reusa por 2 rodadas).",
       "aprimoramentos": [
@@ -472,7 +472,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Enganar",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 2⚡",
+      "custo": "🔶🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Testa Persuasão contra um alvo; com sucesso, aplica Atordoado.",
       "aprimoramentos": [
@@ -524,7 +524,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Acerto Debilitante",
       "tipo": "Ação Curta",
-      "custo": "🔸 · 2⚡",
+      "custo": "🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Após acertar um ataque, role 1d6 para o ponto vital atingido: 6-Cabeça=Atordoado; 5-Torso=Sangramento²; 4-3-Braços=Desarmado e -1 Durabilidade na arma; 2-1-Pernas=Caído². Efeito Negativo Inevitável.",
       "aprimoramentos": [
@@ -546,9 +546,9 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Fogo Rápido",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 5⚡",
+      "custo": "🔶🔶 · 5⚡",
       "custoPE": 5,
-      "efeito": "Após acertar com arma à distância, continua disparando: cada munição extra soma Destreza como Dano Extra (até duas munições adicionais). Sub Encender (🔸 + 4 Componentes): aplica Incendiado¹.",
+      "efeito": "Após acertar com arma à distância, continua disparando: cada munição extra soma Destreza como Dano Extra (até duas munições adicionais). Sub Encender (🔶 + 4 Componentes): aplica Incendiado¹.",
       "aprimoramentos": [
         {
           "nome": "Aprimoramento I",
@@ -567,7 +567,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Disparo Preciso",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 4⚡",
+      "custo": "🔶🔶 · 4⚡",
       "custoPE": 4,
       "efeito": "Disparo que ignora 1d12 Armadura do alvo e a danifica em -2 Durabilidade. Aplica Atordoado¹ Inevitável.",
       "aprimoramentos": [
@@ -610,7 +610,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Bomba Surpresa",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸",
+      "custo": "🔶🔶",
       "custoPE": "",
       "efeito": "A custo de 20 Componentes cria uma Bomba Surpresa (💥40+DES) que explode em 7x7m/3m, aplica 2 Fratura e Incendiado², sem chance de teste de Vigor para resistir.",
       "aprimoramentos": [
@@ -631,7 +631,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Armadilha Secreta",
       "tipo": "Ação Curta",
-      "custo": "🔸 · 2⚡",
+      "custo": "🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Cria Armadilhas Secretas a custo de 3 Componentes cada (até 3 de uma vez com Ação Curta). Armar marca 3 espaços ocultos sob Furtivo-15; ativa Caído², Enraizado² e 1 Fratura, sem chance de defesa.",
       "aprimoramentos": [
@@ -652,7 +652,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Sentinela",
       "tipo": "Ação Curta (Foco)",
-      "custo": "🔸 Foco · 2⚡",
+      "custo": "🔶 Foco · 2⚡",
       "custoPE": 2,
       "efeito": "Marca um inimigo em foco para vigiar; toda vez que ele usar Deslocamento, recebe um ataque simples grátis. Detecta armadilhas e inimigos ocultos por furtividade automaticamente enquanto ativo.",
       "aprimoramentos": [
@@ -736,7 +736,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Inspirar o Bando",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 2⚡",
+      "custo": "🔶🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Testa Persuasão para um discurso inspirador; o próximo Dano e Regeneração de PV/PE dos aliados que ouviram (incluindo você) aumenta em +1d4 por ponto de Persuasão. Todos recebem Inspirado³.",
       "aprimoramentos": [
@@ -780,7 +780,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Despertar Psiônico",
       "tipo": "Ação Curta",
-      "custo": "🔸",
+      "custo": "🔶",
       "custoPE": "",
       "efeito": "Ativa o estado que permite canalizar Feitiços através de um Artefato Paranormal. Testa Psionismo Dif.11 ou recebe 1 ponto de Insanidade (2 em Falha Crítica). Dura 5 rodadas/minutos; pode desativar com Ação Curta.",
       "aprimoramentos": []
@@ -796,7 +796,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Energizar",
       "tipo": "Ação Curta/Longa",
-      "custo": "🔸 + 🔸🔸 · 1⚡",
+      "custo": "🔶 + 🔶🔶 · 1⚡",
       "custoPE": 1,
       "efeito": "Neutro. Golpe Energizado: imbui armas com Psionismo como Dano Extra no próximo ataque, sem gastar munição. Ou Rajada de Energia (Ação Longa): testa Precisão, causa 4×Psionismo de dano; com 1 Carga de Ânima atinge até 5 alvos próximos com 4 pontos de ação.",
       "aprimoramentos": [
@@ -817,7 +817,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Telecinese",
       "tipo": "Ação Curta/Longa (Foco)",
-      "custo": "🔸 + 🔸🔸 Foco · 2⚡",
+      "custo": "🔶 + 🔶🔶 Foco · 2⚡",
       "custoPE": 2,
       "efeito": "Neutro. Em Foco, testa Psionismo Dif.+11 (ou Vigor de criatura viva a cada rodada) para Controlar 1+ alvos (+1 a cada 2 Psionismo) no alcance. Depois, sem testes: Paralisar controlados, ou Mover (arremessar contra cenário/criatura, dano de Arma Improvisada + dobro do Psionismo).",
       "aprimoramentos": [
@@ -839,7 +839,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Potencializar",
       "tipo": "Ação Curta",
-      "custo": "🔸 · 2⚡",
+      "custo": "🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Neutro. Por um número de rodadas igual ao Despertar Psiônico, soma Psionismo em todo dano físico e testes de Força. Cumulativo com Golpe Energizado.",
       "aprimoramentos": [
@@ -861,7 +861,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Propulsão",
       "tipo": "Ação Curta",
-      "custo": "🔸 · 2⚡",
+      "custo": "🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Neutro. Escolhe um efeito ao comprar: Acelerar (Passiva: +1 Ponto de Ação por rodada) ou Voar (Passiva: desloca verticalmente, cai 1m/rodada). Duração igual ao Despertar Psiônico.",
       "aprimoramentos": [
@@ -882,7 +882,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Aura Defletora",
       "tipo": "Ação Curta/Longa",
-      "custo": "🔸 + 🔸🔸 · 4⚡",
+      "custo": "🔶 + 🔶🔶 · 4⚡",
       "custoPE": 4,
       "efeito": "Neutro. Aprende dois Feitiços com mesmo custo e duração (2 rodadas): Aura Defletora (reduz pela metade os próximos danos recebidos), Barreira Defletora (Ação Longa: Cobertura Completa em até 3m) e Refletir (Reação, em Evasões críticas: reflete Feitiço/projétil de volta).",
       "aprimoramentos": [
@@ -904,7 +904,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Dobra-Mentes",
       "tipo": "Ação Curta (Foco)",
-      "custo": "🔸 Foco · 3⚡",
+      "custo": "🔶 Foco · 3⚡",
       "custoPE": 3,
       "efeito": "Neutro. Escolhe dois Feitiços (custo/duração igual ao Despertar Psiônico): Encantar, Empatia, Telepatia, Absorver Idioma, Sono, Medo, Dor Psíquica.",
       "aprimoramentos": [
@@ -926,7 +926,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Evocação",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 6⚡",
+      "custo": "🔶🔶 · 6⚡",
       "custoPE": 6,
       "efeito": "Feérico/Caos/Necromancia. Evoca um Homúnculo (ficha própria, Nível/XP iguais aos seus, +3 pontos de perícia, 4 Características incluindo 1 paranormal). Só um pacto por vez. Sub Ordenar/Ataque Sincronizado.",
       "aprimoramentos": [
@@ -947,7 +947,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Gênese Elemental",
       "tipo": "Ação Longa (Foco)",
-      "custo": "🔸 + 🔸🔸 Foco · 2⚡",
+      "custo": "🔶 + 🔶🔶 Foco · 2⚡",
       "custoPE": 2,
       "efeito": "Feérico. Escolhe um elemento (Fogo/Água-Gelo-Ar/Eletricidade). Em Foco, cria Formas Elementais (+1 a cada 2 Psionismo) ou imbui uma arma; movê-las contra inimigos causa 4×Psionismo + efeito elemental.",
       "aprimoramentos": [
@@ -968,7 +968,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Runas Antigas",
       "tipo": "Ação Longa",
-      "custo": "🔸🔸 · 2⚡",
+      "custo": "🔶🔶 · 2⚡",
       "custoPE": 2,
       "efeito": "Feérico/Caos. Aprende quatro Feitiços de uma língua rúnica (Runicae ou Daemoglifos); aplica uma runa de cada tipo por Ação Longa, dura duas rodadas. Explodir Runas (Ação Curta): 1d6 dano imaterial por runa removida.",
       "aprimoramentos": [
@@ -989,7 +989,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Ilusão",
       "tipo": "Ação Longa (Foco)",
-      "custo": "🔸🔸 Foco · 3⚡",
+      "custo": "🔶🔶 Foco · 3⚡",
       "custoPE": 3,
       "efeito": "Caos. Aprende dois Feitiços: Truque Ilusório (cria objetos/sons ou altera o cenário) e Ilusão Viva (miragem que atrai e distrai inimigos, 1 PV, desconjura ao receber qualquer dano).",
       "aprimoramentos": [
@@ -1011,7 +1011,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Transmutar",
       "tipo": "Ação Curta (Foco)",
-      "custo": "🔸 Foco · 3⚡",
+      "custo": "🔶 Foco · 3⚡",
       "custoPE": 3,
       "efeito": "Caos. Escolhe dois Feitiços (custo/duração igual ao Despertar Psiônico): Dúplice, Polimorfia, Moldar, Negar Sentidos, Estatura, Mutação, Absorver.",
       "aprimoramentos": [
@@ -1033,7 +1033,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Teleporte",
       "tipo": "Ação Curta",
-      "custo": "🔸",
+      "custo": "🔶",
       "custoPE": "",
       "efeito": "Caos/Necromancia. Passivamente teleporta 1d12+Psionismo metros adicionais no deslocamento (tirar 1 faz perder a rodada). Testando Psionismo, translada objeto/criatura como Ação Curta. Por 2⚡, teleporta para o espaço de um alvo (Ação Longa).",
       "aprimoramentos": [
@@ -1054,7 +1054,7 @@ export const ABILITIES_LIBRARY = {
     {
       "nome": "Regenerar",
       "tipo": "Ação Curta",
-      "custo": "🔸 · 4⚡",
+      "custo": "🔶 · 4⚡",
       "custoPE": 4,
       "efeito": "Necromancia. Consumindo sangue de outra criatura, cura 2d20+Psionismo PV instantâneo, +1d4 PV/rodada até o fim do combate (ou a cada 5min fora dele). Com 1 Carga de Ânima, cura sem precisar de sangue.",
       "aprimoramentos": [

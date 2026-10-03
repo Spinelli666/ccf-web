@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { TipoAcaoDialog } from "@/components/dialogs/TipoAcaoDialog";
 import { TipoAcaoBadge } from "@/components/sheet/TipoAcaoBadge";
-import { findAbilityEntry } from "@/lib/classes-lookup";
+import { custoComDiamante, findAbilityEntry } from "@/lib/classes-lookup";
 import type { HabilidadeClasse } from "@/lib/sheet-types";
 
 // Mesmo formato das linhas de aprimoramento que o wizard/level up gravam na ficha.
@@ -38,7 +38,7 @@ export function EditHabilidadeDialog({
 }) {
   const [nome, setNome] = useState(habilidade.nome);
   const [tipo, setTipo] = useState(habilidade.tipo);
-  const [custo, setCusto] = useState(habilidade.custo);
+  const [custo, setCusto] = useState(custoComDiamante(habilidade.custo));
   const [custoPE, setCustoPE] = useState(habilidade.custoPE ?? "");
   const [efeito, setEfeito] = useState(habilidade.efeito);
   const [temContador, setTemContador] = useState(habilidade.temContador);
@@ -96,7 +96,7 @@ export function EditHabilidadeDialog({
           </div>
           <div className="field">
             <label>Custo (texto exibido)</label>
-            <input type="text" value={custo} placeholder="Ex: ◆◆ · 3⚡" onChange={(e) => setCusto(e.target.value)} />
+            <input type="text" value={custo} placeholder="Ex: 🔶🔶 · 3⚡" onChange={(e) => setCusto(e.target.value)} />
           </div>
           <div className="field">
             <label>PE gastos ao usar</label>

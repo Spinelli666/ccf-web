@@ -38,10 +38,10 @@ export function exampleSheetData(): FullSheetData {
     classeTitulo: "Guerreiro",
     classePH: "5",
     classeHabilidades: [
-      { nome: "Ruptura", tipo: "Ação Longa", custo: "🔸🔸 · 4⚡", custoPE: "4", efeito: "Soma Força como Dano Extra. Ignora 1d12 Armadura do alvo e o danifica em -2 Durabilidade. Aplica Atordoado Inevitável.", indent: false, usosGastos: 0, temContador: false, contadorMax: "", contadorAtual: 0 },
+      { nome: "Ruptura", tipo: "Ação Longa", custo: "🔶🔶 · 4⚡", custoPE: "4", efeito: "Soma Força como Dano Extra. Ignora 1d12 Armadura do alvo e o danifica em -2 Durabilidade. Aplica Atordoado Inevitável.", indent: false, usosGastos: 0, temContador: false, contadorMax: "", contadorAtual: 0 },
       { nome: "Aprimoramento I", tipo: "—", custo: "1 PH", custoPE: "3", efeito: "Reduz o custo para 3⚡.", indent: true, ativo: true, usosGastos: 0, temContador: false, contadorMax: "", contadorAtual: 0 },
-      { nome: "Investida", tipo: "Ação Longa", custo: "🔸🔸 · 3⚡", custoPE: "3", efeito: "Corre em linha reta atravessando/derrubando inimigos no caminho. +1 Dano Extra por metro percorrido até cada inimigo atingido.", indent: false, usosGastos: 0, temContador: false, contadorMax: "", contadorAtual: 0 },
-      { nome: "Retribuição", tipo: "Ação Curta (ativa passiva)", custo: "🔸", custoPE: "", efeito: "A cada dano recebido por ele ou aliado à vista, acumula 1 ponto (máx. 6). Ao causar dano, gasta pontos: cada um vira +2 Dano Extra.", indent: false, usosGastos: 0, temContador: true, contadorMax: "6", contadorAtual: 0 },
+      { nome: "Investida", tipo: "Ação Longa", custo: "🔶🔶 · 3⚡", custoPE: "3", efeito: "Corre em linha reta atravessando/derrubando inimigos no caminho. +1 Dano Extra por metro percorrido até cada inimigo atingido.", indent: false, usosGastos: 0, temContador: false, contadorMax: "", contadorAtual: 0 },
+      { nome: "Retribuição", tipo: "Ação Curta (ativa passiva)", custo: "🔶", custoPE: "", efeito: "A cada dano recebido por ele ou aliado à vista, acumula 1 ponto (máx. 6). Ao causar dano, gasta pontos: cada um vira +2 Dano Extra.", indent: false, usosGastos: 0, temContador: true, contadorMax: "6", contadorAtual: 0 },
       { nome: "Adrenalina", tipo: "Passiva", custo: "—", custoPE: "", efeito: "A cada rodada sem tomar dano, ganha +2 PVT (máx. 15). Ao derrotar um inimigo: +1 PE Temporário e +1 Ponto de Ação.", indent: false, usosGastos: 0, temContador: false, contadorMax: "", contadorAtual: 0 },
     ],
     armas: [

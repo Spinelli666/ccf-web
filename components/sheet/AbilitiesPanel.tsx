@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useState, useSyncExternalStore } from "react";
 import { num, clamp } from "@/lib/derived";
 import { computeDerived } from "@/lib/derived";
-import { AUTO_GRANT_ABILITIES, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
+import { AUTO_GRANT_ABILITIES, custoComDiamante, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
 import { EffectText } from "@/components/sheet/EffectText";
 import { TipoAcaoBadge } from "@/components/sheet/TipoAcaoBadge";
 import { AcaoDialog } from "@/components/dialogs/AcaoDialog";
@@ -221,7 +221,7 @@ export function AbilitiesPanel({
       for (let k = i; k < acaoTotal; k++) next[k] = false;
     }
     onChange({ acaoBoxes: next });
-    onLog(`🔸 Pontos de Ação usados: ${next.filter(Boolean).length}/${acaoTotal}`);
+    onLog(`🔶 Pontos de Ação usados: ${next.filter(Boolean).length}/${acaoTotal}`);
   }
 
   // Aviso de "Pontos de Ação insuficientes" é só local (nunca vai pro chat/socket) —
@@ -246,14 +246,14 @@ export function AbilitiesPanel({
     for (let k = usados; k < usados + custo; k++) next[k] = true;
     onChange({ acaoBoxes: next });
     onLog(
-      `🔸 ${nome} usou uma Ação ${tipo === "curta" ? "Curta" : "Longa"}: ${opcao} (${usados + custo}/${acaoTotal})`
+      `🔶 ${nome} usou uma Ação ${tipo === "curta" ? "Curta" : "Longa"}: ${opcao} (${usados + custo}/${acaoTotal})`
     );
   }
 
   function acaoAdd() {
     const novo = clamp(acaoTotal + 1, 1, 12);
     onChange({ acaoTotal: novo, acaoBoxes: [...acaoBoxes, false] });
-    onLog(`🔸 Ganhou +1 Ponto de Ação neste turno (total: ${novo})`);
+    onLog(`🔶 Ganhou +1 Ponto de Ação neste turno (total: ${novo})`);
   }
 
   function acaoRemove() {
@@ -386,7 +386,7 @@ export function AbilitiesPanel({
           )}
 
           <div className="action-points-bar">
-            <span className="action-points-label">🔸 Pontos de Ação (turno atual)</span>
+            <span className="action-points-label">🔶 Pontos de Ação (turno atual)</span>
             <div className="cost-boxes">
               {Array.from({ length: acaoTotal }, (_, i) => (
                 <input
@@ -479,7 +479,7 @@ export function AbilitiesPanel({
                   <div className="hab-linha hab-meta">
                     <TipoAcaoBadge tipo={h.tipo} />
                     <span className="hab-sep" aria-hidden="true" />
-                    <span className="hab-custo">{h.custo || "—"}</span>
+                    <span className="hab-custo">{custoComDiamante(h.custo) || "—"}</span>
                   </div>
 
                   {tiers.length > 0 && (

@@ -5,8 +5,8 @@ import { Modal } from "@/components/ui/Modal";
 import { TipoAcaoBadge, selosDoTipo, tipoDosSelos, type SeloKey } from "@/components/sheet/TipoAcaoBadge";
 
 const OPCOES: { key: SeloKey; nome: string; desc: string }[] = [
-  { key: "curta", nome: "Ação Curta", desc: "Custa 1 Ponto de Ação (🔸)." },
-  { key: "longa", nome: "Ação Longa", desc: "Custa 2 Pontos de Ação (🔸🔸)." },
+  { key: "curta", nome: "Ação Curta", desc: "Custa 1 Ponto de Ação (🔶)." },
+  { key: "longa", nome: "Ação Longa", desc: "Custa 2 Pontos de Ação (🔶🔶)." },
   { key: "reacao", nome: "Reação", desc: "Usada no turno de outro alvo, 1 por rodada." },
   { key: "passiva", nome: "Passiva", desc: "Sempre ativa, sem custo." },
 ];

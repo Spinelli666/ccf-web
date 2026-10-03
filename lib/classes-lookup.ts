@@ -35,3 +35,8 @@ export function findAbilityEntry(nome: string): AbilityEntry | null {
   }
   return null;
 }
+
+// Fichas antigas gravaram o custo com 🔸; hoje o Ponto de Ação é 🔶.
+export function custoComDiamante(custo: string): string {
+  return (custo || "").replace(/🔸/g, "🔶");
+}

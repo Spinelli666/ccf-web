@@ -17,7 +17,7 @@ const INK_SOFT: [number, number, number] = [95, 82, 62];
 // caracteres quebrados no PDF em vez de sumirem ou virarem texto legível.
 function sanitizeForPdf(text: string): string {
   return String(text ?? "")
-    .replace(/🔸/g, "PA ")
+    .replace(/🔸|🔶/g, "PA ")
     .replace(/⚡/g, " PE")
     .replace(/🪙/g, " moedas")
     .replace(/[\u{1F000}-\u{1FFFF}]/gu, "")

@@ -48,8 +48,8 @@ const RULES: Rule[] = [
   { re: /foi executado/, icon: "☠️", tone: "morte" },
   { re: /foi poupado/, icon: "🕊️", tone: "cura" },
   { re: /subiu para o nível|Nível ajustado/, icon: "⭐", tone: "nivel" },
-  { re: /Ação (Curta|Longa)/, icon: "🔸", tone: "acao", split: "colon" },
-  { re: /Pontos? de Ação/, icon: "🔸", tone: "acao" },
+  { re: /Ação (Curta|Longa)/, icon: "🔶", tone: "acao", split: "colon" },
+  { re: /Pontos? de Ação/, icon: "🔶", tone: "acao" },
   { re: /^recebeu o efeito/, icon: "🌀", tone: "efeito" },
   { re: /^removeu o efeito/, icon: "✖️", tone: "efeito" },
   { re: /^equipou /, icon: "📥", tone: "item" },
@@ -65,7 +65,7 @@ const RULES: Rule[] = [
 ];
 
 const METER_RE = /\s*—\s*(PV|PE):\s*(-?\d+)\s*\/\s*(\d+)\s*$/;
-// Emojis/símbolos que os textos antigos já traziam no começo (🔸, ⚠️, 🔔, ▶, ◀, ↩...).
+// Emojis/símbolos que os textos antigos já traziam no começo (🔶, ⚠️, 🔔, ▶, ◀, ↩...).
 const LEADING_SYMBOLS_RE = /^[^\p{L}\p{N}"(]+/u;
 
 function capitalize(s: string): string {

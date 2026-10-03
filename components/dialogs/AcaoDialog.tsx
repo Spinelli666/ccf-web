@@ -26,10 +26,10 @@ export function AcaoDialog({
           <div className="modal-message">O que o personagem vai fazer?</div>
           <div className="modal-options">
             <button type="button" className="modal-opt-btn is-normal" onClick={() => setFase("curta")}>
-              🔸 Ação Curta (1 Ponto de Ação)
+              🔶 Ação Curta (1 Ponto de Ação)
             </button>
             <button type="button" className="modal-opt-btn" onClick={() => setFase("longa")}>
-              🔸🔸 Ação Longa (2 Pontos de Ação)
+              🔶🔶 Ação Longa (2 Pontos de Ação)
             </button>
           </div>
           <button type="button" className="btn ghost small" onClick={onCancel}>

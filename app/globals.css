@@ -55,12 +55,13 @@ input[type="checkbox"]:checked::after{
 .cost-icon{ font-size:1.4em; line-height:1; vertical-align:-2px; display:inline-block; }
 
 /* Pontos de Ação (AbilitiesPanel) ficam de fora da mudança de estilo — mantêm o laranja original. */
+/* Disponível = losango laranja com borda amarela; usado = losango cinza escuro com "x". */
 .cost-box{
   width:16px; height:16px; cursor:pointer;
-  background:#FF9F40 !important; border:2px solid #FFD966 !important;
+  background:#FF7A45 !important; border:2px solid #FFD966 !important;
 }
-.cost-box:checked{ background:#FF8A1E !important; border-color:#FFE08A !important; }
-.cost-box:checked::after{ color:#112a35 !important; }
+.cost-box:checked{ background:#4a4744 !important; border-color:#2b2a29 !important; }
+.cost-box:checked::after{ content:"x" !important; color:#151515 !important; font-size:11px !important; font-weight:700; }
 
 .pip-box{ width:16px; height:16px; cursor:pointer; }
 
