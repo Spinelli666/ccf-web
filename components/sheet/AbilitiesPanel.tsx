@@ -144,8 +144,24 @@ export function AbilitiesPanel({
     setExpandidas(new Set());
     setAprimAbertas(new Set());
   }
-  function salvarEdicao(i: number, patch: Partial<HabilidadeClasse>) {
-    updateClasse(i, patch);
+  // Os aprimoramentos editados no diálogo substituem as linhas indentadas logo abaixo da base.
+  function salvarEdicao(i: number, patch: Partial<HabilidadeClasse>, aprims: HabilidadeClasse[]) {
+    const h = sheet.classeHabilidades[i];
+    const antigos = qtdAprimoramentosAbaixo(i);
+    const next = [
+      ...sheet.classeHabilidades.slice(0, i),
+      { ...h, ...patch },
+      ...(h.indent ? [] : aprims),
+      ...sheet.classeHabilidades.slice(i + 1 + antigos),
+    ];
+    onChange({ classeHabilidades: next });
+    // Cards abertos mais abaixo mudam de índice se a quantidade de aprimoramentos mudou.
+    const delta = h.indent ? 0 : aprims.length - antigos;
+    if (delta) {
+      const desloca = (set: Set<number>) => new Set([...set].map((k) => (k > i ? k + delta : k)));
+      setExpandidas(desloca(expandidas));
+      setAprimAbertas(desloca(aprimAbertas));
+    }
     setEditandoIdx(null);
   }
 
@@ -562,7 +578,8 @@ export function AbilitiesPanel({
       {editandoIdx !== null && sheet.classeHabilidades[editandoIdx] && (
         <EditHabilidadeDialog
           habilidade={sheet.classeHabilidades[editandoIdx]}
-          onSave={(patch) => salvarEdicao(editandoIdx, patch)}
+          aprimoramentos={sheet.classeHabilidades.slice(editandoIdx + 1, editandoIdx + 1 + qtdAprimoramentosAbaixo(editandoIdx))}
+          onSave={(patch, aprims) => salvarEdicao(editandoIdx, patch, aprims)}
           onCancel={() => setEditandoIdx(null)}
         />
       )}

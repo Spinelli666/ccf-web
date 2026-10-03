@@ -4,15 +4,36 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { TipoAcaoDialog } from "@/components/dialogs/TipoAcaoDialog";
 import { TipoAcaoBadge } from "@/components/sheet/TipoAcaoBadge";
+import { findAbilityEntry } from "@/lib/classes-lookup";
 import type { HabilidadeClasse } from "@/lib/sheet-types";
+
+// Mesmo formato das linhas de aprimoramento que o wizard/level up gravam na ficha.
+function novaLinhaAprimoramento(nome: string, efeito: string, custoPE?: number): HabilidadeClasse {
+  return {
+    nome,
+    tipo: "—",
+    custo: "1 PH",
+    custoPE: custoPE !== undefined ? String(custoPE) : "",
+    efeito,
+    indent: true,
+    ativo: true,
+    usosGastos: 0,
+    temContador: false,
+    contadorMax: "",
+    contadorAtual: 0,
+  };
+}
 
 export function EditHabilidadeDialog({
   habilidade,
+  aprimoramentos = [],
   onSave,
   onCancel,
 }: {
   habilidade: HabilidadeClasse;
-  onSave: (patch: Partial<HabilidadeClasse>) => void;
+  /** Linhas de aprimoramento (indentadas) logo abaixo da habilidade base na ficha. */
+  aprimoramentos?: HabilidadeClasse[];
+  onSave: (patch: Partial<HabilidadeClasse>, aprimoramentos: HabilidadeClasse[]) => void;
   onCancel: () => void;
 }) {
   const [nome, setNome] = useState(habilidade.nome);
@@ -23,6 +44,25 @@ export function EditHabilidadeDialog({
   const [temContador, setTemContador] = useState(habilidade.temContador);
   const [contadorMax, setContadorMax] = useState(habilidade.contadorMax || "");
   const [escolhendoTipo, setEscolhendoTipo] = useState(false);
+  const [aprims, setAprims] = useState<HabilidadeClasse[]>(aprimoramentos);
+
+  // Tiers do catálogo (I/II/III) pela habilidade original; os de fora do catálogo ficam no fim.
+  const catalogo = findAbilityEntry(habilidade.nome)?.aprimoramentos ?? [];
+  const ordem = (a: HabilidadeClasse) => {
+    const k = catalogo.findIndex((ap) => ap.nome === a.nome);
+    return k < 0 ? catalogo.length : k;
+  };
+  const faltando = catalogo.filter((ap) => !aprims.some((a) => a.nome === ap.nome));
+
+  function updateAprim(k: number, patch: Partial<HabilidadeClasse>) {
+    setAprims(aprims.map((a, j) => (j === k ? { ...a, ...patch } : a)));
+  }
+  function adicionarAprim(nomeAp: string) {
+    const ap = catalogo.find((c) => c.nome === nomeAp);
+    if (!ap) return;
+    const next = [...aprims, novaLinhaAprimoramento(ap.nome, ap.efeito, ap.custoPE)];
+    setAprims(next.sort((a, b) => ordem(a) - ordem(b)));
+  }
 
   function salvar() {
     if (!nome.trim()) return;
@@ -35,7 +75,7 @@ export function EditHabilidadeDialog({
       temContador,
       contadorMax: temContador ? contadorMax : habilidade.contadorMax,
       contadorAtual: temContador ? Math.min(habilidade.contadorAtual, parseInt(contadorMax, 10) || 0) : habilidade.contadorAtual,
-    });
+    }, aprims.map((a) => ({ ...a, custoPE: String(a.custoPE ?? "").trim() })));
   }
 
   return (
@@ -84,6 +124,50 @@ export function EditHabilidadeDialog({
             <label>Efeito</label>
             <textarea rows={6} value={efeito} onChange={(e) => setEfeito(e.target.value)} />
           </div>
+          {!habilidade.indent && (
+            <div className="field span-3">
+              <label>Aprimoramentos</label>
+              <div className="edit-aprim-list">
+                {aprims.length === 0 && <div className="hab-aprim-vazio">Nenhum aprimoramento aprendido.</div>}
+                {aprims.map((a, k) => (
+                  <div key={a.nome + k} className="edit-aprim-item">
+                    <div className="edit-aprim-head">
+                      <span className="hab-tier learned">{ordem(a) < catalogo.length ? ordem(a) + 1 : k + 1}</span>
+                      <span className="edit-aprim-nome">{a.nome}</span>
+                      <input
+                        type="number"
+                        min={0}
+                        className="edit-aprim-pe"
+                        title="PE gastos ao usar (substitui o custo da habilidade)"
+                        placeholder="PE"
+                        value={a.custoPE ?? ""}
+                        onChange={(e) => updateAprim(k, { custoPE: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="icon-btn is-danger"
+                        title="Remover aprimoramento"
+                        aria-label={`Remover ${a.nome}`}
+                        onClick={() => setAprims(aprims.filter((_, j) => j !== k))}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                    <textarea rows={3} value={a.efeito} onChange={(e) => updateAprim(k, { efeito: e.target.value })} />
+                  </div>
+                ))}
+                {faltando.length > 0 && (
+                  <div className="edit-aprim-add">
+                    {faltando.map((ap) => (
+                      <button key={ap.nome} type="button" className="btn ghost small" onClick={() => adicionarAprim(ap.nome)}>
+                        + {ap.nome}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         <div className="item-form-footer">
           <span />
