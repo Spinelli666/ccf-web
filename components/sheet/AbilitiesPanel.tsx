@@ -451,7 +451,6 @@ export function AbilitiesPanel({
                       onClick={() => toggleExpandida(base)}
                     >
                       {h.nome}
-                      <span className={`hab-nome-seta ${aberta ? "open" : ""}`}>⤵</span>
                     </button>
                     <div className="hab-acoes">{isMine && linhaBotoes(base)}</div>
                   </div>
@@ -494,19 +493,21 @@ export function AbilitiesPanel({
                       </button>
                       {aprimAberto && (
                         <div className="hab-aprim-lista">
-                          {tiers.map((t, k) => (
-                            <div key={k} className={`hab-aprim-item ${t.idx !== null ? "learned" : ""}`}>
-                              <div className="hab-aprim-item-head">
-                                <span className={`hab-tier ${t.idx !== null ? "learned" : ""}`}>{k + 1}</span>
-                                <span className="hab-aprim-nome">
-                                  {t.nome}
-                                  {t.idx === null && <span className="hab-aprim-pendente"> — não aprendido</span>}
-                                </span>
-                                {isMine && t.idx !== null && <span className="hab-acoes">{linhaBotoes(t.idx)}</span>}
-                              </div>
-                              <EffectText text={t.efeito} />
-                            </div>
-                          ))}
+                          {tiers.some((t) => t.idx !== null) ? (
+                            tiers.map((t, k) =>
+                              t.idx === null ? null : (
+                                <div key={k} className="hab-aprim-item">
+                                  <div className="hab-aprim-item-head">
+                                    <span className="hab-tier learned">{k + 1}</span>
+                                    <span className="hab-aprim-nome">{t.nome}</span>
+                                  </div>
+                                  <EffectText text={t.efeito} />
+                                </div>
+                              )
+                            )
+                          ) : (
+                            <div className="hab-aprim-vazio">Nenhum aprimoramento aprendido ainda.</div>
+                          )}
                         </div>
                       )}
                     </>

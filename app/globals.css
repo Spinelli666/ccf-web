@@ -1511,8 +1511,6 @@ a.link{ color:var(--blue); }
   display:inline-flex; align-items:center; justify-content:center; gap:8px; text-align:center;
 }
 .hab-nome:hover{ filter:brightness(1.15); }
-.hab-nome-seta{ font-size:16px; transition:transform .15s ease; }
-.hab-nome-seta.open{ transform:rotate(180deg); }
 .hab-desc{ padding:8px 14px 12px; font-size:13px; color:var(--ink-soft); border-top:1px solid var(--gold-line); }
 .hab-linha{
   display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
@@ -1533,11 +1531,9 @@ a.link{ color:var(--blue); }
 }
 .hab-tier.learned{ background:var(--gold); color:var(--btn-text); border-color:var(--gold); }
 .hab-aprim-lista{ display:flex; flex-direction:column; gap:8px; padding:8px 12px 12px; border-top:1px solid var(--gold-line); font-size:13px; color:var(--ink-soft); }
-.hab-aprim-item{ opacity:.6; }
-.hab-aprim-item.learned{ opacity:1; }
 .hab-aprim-item-head{ display:flex; align-items:center; gap:8px; margin-bottom:2px; }
 .hab-aprim-nome{ font-weight:700; color:var(--gold); flex:1; }
-.hab-aprim-pendente{ font-weight:400; font-style:italic; color:var(--muted); }
+.hab-aprim-vazio{ text-align:center; font-style:italic; color:var(--muted); }
 .hab-usar{ padding:10px; gap:14px; }
 .hab-usar-btn{
   width:46px; height:46px; border-radius:50%; cursor:pointer; font-size:24px; line-height:1;
