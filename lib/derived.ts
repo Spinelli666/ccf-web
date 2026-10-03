@@ -73,6 +73,25 @@ export function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v));
 }
 
+/**
+ * Regra de Morte aplicada a uma mudança de PV (dano, cura, descanso, nível...).
+ * - PV volta a ficar positivo: deixa de estar morto/derrotado e zera o Julgamento.
+ * - PV cai de positivo pra 0 ou menos: nova queda, começa um Julgamento do zero.
+ * - Chegar a -metade do PV máximo mata.
+ * Devolve só os campos que mudam, pra espalhar no patch da ficha.
+ */
+export function regraDeMortePatch(
+  pvAntes: number,
+  pvNovo: number,
+  pvMax: number
+): { morto?: boolean; julgamento?: { sentencas: number; dadivas: number } } {
+  const zerado = { sentencas: 0, dadivas: 0 };
+  if (pvNovo > 0) return { morto: false, julgamento: zerado };
+  if (pvNovo < pvAntes && pvNovo <= -pvMax / 2) return { morto: true };
+  if (pvAntes > 0) return { morto: false, julgamento: zerado };
+  return {};
+}
+
 /** Valor da perícia + o campo de bônus dela (ex: Destreza 4 + bônus 2 = 6). */
 export function getPericiaTotal(s: SheetData, nome: string): number {
   const p = (s.pericias || []).find((pp) => pp.nome.trim().toLowerCase() === nome.toLowerCase());

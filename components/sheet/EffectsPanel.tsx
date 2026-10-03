@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { computeDerived, num, clamp } from "@/lib/derived";
+import { computeDerived, num, clamp, regraDeMortePatch } from "@/lib/derived";
 import { EFFECTS_CATALOG } from "@/data/effects";
 import { SURVIVAL_EFFECTS_CATALOG } from "@/lib/survival-effects";
 import { EffectPickerDialog } from "@/components/dialogs/EffectPickerDialog";
@@ -36,8 +36,13 @@ export function EffectsPanel({
   function aplicarDano(nomeEfeito: string, valor: number) {
     const pvAtual = clamp(num(sheet.stats.pvAtual), -derived.pvMax, derived.pvMax);
     const novoPv = clamp(pvAtual - valor, -derived.pvMax, derived.pvMax);
-    onChange({ stats: { ...sheet.stats, pvAtual: String(novoPv) } });
-    onLog(`⚠️ ${nome} sofreu ${valor} de dano de "${nomeEfeito}" — PV: ${novoPv}/${derived.pvMax}`);
+    const morte = regraDeMortePatch(pvAtual, novoPv, derived.pvMax);
+    onChange({ stats: { ...sheet.stats, pvAtual: String(novoPv) }, ...morte });
+    onLog(
+      `⚠️ ${nome} sofreu ${valor} de dano de "${nomeEfeito}" — PV: ${novoPv}/${derived.pvMax}${
+        morte.morto && !sheet.morto ? " — ☠️ MORREU (PV chegou a -metade do máximo)" : ""
+      }`
+    );
   }
 
   return (

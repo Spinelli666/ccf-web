@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { computeDerived, equippedArmorSum, equippedWeaponProtectionSum, num, clamp } from "@/lib/derived";
+import { computeDerived, equippedArmorSum, equippedWeaponProtectionSum, num, clamp, regraDeMortePatch } from "@/lib/derived";
 import { rollDie } from "@/lib/dice";
 import { isMaxRoll } from "@/lib/max-roll";
 import { DescansoDialog } from "@/components/dialogs/DescansoDialog";
@@ -131,11 +131,14 @@ export function StatsPanel({
       finalDano -= descontoBonus;
     }
     const novoPv = clamp(pvAtual - finalDano, -derived.pvMax, derived.pvMax + novoPvBonusTemp);
-    onChange({ stats: { ...sheet.stats, pvAtual: String(novoPv) }, pvBonusTemp: novoPvBonusTemp });
+    const morte = regraDeMortePatch(pvAtual, novoPv, derived.pvMax);
+    onChange({ stats: { ...sheet.stats, pvAtual: String(novoPv) }, pvBonusTemp: novoPvBonusTemp, ...morte });
     onLog(
       `${nome} sofreu ${v} de dano${!ignoreArmor && armaduraAtual ? " (armadura já descontada)" : ""}${
         descontoBonus ? ` — ${descontoBonus} absorvido pelo Bônus de Vida` : ""
-      } — PV: ${novoPv}/${derived.pvMax + novoPvBonusTemp}`
+      } — PV: ${novoPv}/${derived.pvMax + novoPvBonusTemp}${
+        morte.morto && !morto ? " — ☠️ MORREU (PV chegou a -metade do máximo)" : ""
+      }`
     );
     setPvDelta("");
   }
@@ -144,9 +147,10 @@ export function StatsPanel({
     const v = Math.abs(num(pvDelta, 0));
     if (!v) return;
     const novoPv = clamp(pvAtual + v, -derived.pvMax, pvMaxTotal);
-    const patch: Partial<FullSheetData> = { stats: { ...sheet.stats, pvAtual: String(novoPv) } };
-    if (novoPv > 0) patch.julgamento = { sentencas: 0, dadivas: 0 };
-    onChange(patch);
+    onChange({
+      stats: { ...sheet.stats, pvAtual: String(novoPv) },
+      ...regraDeMortePatch(pvAtual, novoPv, derived.pvMax),
+    });
     onLog(`${nome} curou ${v} de PV — PV: ${novoPv}/${pvMaxTotal}`);
     setPvDelta("");
   }
@@ -193,6 +197,7 @@ export function StatsPanel({
     const patch: Partial<FullSheetData> = {
       stats: { ...sheet.stats, pvAtual: String(novoPv), peAtual: String(novoPe) },
       efeitosAtivos: sheet.efeitosAtivos.filter((e) => e !== "Exaustão"),
+      ...regraDeMortePatch(pvAtual, novoPv, derived.pvMax),
     };
     let extra = "";
     if (tipo === "longo") {
@@ -242,7 +247,7 @@ export function StatsPanel({
   }
 
   function poupar() {
-    onChange({ stats: { ...sheet.stats, pvAtual: "1" }, julgamento: { sentencas: 0, dadivas: 0 } });
+    onChange({ stats: { ...sheet.stats, pvAtual: "1" }, ...regraDeMortePatch(pvAtual, 1, derived.pvMax) });
     onLog(`${nome} foi poupado (Compaixão) — fica com 1 PV e Inconsciente.`);
   }
 
@@ -556,6 +561,7 @@ export function StatsPanel({
                 pvAtual: String(num(sheet.stats.pvAtual) + 5),
                 peAtual: String(num(sheet.stats.peAtual) + 1),
               },
+              ...regraDeMortePatch(pvAtual, pvAtual + 5, derived.pvMax),
             });
             onLog(`${nome} subiu para o nível ${patch.nivel}!`);
             setShowLevelUp(false);
@@ -577,6 +583,7 @@ export function StatsPanel({
                 pvAtual: String(num(sheet.stats.pvAtual) + patch.pvDelta),
                 peAtual: String(num(sheet.stats.peAtual) + patch.peDelta),
               },
+              ...regraDeMortePatch(pvAtual, pvAtual + patch.pvDelta, derived.pvMax),
             });
             onLog(`${nome} teve o Nível ajustado de ${nivelAntigo} para ${patch.nivel}.`);
             setShowAjustarNivel(false);
