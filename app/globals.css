@@ -619,10 +619,12 @@ body{
 
 .derrotado-banner.morto{ background:#1a1a1a; color:#ddd; border-color:#000; }
 .julgamento-panel{ border:1px solid #7a2331; border-radius:4px; padding:12px 14px; margin-bottom:14px; background:rgba(255,183,92,0.06); }
-.julgamento-title{ font-size:12px; letter-spacing:1px; color:var(--maroon); margin-bottom:8px; }
-.julgamento-row{ display:flex; gap:20px; flex-wrap:wrap; font-size:14px; margin-bottom:10px; }
-.julgamento-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-.judgment-pip{ opacity:1; margin-right:2px; }
+.julgamento-title{ text-align:center; font-size:12px; letter-spacing:1px; color:var(--maroon); margin-bottom:8px; }
+.julgamento-row{ display:flex; justify-content:center; align-items:center; gap:20px; flex-wrap:wrap; font-size:14px; margin-bottom:10px; }
+.julgamento-actions{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+.judgment-pip{ opacity:1; margin-right:2px; padding:0; border:0; background:none; font:inherit; cursor:pointer; transition:transform .1s, opacity .1s; }
+.judgment-pip:hover:not(:disabled){ transform:scale(1.2); }
+.judgment-pip:disabled{ cursor:default; }
 .judgment-pip.is-empty{ opacity:.35; }
 .rest-buttons{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
 

@@ -240,6 +240,18 @@ export function StatsPanel({
     );
   }
 
+  // Clicar numa caveira/coração marcado desmarca dali pra frente; num vazio, marca até ele
+  // (mesmo esquema das Fraturas). 3 Sentenças marcadas à mão matam igual à rolagem.
+  function togglePip(tipo: "sentencas" | "dadivas", i: number) {
+    const novo = julg[tipo] > i ? i : i + 1;
+    const next = { ...julg, [tipo]: novo };
+    const patch: Partial<FullSheetData> = { julgamento: next };
+    if (next.sentencas >= 3) patch.morto = true;
+    onChange(patch);
+    const label = tipo === "sentencas" ? "Sentenças de Morte" : "Dádivas de Vida";
+    onLog(`${nome} ajustou ${label} para ${novo}/3${next.sentencas >= 3 ? " — ☠️ MORREU (3 Sentenças)" : ""}`);
+  }
+
   function executar() {
     setShowExecutar(false);
     onChange({ morto: true });
@@ -268,17 +280,31 @@ export function StatsPanel({
             <span>
               Sentenças de Morte:{" "}
               {[0, 1, 2].map((i) => (
-                <span key={i} className={`judgment-pip${i < julg.sentencas ? "" : " is-empty"}`}>
+                <button
+                  key={i}
+                  type="button"
+                  disabled={!isMine}
+                  title={i < julg.sentencas ? "Desmarcar Sentença" : "Marcar Sentença"}
+                  className={`judgment-pip${i < julg.sentencas ? "" : " is-empty"}`}
+                  onClick={() => togglePip("sentencas", i)}
+                >
                   💀
-                </span>
+                </button>
               ))}
             </span>
             <span>
               Dádivas de Vida:{" "}
               {[0, 1, 2].map((i) => (
-                <span key={i} className={`judgment-pip${i < julg.dadivas ? "" : " is-empty"}`}>
+                <button
+                  key={i}
+                  type="button"
+                  disabled={!isMine}
+                  title={i < julg.dadivas ? "Desmarcar Dádiva" : "Marcar Dádiva"}
+                  className={`judgment-pip${i < julg.dadivas ? "" : " is-empty"}`}
+                  onClick={() => togglePip("dadivas", i)}
+                >
                   ❤️‍🔥
-                </span>
+                </button>
               ))}
             </span>
           </div>
