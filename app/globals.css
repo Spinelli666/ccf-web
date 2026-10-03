@@ -1494,3 +1494,56 @@ a.link{ color:var(--blue); }
 }
 .tipo-preview-lbl{ font-size:10.5px; letter-spacing:.8px; text-transform:uppercase; }
 .tipo-acoes-footer{ flex-direction:row; justify-content:flex-end; margin-top:14px; }
+
+/* Habilidades de Classe em cards (2 colunas; 1 no celular) */
+.hab-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; margin-top:12px; }
+@media (max-width:700px){ .hab-grid{ grid-template-columns:minmax(0,1fr); } }
+.hab-card{
+  border:1px solid var(--gold); border-radius:10px; overflow:hidden; align-self:start;
+  background:var(--parchment); box-shadow:0 4px 14px var(--shadow);
+}
+.hab-head{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:8px; padding:8px 10px; }
+.hab-classe{ font-size:14px; min-width:44px; white-space:nowrap; }
+.hab-acoes{ display:flex; gap:6px; justify-content:flex-end; min-width:44px; }
+.hab-nome{
+  background:none; border:0; padding:2px 4px; cursor:pointer; color:var(--gold);
+  font-size:20px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; line-height:1.15;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px; text-align:center;
+}
+.hab-nome:hover{ filter:brightness(1.15); }
+.hab-nome-seta{ font-size:16px; transition:transform .15s ease; }
+.hab-nome-seta.open{ transform:rotate(180deg); }
+.hab-desc{ padding:8px 14px 12px; font-size:13px; color:var(--ink-soft); border-top:1px solid var(--gold-line); }
+.hab-linha{
+  display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+  padding:7px 10px; border:0; border-top:1px solid var(--gold); background:none; color:var(--gold);
+}
+.hab-sep{ width:2px; align-self:stretch; min-height:20px; background:var(--gold); border-radius:1px; }
+.hab-custo{ font-size:14px; color:var(--ink-soft); white-space:nowrap; }
+.hab-aprim{ cursor:pointer; font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+.hab-aprim:hover{ background:rgba(255,183,92,0.08); }
+.hab-aprim-seta{ font-size:12px; transition:transform .15s ease; }
+.hab-aprim-seta.open{ transform:rotate(90deg); }
+.hab-tiers{ display:inline-flex; align-items:center; gap:6px; }
+.hab-tier-sep{ width:2px; height:18px; background:var(--gold); border-radius:1px; }
+.hab-tier{
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  width:20px; height:20px; border-radius:50%; font-size:12px; font-weight:700; line-height:1;
+  background:#16384a; color:var(--gold); border:1px solid var(--gold-line);
+}
+.hab-tier.learned{ background:var(--gold); color:var(--btn-text); border-color:var(--gold); }
+.hab-aprim-lista{ display:flex; flex-direction:column; gap:8px; padding:8px 12px 12px; border-top:1px solid var(--gold-line); font-size:13px; color:var(--ink-soft); }
+.hab-aprim-item{ opacity:.6; }
+.hab-aprim-item.learned{ opacity:1; }
+.hab-aprim-item-head{ display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+.hab-aprim-nome{ font-weight:700; color:var(--gold); flex:1; }
+.hab-aprim-pendente{ font-weight:400; font-style:italic; color:var(--muted); }
+.hab-usar{ padding:10px; gap:14px; }
+.hab-usar-btn{
+  width:46px; height:46px; border-radius:50%; cursor:pointer; font-size:24px; line-height:1;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:#16384a; border:2px solid var(--gold); box-shadow:0 2px 8px var(--shadow);
+  transition:transform .1s ease, filter .1s ease;
+}
+.hab-usar-btn:hover{ transform:scale(1.07); filter:brightness(1.15); }
+.hab-usar-btn:active{ transform:scale(.95); }

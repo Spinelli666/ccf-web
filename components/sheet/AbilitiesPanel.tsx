@@ -12,6 +12,8 @@ import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import type { DerivedStats } from "@/lib/derived";
 import type { FullSheetData, HabilidadeClasse, HabilidadeRaca } from "@/lib/sheet-types";
 
+type AprimTier = { nome: string; efeito: string; idx: number | null };
+
 const ALL_AUTO_GRANT_NAMES = Object.values(AUTO_GRANT_ABILITIES).flat();
 
 // Botões de classe acima da tabela de habilidades (ordem e ícones pedidos pro jogo).
@@ -100,6 +102,7 @@ export function AbilitiesPanel({
   const [editandoIdx, setEditandoIdx] = useState<number | null>(null);
   const [excluindoIdx, setExcluindoIdx] = useState<number | null>(null);
   const [expandidas, setExpandidas] = useState<Set<number>>(new Set());
+  const [aprimAbertas, setAprimAbertas] = useState<Set<number>>(new Set());
   const [showAcao, setShowAcao] = useState(false);
   const [erroAcao, setErroAcao] = useState<string | null>(null);
   const derived = computeDerived(sheet);
@@ -139,6 +142,7 @@ export function AbilitiesPanel({
     onLog(`${nome} removeu ${h.indent ? "o aprimoramento" : "a habilidade"} "${h.nome}" da ficha.`);
     setExcluindoIdx(null);
     setExpandidas(new Set());
+    setAprimAbertas(new Set());
   }
   function salvarEdicao(i: number, patch: Partial<HabilidadeClasse>) {
     updateClasse(i, patch);
@@ -248,17 +252,32 @@ export function AbilitiesPanel({
     setExpandidas(next);
   }
 
+  function toggleAprim(i: number) {
+    const next = new Set(aprimAbertas);
+    if (next.has(i)) next.delete(i);
+    else next.add(i);
+    setAprimAbertas(next);
+  }
+
   // Os aprimoramentos aprendidos de uma habilidade base aparecem como linhas indentadas
-  // logo em seguida a ela (ver rebuildClasseHabilidades no wizard) — usado só pra marcar
-  // quais tiers do catálogo (I/II/III) o personagem já tem.
-  function aprimoramentosAprendidos(baseIndex: number): Set<string> {
-    const nomes = new Set<string>();
-    for (let k = baseIndex + 1; k < sheet.classeHabilidades.length; k++) {
-      const row = sheet.classeHabilidades[k];
-      if (!row.indent) break;
-      nomes.add(row.nome);
-    }
-    return nomes;
+  // logo em seguida a ela (ver rebuildClasseHabilidades no wizard). No card, cada tier do
+  // catálogo (I/II/III) vira um número: com `idx` = linha da ficha se aprendido, null se não.
+  function tiersDoAprimoramento(base: number, aprims: number[]): AprimTier[] {
+    const entry = findAbilityEntry(sheet.classeHabilidades[base].nome);
+    const usados = new Set<number>();
+    const tiers: AprimTier[] = (entry?.aprimoramentos || []).map((ap) => {
+      const idx = aprims.find((k) => !usados.has(k) && sheet.classeHabilidades[k].nome === ap.nome) ?? null;
+      if (idx !== null) usados.add(idx);
+      return { nome: ap.nome, efeito: idx !== null ? sheet.classeHabilidades[idx].efeito : ap.efeito, idx };
+    });
+    // Aprimoramentos fora do catálogo (criados ou renomeados à mão) entram no fim, aprendidos.
+    aprims
+      .filter((k) => !usados.has(k))
+      .forEach((k) => {
+        const row = sheet.classeHabilidades[k];
+        tiers.push({ nome: row.nome, efeito: row.efeito, idx: k });
+      });
+    return tiers;
   }
 
   // Cada linha não-indentada infere sua classe pelo catálogo; uma linha indentada
@@ -269,9 +288,17 @@ export function AbilitiesPanel({
     const anterior = classePairsComClasse[i - 1]?.classe ?? "Outras";
     classePairsComClasse.push({ h, i, classe: h.indent ? anterior : findAbilityClass(h.nome) || "Outras" });
   }
-  // Habilidades fora do catálogo ("Outras") aparecem junto sempre que alguma classe estiver marcada.
-  const classePairsFiltrados = classePairsComClasse.filter(
-    (p) => classesSelecionadas.includes(p.classe) || (p.classe === "Outras" && classesSelecionadas.length > 0)
+  // Cada habilidade base vira um card; os aprimoramentos dela (linhas indentadas logo
+  // abaixo) entram no mesmo card. Habilidades fora do catálogo ("Outras") aparecem junto
+  // sempre que alguma classe estiver marcada.
+  const grupos: { base: number; aprims: number[]; classe: string }[] = [];
+  classePairsComClasse.forEach(({ h, i, classe }) => {
+    const ultimo = grupos[grupos.length - 1];
+    if (h.indent && ultimo) ultimo.aprims.push(i);
+    else grupos.push({ base: i, aprims: [], classe });
+  });
+  const gruposFiltrados = grupos.filter(
+    (g) => classesSelecionadas.includes(g.classe) || (g.classe === "Outras" && classesSelecionadas.length > 0)
   );
 
   const phPorClasse: Record<string, number> = {};
@@ -403,137 +430,129 @@ export function AbilitiesPanel({
               Selecione uma classe acima para ver as habilidades.
             </div>
           ) : (
-          <div className="sheet-table-wrap">
-          <table className="sheet-table">
-            <thead>
-              <tr>
-                <th>Habilidade</th>
-                <th>Tipo</th>
-                <th>Custo</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {classePairsFiltrados.map(({ h, i }) => {
-                const aberta = expandidas.has(i);
-                const nomeCell = (
-                  <td className="name">
-                    <span
-                      className="ability-name-toggle"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => toggleExpandida(i)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          toggleExpandida(i);
-                        }
-                      }}
-                    >
-                      <span className={`ability-name-arrow ${aberta ? "open" : ""}`}>▶</span>
-                      {h.nome}
+          <div className="hab-grid">
+            {gruposFiltrados.map(({ base, aprims, classe }) => {
+              const h = sheet.classeHabilidades[base];
+              const aberta = expandidas.has(base);
+              const aprimAberto = aprimAbertas.has(base);
+              const tiers = tiersDoAprimoramento(base, aprims);
+              const icone = CLASSE_BOTOES.find((b) => b.classe === classe)?.icone;
+              return (
+                <div key={base} className="hab-card">
+                  <div className="hab-head">
+                    <span className="hab-classe" title={classe}>
+                      {icone}
                     </span>
-                  </td>
-                );
-                return h.indent ? (
-                  <Fragment key={i}>
-                    <tr className="indent">
-                      {nomeCell}
-                      <td className="col-tight">
-                        <TipoAcaoBadge tipo={h.tipo} />
-                      </td>
-                      <td className="col-tight">{h.custo}</td>
-                      <td className="col-tight">
-                        {isMine && <div className="ability-controls">{linhaBotoes(i)}</div>}
-                      </td>
-                    </tr>
-                    {aberta && (
-                      <tr className="ability-effect-row">
-                        <td colSpan={4}>
-                          <EffectText text={h.efeito} />
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                ) : (
-                  <Fragment key={i}>
-                    <tr>
-                      {nomeCell}
-                      <td className="col-tight">
-                        <TipoAcaoBadge tipo={h.tipo} />
-                      </td>
-                      <td className="col-tight">{h.custo}</td>
-                      <td className="col-tight">
-                        {isMine && (
-                          <div className="ability-controls">
-                            {h.temContador && (
-                              <div className="counter">
-                                <button
-                                  type="button"
-                                  className="counter-btn"
-                                  onClick={() => updateClasse(i, { contadorAtual: Math.max(0, h.contadorAtual - 1) })}
-                                >
-                                  −
-                                </button>
-                                <span className="counter-val">
-                                  {h.contadorAtual}/{h.contadorMax}
+                    <button
+                      type="button"
+                      className="hab-nome"
+                      aria-expanded={aberta}
+                      title={aberta ? "Esconder descrição" : "Ver descrição"}
+                      onClick={() => toggleExpandida(base)}
+                    >
+                      {h.nome}
+                      <span className={`hab-nome-seta ${aberta ? "open" : ""}`}>⤵</span>
+                    </button>
+                    <div className="hab-acoes">{isMine && linhaBotoes(base)}</div>
+                  </div>
+                  {aberta && (
+                    <div className="hab-desc">
+                      <EffectText text={h.efeito} />
+                    </div>
+                  )}
+
+                  <div className="hab-linha hab-meta">
+                    <TipoAcaoBadge tipo={h.tipo} />
+                    <span className="hab-sep" aria-hidden="true" />
+                    <span className="hab-custo">{h.custo || "—"}</span>
+                  </div>
+
+                  {tiers.length > 0 && (
+                    <>
+                      <button
+                        type="button"
+                        className="hab-linha hab-aprim"
+                        aria-expanded={aprimAberto}
+                        title={aprimAberto ? "Esconder aprimoramentos" : "Ver aprimoramentos"}
+                        onClick={() => toggleAprim(base)}
+                      >
+                        Aprimoramentos
+                        <span className={`hab-aprim-seta ${aprimAberto ? "open" : ""}`}>▸</span>
+                        <span className="hab-tiers">
+                          {tiers.map((t, k) => (
+                            <Fragment key={k}>
+                              {k > 0 && <span className="hab-tier-sep" aria-hidden="true" />}
+                              <span
+                                className={`hab-tier ${t.idx !== null ? "learned" : ""}`}
+                                title={`${t.nome}${t.idx !== null ? " (aprendido)" : " (não aprendido)"}`}
+                              >
+                                {k + 1}
+                              </span>
+                            </Fragment>
+                          ))}
+                        </span>
+                      </button>
+                      {aprimAberto && (
+                        <div className="hab-aprim-lista">
+                          {tiers.map((t, k) => (
+                            <div key={k} className={`hab-aprim-item ${t.idx !== null ? "learned" : ""}`}>
+                              <div className="hab-aprim-item-head">
+                                <span className={`hab-tier ${t.idx !== null ? "learned" : ""}`}>{k + 1}</span>
+                                <span className="hab-aprim-nome">
+                                  {t.nome}
+                                  {t.idx === null && <span className="hab-aprim-pendente"> — não aprendido</span>}
                                 </span>
-                                <button
-                                  type="button"
-                                  className="counter-btn"
-                                  onClick={() =>
-                                    updateClasse(i, {
-                                      contadorAtual: Math.min(num(h.contadorMax, 99), h.contadorAtual + 1),
-                                    })
-                                  }
-                                >
-                                  +
-                                </button>
+                                {isMine && t.idx !== null && <span className="hab-acoes">{linhaBotoes(t.idx)}</span>}
                               </div>
-                            )}
-                            <button
-                              type="button"
-                              className="btn small secondary emoji-btn"
-                              title={effectiveCost(i) ? `Usar (-${effectiveCost(i)}⚡)` : "Usar"}
-                              aria-label="Usar"
-                              onClick={() => usarClasse(i)}
-                            >
-                              ✨
-                            </button>
-                            {linhaBotoes(i)}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                    {aberta &&
-                      (() => {
-                        const entry = findAbilityEntry(h.nome);
-                        const aprendidos = aprimoramentosAprendidos(i);
-                        const aprimorAprendidos = (entry?.aprimoramentos || []).filter((ap) => aprendidos.has(ap.nome));
-                        return (
-                          <tr className="ability-effect-row">
-                            <td colSpan={4}>
-                              <EffectText text={h.efeito} />
-                              {aprimorAprendidos.length > 0 && (
-                                <div className="ability-aprim-list">
-                                  <div className="ability-aprim-title">Aprimoramentos aprendidos</div>
-                                  {aprimorAprendidos.map((ap) => (
-                                    <div key={ap.nome} className="ability-aprim-item learned">
-                                      <span className="ability-aprim-tag">✓ {ap.nome}</span>
-                                      <EffectText text={ap.efeito} />
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })()}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                              <EffectText text={t.efeito} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {isMine && (
+                    <div className="hab-linha hab-usar">
+                      {h.temContador && (
+                        <div className="counter">
+                          <button
+                            type="button"
+                            className="counter-btn"
+                            onClick={() => updateClasse(base, { contadorAtual: Math.max(0, h.contadorAtual - 1) })}
+                          >
+                            −
+                          </button>
+                          <span className="counter-val">
+                            {h.contadorAtual}/{h.contadorMax}
+                          </span>
+                          <button
+                            type="button"
+                            className="counter-btn"
+                            onClick={() =>
+                              updateClasse(base, {
+                                contadorAtual: Math.min(num(h.contadorMax, 99), h.contadorAtual + 1),
+                              })
+                            }
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        className="hab-usar-btn"
+                        title={effectiveCost(base) ? `Usar (-${effectiveCost(base)}⚡)` : "Usar"}
+                        aria-label="Usar"
+                        onClick={() => usarClasse(base)}
+                      >
+                        ✨
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
           )}
         </>
