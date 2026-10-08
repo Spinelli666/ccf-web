@@ -3,9 +3,7 @@ import { ROLL_MODES } from "@/data/roll-modes";
 
 export type RollModeKey = keyof typeof ROLL_MODES;
 
-// `max`: força o valor máximo do dado (interruptor de rolagem no máximo, ver lib/max-roll.ts).
-export function rollDie(sides: number, max = false): number {
-  if (max) return sides;
+export function rollDie(sides: number): number {
   return Math.floor(Math.random() * sides) + 1;
 }
 
@@ -15,10 +13,10 @@ export type RollWithModeResult = {
   mode: (typeof ROLL_MODES)[RollModeKey];
 };
 
-export function rollWithMode(sides: number, modeKey: RollModeKey, max = false): RollWithModeResult {
+export function rollWithMode(sides: number, modeKey: RollModeKey): RollWithModeResult {
   const mode = ROLL_MODES[modeKey] ?? ROLL_MODES.normal;
   const rolls: number[] = [];
-  for (let i = 0; i < mode.dice; i++) rolls.push(rollDie(sides, max));
+  for (let i = 0; i < mode.dice; i++) rolls.push(rollDie(sides));
   const picked = mode.pick === "max" ? Math.max(...rolls) : Math.min(...rolls);
   return { picked, rolls, mode };
 }
@@ -47,8 +45,8 @@ export function rollCritClass(total: number): "roll-crit-high" | "roll-crit-low"
   return "";
 }
 
-export function rollDiceCommand(dice: DiceCommand, max = false): { rolls: number[]; total: number; text: string } {
-  const rolls = Array.from({ length: dice.qty }, () => rollDie(dice.sides, max));
+export function rollDiceCommand(dice: DiceCommand): { rolls: number[]; total: number; text: string } {
+  const rolls = Array.from({ length: dice.qty }, () => rollDie(dice.sides));
   const total = rolls.reduce((a, b) => a + b, 0) + dice.mod;
   let text = `${dice.qty}d${dice.sides}`;
   if (dice.mod) text += (dice.mod > 0 ? "+" : "") + dice.mod;
