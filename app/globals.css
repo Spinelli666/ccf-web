@@ -188,6 +188,15 @@ body{
   font-size:12px; padding:3px 7px; opacity:0.6;
 }
 .chat-clear-btn:hover{ opacity:1; background:rgba(138,58,42,0.1); }
+.chat-stats-btn:hover{ background:rgba(255,183,92,0.12); }
+.roll-stats{ display:flex; flex-direction:column; gap:14px; max-height:60vh; overflow-y:auto; margin-bottom:16px; text-align:left; }
+.roll-stats-dado{ border:1px solid var(--gold-line); border-radius:6px; padding:10px 12px; }
+.roll-stats-head{ display:flex; justify-content:space-between; align-items:baseline; font-weight:700; color:var(--gold); margin-bottom:6px; }
+.roll-stats-total{ font-size:12px; font-weight:400; color:var(--ink-soft); }
+.roll-stats-linha{ display:grid; grid-template-columns:3ch 9em 1fr; align-items:center; gap:8px; font-size:14px; color:var(--ink); padding:2px 0; }
+.roll-stats-valor{ font-weight:700; text-align:right; }
+.roll-stats-barra{ height:6px; border-radius:3px; background:rgba(255,183,92,0.12); overflow:hidden; }
+.roll-stats-barra > span{ display:block; height:100%; background:var(--gold); }
 .chat-card{
   position:relative; background: var(--parchment-dark); border:1px solid var(--gold-line);
   border-top:1px solid var(--gold); border-bottom:1px solid var(--gold);

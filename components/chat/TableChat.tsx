@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { getSocket } from "@/lib/socket-client";
 import { parseDiceCommand, rollDiceCommand, rollCritClass, timeAgo } from "@/lib/dice";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
+import { RolagensStatsDialog } from "@/components/dialogs/RolagensStatsDialog";
 import { useIsNarrowViewport } from "@/lib/use-narrow-viewport";
 import { useRollVisibility, setRollVisibility, type RollVisibility } from "@/lib/roll-visibility";
 import { formatLog, type LogMeter } from "@/lib/chat-log";
@@ -92,6 +93,7 @@ export function TableChat({ mesaId }: { mesaId: string }) {
   const [input, setInput] = useState("");
   const [, forceTick] = useState(0);
   const [showClear, setShowClear] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const visibility = useRollVisibility();
   // Em celular o painel do chat cobre a tela quase inteira (fixed, largura ~viewport) —
   // começa fechado nesse caso pra não esconder a ficha, igual a SideNav/CombateClient.
@@ -279,6 +281,14 @@ export function TableChat({ mesaId }: { mesaId: string }) {
         <div className="chat-popover-head-actions">
           <button
             type="button"
+            className="chat-clear-btn chat-stats-btn"
+            title="Quantas vezes saiu cada valor nas rolagens"
+            onClick={() => setShowStats(true)}
+          >
+            📊
+          </button>
+          <button
+            type="button"
             className="chat-clear-btn"
             title="Limpar tudo (rolagens, ações e mensagens)"
             onClick={() => setShowClear(true)}
@@ -290,6 +300,12 @@ export function TableChat({ mesaId }: { mesaId: string }) {
           </button>
         </div>
       </div>
+      {showStats && (
+        <RolagensStatsDialog
+          textos={messages.filter((m) => m.kind === "roll").map((m) => m.text)}
+          onClose={() => setShowStats(false)}
+        />
+      )}
       {showClear && (
         <ConfirmDialog
           title="Limpar tudo"

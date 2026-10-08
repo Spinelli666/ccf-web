@@ -64,3 +64,21 @@ export function timeAgo(ts: number): string {
   const days = Math.floor(hrs / 24);
   return days + "d atrás";
 }
+
+// Lê os dados que saíram no texto de uma rolagem do chat, nos formatos gerados aqui:
+// "2d6+3 = [4, 5] +3" (comando /r), "d20 (4)" (normal) e "d20 [3, 18] (vantagem, 18)"
+// (vantagem/desvantagem: conta os dois dados rolados).
+const DADOS_ROLADOS_RE = /(?<![a-z])d(\d+)(?:\s*[+-]\s*\d+)?(?:\s*=)?\s*(?:\[([\d,\s]+)\]|\((\d+)\))/gi;
+
+export function extrairDadosRolados(text: string): { sides: number; value: number }[] {
+  const out: { sides: number; value: number }[] = [];
+  for (const m of text.matchAll(DADOS_ROLADOS_RE)) {
+    const sides = parseInt(m[1], 10);
+    const valores = m[2] ? m[2].split(",") : [m[3]];
+    valores.forEach((v) => {
+      const value = parseInt(v, 10);
+      if (value >= 1 && value <= sides) out.push({ sides, value });
+    });
+  }
+  return out;
+}
