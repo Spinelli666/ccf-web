@@ -181,6 +181,14 @@ export function equippedPericiaBonus(armaduras: Armadura[], armas: Arma[], peric
     .reduce((sum, b) => sum + num(b.valor, 0), 0);
 }
 
+// Bônus de perícia vindos das Habilidades de Classe (inclui aprimoramentos) — sempre ativos.
+export function habilidadePericiaBonus(habilidades: HabilidadeClasse[], periciaNome: string): number {
+  return (habilidades || [])
+    .flatMap((h) => getPericiaBonuses(h))
+    .filter((b) => b.pericia.trim().toLowerCase() === periciaNome.trim().toLowerCase())
+    .reduce((sum, b) => sum + num(b.valor, 0), 0);
+}
+
 export function computeDerived(s: SheetData): DerivedStats {
   const nivel = Math.max(1, num(s.nivel, 1));
   const forca = getPericiaVal(s, "Força");

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { PericiaBonusEditor } from "@/components/dialogs/PericiaBonusEditor";
 import { getPericiaBonuses } from "@/lib/derived";
 import type { Arma, Armadura, PericiaBonusItem, Remedio } from "@/lib/sheet-types";
 
@@ -10,18 +11,6 @@ const PESO_OPCOES = [
   { value: "medio", label: "Médio" },
   { value: "pesado", label: "Pesado" },
   { value: "mpesado", label: "M. Pesado" },
-];
-
-const PERICIA_NOMES = [
-  "Força",
-  "Vigor",
-  "Evasão",
-  "Persuasão",
-  "Precisão",
-  "Inteligência",
-  "Destreza",
-  "Furtividade",
-  "Psionismo",
 ];
 
 // Sugestões pro campo "Parte do corpo" (continua aceitando texto livre).
@@ -70,20 +59,6 @@ export function EditItemDialog({
     target.tipo === "arma" || target.tipo === "armadura" ? String(target.data.durabilidadeMax) : ""
   );
   const [confirmarRemover, setConfirmarRemover] = useState(false);
-
-  function addPericiaBonus() {
-    setPericiaBonuses((prev) => [...prev, { pericia: PERICIA_NOMES[0], valor: "1" }]);
-  }
-  function updatePericiaBonus(i: number, field: keyof PericiaBonusItem, value: string) {
-    setPericiaBonuses((prev) => {
-      const next = prev.slice();
-      next[i] = { ...next[i], [field]: value };
-      return next;
-    });
-  }
-  function removePericiaBonus(i: number) {
-    setPericiaBonuses((prev) => prev.filter((_, idx) => idx !== i));
-  }
 
   function salvar() {
     if (!item.trim()) return;
@@ -161,40 +136,7 @@ export function EditItemDialog({
     </div>
   );
 
-  const camposPericia = (
-    <div className="item-form-pericias">
-      <label className="item-form-sublabel">🎯 Bônus de perícia</label>
-      {periciaBonuses.map((b, i) => (
-        <div className="item-form-pericia-row" key={i}>
-          <select value={b.pericia} onChange={(e) => updatePericiaBonus(i, "pericia", e.target.value)}>
-            {PERICIA_NOMES.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            value={b.valor}
-            placeholder="Ex: 1"
-            onChange={(e) => updatePericiaBonus(i, "valor", e.target.value)}
-          />
-          <button
-            type="button"
-            className="icon-btn is-danger"
-            title="Remover bônus"
-            aria-label="Remover bônus"
-            onClick={() => removePericiaBonus(i)}
-          >
-            🗑️
-          </button>
-        </div>
-      ))}
-      <button type="button" className="add-row-btn" onClick={addPericiaBonus}>
-        + Adicionar bônus de perícia
-      </button>
-    </div>
-  );
+  const camposPericia = <PericiaBonusEditor value={periciaBonuses} onChange={setPericiaBonuses} />;
 
   return (
     <Modal onClose={onCancel} wide>

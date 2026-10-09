@@ -1,9 +1,9 @@
 "use client";
 
 import { Fragment, useEffect, useState, useSyncExternalStore } from "react";
-import { num, clamp } from "@/lib/derived";
+import { num, clamp, getPericiaBonuses } from "@/lib/derived";
 import { computeDerived } from "@/lib/derived";
-import { AUTO_GRANT_ABILITIES, custoComDiamante, findAbilityClass, findAbilityEntry } from "@/lib/classes-lookup";
+import { AUTO_GRANT_ABILITIES, CLASSE_UNICA, classeDaHabilidade, custoComDiamante, findAbilityEntry } from "@/lib/classes-lookup";
 import { EffectText } from "@/components/sheet/EffectText";
 import { TipoAcaoBadge } from "@/components/sheet/TipoAcaoBadge";
 import { AcaoDialog } from "@/components/dialogs/AcaoDialog";
@@ -16,8 +16,26 @@ type AprimTier = { nome: string; efeito: string; idx: number | null };
 
 const ALL_AUTO_GRANT_NAMES = Object.values(AUTO_GRANT_ABILITIES).flat();
 
+// Ponto de partida do "+ Criar Habilidade".
+const HABILIDADE_NOVA: HabilidadeClasse = {
+  nome: "",
+  tipo: "",
+  custo: "",
+  custoPE: "",
+  efeito: "",
+  indent: false,
+  ativo: true,
+  usosGastos: 0,
+  temContador: false,
+  contadorMax: "",
+  contadorAtual: 0,
+  classe: CLASSE_UNICA,
+};
+
 // Botões de classe acima da tabela de habilidades (ordem e ícones pedidos pro jogo).
+// "Única" agrupa as habilidades criadas à mão / fora do catálogo de classes.
 const CLASSE_BOTOES: { classe: string; icone: string }[] = [
+  { classe: CLASSE_UNICA, icone: "🌟🟡" },
   { classe: "Guerreiro", icone: "⚔️🔴" },
   { classe: "Andarilho", icone: "🏹🟢" },
   { classe: "Ladino", icone: "🗡️🟣" },
@@ -27,7 +45,8 @@ const CLASSE_BOTOES: { classe: string; icone: string }[] = [
 // A seleção de classes visíveis é só uma preferência de visualização de quem está
 // olhando a ficha — fica no localStorage do navegador, por ficha.
 function storageKey(sheetId: string) {
-  return `ccf:habilidades-classes:${sheetId}`;
+  // v2: a categoria "Única" entrou como botão — seleções antigas não a conheciam.
+  return `ccf:habilidades-classes:v2:${sheetId}`;
 }
 const classesListeners = new Set<() => void>();
 function subscribeClasses(listener: () => void) {
@@ -97,9 +116,10 @@ export function AbilitiesPanel({
   const classesSelecionadas =
     parseClasses(classesRaw) ??
     CLASSE_BOTOES.map((b) => b.classe).filter((c) =>
-      sheet.classeHabilidades.some((h) => !h.indent && findAbilityClass(h.nome) === c)
+      sheet.classeHabilidades.some((h) => !h.indent && classeDaHabilidade(h) === c)
     );
   const [editandoIdx, setEditandoIdx] = useState<number | null>(null);
+  const [criando, setCriando] = useState(false);
   const [excluindoIdx, setExcluindoIdx] = useState<number | null>(null);
   const [expandidas, setExpandidas] = useState<Set<number>>(new Set());
   const [aprimAbertas, setAprimAbertas] = useState<Set<number>>(new Set());
@@ -163,6 +183,15 @@ export function AbilitiesPanel({
       setAprimAbertas(desloca(aprimAbertas));
     }
     setEditandoIdx(null);
+  }
+
+  function criarHabilidade(nova: HabilidadeClasse, aprims: HabilidadeClasse[]) {
+    const cat = nova.classe || CLASSE_UNICA;
+    onChange({ classeHabilidades: [...sheet.classeHabilidades, nova, ...aprims] });
+    onLog(`${nome} criou a habilidade "${nova.nome}" (${cat}).`);
+    // Mostra a categoria da habilidade nova, se ela estava escondida no filtro.
+    if (!classesSelecionadas.includes(cat)) salvarClasses(sheetId, [...classesSelecionadas, cat]);
+    setCriando(false);
   }
 
   function linhaBotoes(i: number) {
@@ -301,21 +330,18 @@ export function AbilitiesPanel({
   const classePairsComClasse: { h: HabilidadeClasse; i: number; classe: string }[] = [];
   for (let i = 0; i < sheet.classeHabilidades.length; i++) {
     const h = sheet.classeHabilidades[i];
-    const anterior = classePairsComClasse[i - 1]?.classe ?? "Outras";
-    classePairsComClasse.push({ h, i, classe: h.indent ? anterior : findAbilityClass(h.nome) || "Outras" });
+    const anterior = classePairsComClasse[i - 1]?.classe ?? CLASSE_UNICA;
+    classePairsComClasse.push({ h, i, classe: h.indent ? anterior : classeDaHabilidade(h) });
   }
   // Cada habilidade base vira um card; os aprimoramentos dela (linhas indentadas logo
-  // abaixo) entram no mesmo card. Habilidades fora do catálogo ("Outras") aparecem junto
-  // sempre que alguma classe estiver marcada.
+  // abaixo) entram no mesmo card.
   const grupos: { base: number; aprims: number[]; classe: string }[] = [];
   classePairsComClasse.forEach(({ h, i, classe }) => {
     const ultimo = grupos[grupos.length - 1];
     if (h.indent && ultimo) ultimo.aprims.push(i);
     else grupos.push({ base: i, aprims: [], classe });
   });
-  const gruposFiltrados = grupos.filter(
-    (g) => classesSelecionadas.includes(g.classe) || (g.classe === "Outras" && classesSelecionadas.length > 0)
-  );
+  const gruposFiltrados = grupos.filter((g) => classesSelecionadas.includes(g.classe));
 
   const phPorClasse: Record<string, number> = {};
   classePairsComClasse.forEach(({ h, classe }) => {
@@ -440,6 +466,13 @@ export function AbilitiesPanel({
               );
             })}
           </div>
+          {isMine && (
+            <div className="hab-criar-row">
+              <button type="button" className="btn ghost small" onClick={() => setCriando(true)}>
+                + Criar Habilidade
+              </button>
+            </div>
+          )}
 
           {classesSelecionadas.length === 0 ? (
             <div className="derived-note" style={{ textAlign: "center" }}>
@@ -481,6 +514,15 @@ export function AbilitiesPanel({
                     <span className="hab-sep" aria-hidden="true" />
                     <span className="hab-custo">{custoComDiamante(h.custo) || "—"}</span>
                   </div>
+                  {getPericiaBonuses(h).length > 0 && (
+                    <div className="hab-linha hab-bonus">
+                      {getPericiaBonuses(h).map((b, k) => (
+                        <span key={k} className="hab-bonus-chip">
+                          🎯 +{num(b.valor, 0)} {b.pericia}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   {tiers.length > 0 && (
                     <>
@@ -581,6 +623,14 @@ export function AbilitiesPanel({
           aprimoramentos={sheet.classeHabilidades.slice(editandoIdx + 1, editandoIdx + 1 + qtdAprimoramentosAbaixo(editandoIdx))}
           onSave={(patch, aprims) => salvarEdicao(editandoIdx, patch, aprims)}
           onCancel={() => setEditandoIdx(null)}
+        />
+      )}
+      {criando && (
+        <EditHabilidadeDialog
+          criando
+          habilidade={HABILIDADE_NOVA}
+          onSave={(patch, aprims) => criarHabilidade({ ...HABILIDADE_NOVA, ...patch }, aprims)}
+          onCancel={() => setCriando(false)}
         />
       )}
       {excluindoIdx !== null && sheet.classeHabilidades[excluindoIdx] && (

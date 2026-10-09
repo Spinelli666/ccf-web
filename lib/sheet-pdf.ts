@@ -1,7 +1,7 @@
 // Monta um PDF de verdade (texto selecionável, não uma imagem/print da tela) com o
 // estado atual da ficha — espelha os cálculos derivados usados em StatsPanel/EquipmentPanel.
 import { jsPDF } from "jspdf";
-import { computeDerived, equippedArmorSum, equippedPericiaBonus, getPericiaBonuses, orderPericias, num, clamp } from "@/lib/derived";
+import { computeDerived, equippedArmorSum, equippedPericiaBonus, habilidadePericiaBonus, getPericiaBonuses, orderPericias, num, clamp } from "@/lib/derived";
 import type { FullSheetData } from "@/lib/sheet-types";
 
 const PAGE_W = 595.28;
@@ -169,7 +169,9 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
     const bonusTxt = num(p.bonus) ? ` (+${p.bonus})` : "";
     const equipBonus = equippedPericiaBonus(sheet.armaduras, sheet.armas, p.nome);
     const equipTxt = equipBonus ? ` +${equipBonus} equip.` : "";
-    return `${p.nome}: ${p.valor}${bonusTxt}${equipTxt}`;
+    const habBonus = habilidadePericiaBonus(sheet.classeHabilidades, p.nome);
+    const habTxt = habBonus ? ` +${habBonus} hab.` : "";
+    return `${p.nome}: ${p.valor}${bonusTxt}${equipTxt}${habTxt}`;
   }
   colL.forEach((p, i) => {
     doc.text(sanitizeForPdf(periciaLine(p)), MARGIN, yPericias + i * rowH);

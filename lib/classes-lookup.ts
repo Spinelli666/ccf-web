@@ -20,6 +20,14 @@ export const ABILITIES_LIBRARY = RAW_ABILITIES as unknown as Record<string, Abil
 export const AUTO_GRANT_ABILITIES = RAW_AUTO_GRANT as unknown as Record<string, string[]>;
 export { CLASSES_ORDENADAS };
 
+// Categoria das habilidades criadas à mão / fora do catálogo de classes.
+export const CLASSE_UNICA = "Única";
+
+/** Classe de uma habilidade base: a escolhida à mão, senão a do catálogo, senão "Única". */
+export function classeDaHabilidade(h: { nome: string; classe?: string }): string {
+  return h.classe || findAbilityClass(h.nome) || CLASSE_UNICA;
+}
+
 export function findAbilityClass(nome: string): string | null {
   for (const cls of CLASSES_ORDENADAS) {
     if ((ABILITIES_LIBRARY[cls] || []).some((e) => e.nome === nome)) return cls;

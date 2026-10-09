@@ -32,6 +32,10 @@ export type HabilidadeClasse = {
   temContador: boolean;
   contadorMax: string;
   contadorAtual: number;
+  // Categoria escolhida à mão ("Única" ou uma classe). Sem ela, a classe vem do catálogo.
+  classe?: string;
+  // Ex: habilidade que dá +1 Furtividade — soma sempre ao rolar a perícia.
+  periciaBonuses?: PericiaBonusItem[];
 };
 
 export type Arma = {
