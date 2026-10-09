@@ -55,7 +55,7 @@ export function EditItemDialog({
     target.tipo === "armadura" ? target.data.inventarioBonus || "" : ""
   );
   const [periciaBonuses, setPericiaBonuses] = useState<PericiaBonusItem[]>(
-    target.tipo === "armadura" ? getPericiaBonuses(target.data) : []
+    target.tipo === "armadura" || target.tipo === "arma" ? getPericiaBonuses(target.data) : []
   );
   const [deslocamentoBonus, setDeslocamentoBonus] = useState(
     target.tipo === "armadura" ? target.data.deslocamentoBonus || "" : ""
@@ -91,7 +91,18 @@ export function EditItemDialog({
       const novoMax = Math.max(0, parseInt(durabilidadeMax, 10) || 0);
       const durabilidadeAtual = Math.min(target.data.durabilidadeAtual, novoMax);
       if (target.tipo === "arma") {
-        onSave({ item: item.trim(), dano, propriedades, preco, peso, descricao, protecao, durabilidadeMax: novoMax, durabilidadeAtual });
+        onSave({
+          item: item.trim(),
+          dano,
+          propriedades,
+          preco,
+          peso,
+          descricao,
+          protecao,
+          periciaBonuses: periciaBonuses.filter((b) => b.pericia.trim()),
+          durabilidadeMax: novoMax,
+          durabilidadeAtual,
+        });
       } else {
         onSave({
           item: item.trim(),
@@ -147,6 +158,41 @@ export function EditItemDialog({
     <div className="field span-3">
       <label>Descrição</label>
       <textarea rows={3} value={texto} placeholder="O que é / história / detalhes..." onChange={(e) => setTexto(e.target.value)} />
+    </div>
+  );
+
+  const camposPericia = (
+    <div className="item-form-pericias">
+      <label className="item-form-sublabel">🎯 Bônus de perícia</label>
+      {periciaBonuses.map((b, i) => (
+        <div className="item-form-pericia-row" key={i}>
+          <select value={b.pericia} onChange={(e) => updatePericiaBonus(i, "pericia", e.target.value)}>
+            {PERICIA_NOMES.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            value={b.valor}
+            placeholder="Ex: 1"
+            onChange={(e) => updatePericiaBonus(i, "valor", e.target.value)}
+          />
+          <button
+            type="button"
+            className="icon-btn is-danger"
+            title="Remover bônus"
+            aria-label="Remover bônus"
+            onClick={() => removePericiaBonus(i)}
+          >
+            🗑️
+          </button>
+        </div>
+      ))}
+      <button type="button" className="add-row-btn" onClick={addPericiaBonus}>
+        + Adicionar bônus de perícia
+      </button>
     </div>
   );
 
@@ -207,6 +253,13 @@ export function EditItemDialog({
           </div>
         </div>
 
+        {target.tipo === "arma" && (
+          <div className="item-form-section">
+            <div className="item-form-section-title">Bônus quando equipada (opcional)</div>
+            {camposPericia}
+          </div>
+        )}
+
         {target.tipo === "armadura" && (
           <div className="item-form-section">
             <div className="item-form-section-title">Bônus quando equipada (opcional)</div>
@@ -239,38 +292,7 @@ export function EditItemDialog({
               </div>
             </div>
 
-            <div className="item-form-pericias">
-              <label className="item-form-sublabel">🎯 Bônus de perícia</label>
-              {periciaBonuses.map((b, i) => (
-                <div className="item-form-pericia-row" key={i}>
-                  <select value={b.pericia} onChange={(e) => updatePericiaBonus(i, "pericia", e.target.value)}>
-                    {PERICIA_NOMES.map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    value={b.valor}
-                    placeholder="Ex: 1"
-                    onChange={(e) => updatePericiaBonus(i, "valor", e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="icon-btn is-danger"
-                    title="Remover bônus"
-                    aria-label="Remover bônus"
-                    onClick={() => removePericiaBonus(i)}
-                  >
-                    🗑️
-                  </button>
-                </div>
-              ))}
-              <button type="button" className="add-row-btn" onClick={addPericiaBonus}>
-                + Adicionar bônus de perícia
-              </button>
-            </div>
+            {camposPericia}
           </div>
         )}
 

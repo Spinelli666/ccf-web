@@ -1,7 +1,7 @@
 // Monta um PDF de verdade (texto selecionável, não uma imagem/print da tela) com o
 // estado atual da ficha — espelha os cálculos derivados usados em StatsPanel/EquipmentPanel.
 import { jsPDF } from "jspdf";
-import { computeDerived, equippedArmorSum, equippedArmorPericiaBonus, getPericiaBonuses, orderPericias, num, clamp } from "@/lib/derived";
+import { computeDerived, equippedArmorSum, equippedPericiaBonus, getPericiaBonuses, orderPericias, num, clamp } from "@/lib/derived";
 import type { FullSheetData } from "@/lib/sheet-types";
 
 const PAGE_W = 595.28;
@@ -167,7 +167,7 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
   doc.setTextColor(...INK);
   function periciaLine(p: (typeof periciasOrdenadas)[number]) {
     const bonusTxt = num(p.bonus) ? ` (+${p.bonus})` : "";
-    const equipBonus = equippedArmorPericiaBonus(sheet.armaduras, p.nome);
+    const equipBonus = equippedPericiaBonus(sheet.armaduras, sheet.armas, p.nome);
     const equipTxt = equipBonus ? ` +${equipBonus} equip.` : "";
     return `${p.nome}: ${p.valor}${bonusTxt}${equipTxt}`;
   }
@@ -231,8 +231,12 @@ export function buildSheetPdf(sheet: FullSheetData, ownerName: string): jsPDF {
       subheading("Armas");
       armasEquipadas.forEach((a) => {
         const protecaoTxt = num(a.protecao, 0) > 0 ? ` · +${num(a.protecao, 0)} Armadura quando equipada` : "";
+        const periciaTxt = getPericiaBonuses(a)
+          .filter((b) => num(b.valor, 0) > 0)
+          .map((b) => ` · +${num(b.valor, 0)} ${b.pericia}`)
+          .join("");
         paragraph(
-          `${a.item} — Dano ${a.dano}${a.propriedades && a.propriedades !== "—" ? ` · ${a.propriedades}` : ""}${protecaoTxt} · Durab. ${a.durabilidadeAtual}/${a.durabilidadeMax}`
+          `${a.item} — Dano ${a.dano}${a.propriedades && a.propriedades !== "—" ? ` · ${a.propriedades}` : ""}${protecaoTxt}${periciaTxt} · Durab. ${a.durabilidadeAtual}/${a.durabilidadeMax}`
         );
       });
       spacer(4);

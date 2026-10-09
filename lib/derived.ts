@@ -163,7 +163,7 @@ function equippedArmorPvBonus(armaduras: Armadura[] | undefined): number {
 // array) com fallback pro campo legado singular (periciaBonusNome/periciaBonusValor) de
 // fichas salvas antes dessa mudança.
 export function getPericiaBonuses(
-  a: Pick<Armadura, "periciaBonuses" | "periciaBonusNome" | "periciaBonusValor">
+  a: Partial<Pick<Armadura, "periciaBonuses" | "periciaBonusNome" | "periciaBonusValor">>
 ): PericiaBonusItem[] {
   if (a.periciaBonuses && a.periciaBonuses.length) return a.periciaBonuses;
   if (a.periciaBonusNome) return [{ pericia: a.periciaBonusNome, valor: a.periciaBonusValor || "0" }];
@@ -171,10 +171,10 @@ export function getPericiaBonuses(
 }
 
 // Ex: Óculos (+1 Inteligência), Amuleto Divino (+1 Psionismo) — bônus de uma perícia
-// específica quando equipada. Não entra em computeDerived (só importa na hora de rolar
-// aquela perícia), usado por PericiasPanel.
-export function equippedArmorPericiaBonus(armaduras: Armadura[], periciaNome: string): number {
-  return armaduras
+// específica quando equipada (Armadura ou Arma). Não entra em computeDerived (só importa
+// na hora de rolar aquela perícia), usado por PericiasPanel.
+export function equippedPericiaBonus(armaduras: Armadura[], armas: Arma[], periciaNome: string): number {
+  return [...armaduras, ...(armas || [])]
     .filter((a) => a.equipado)
     .flatMap((a) => getPericiaBonuses(a))
     .filter((b) => b.pericia.trim().toLowerCase() === periciaNome.trim().toLowerCase())

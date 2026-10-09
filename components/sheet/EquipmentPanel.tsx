@@ -117,7 +117,8 @@ export function EquipmentPanel({
         a.dano === item.dano &&
         a.propriedades === item.propriedades &&
         a.preco === item.preco &&
-        (a.peso || "medio") === (item.peso || "medio")
+        (a.peso || "medio") === (item.peso || "medio") &&
+        JSON.stringify(getPericiaBonuses(a)) === JSON.stringify(getPericiaBonuses(item))
     );
     if (matchIdx >= 0) {
       next[matchIdx] = { ...next[matchIdx], quantidade: String(qtdDe(next[matchIdx]) + 1) };
@@ -378,6 +379,7 @@ export function EquipmentPanel({
 
   function weaponPropsRow(idx: number, a: Arma, key: string, colSpan: number) {
     const props = explicarPropriedades(a.propriedades);
+    const periciaBonuses = getPericiaBonuses(a);
     return (
       expanded.has(key) && (
         <tr className="item-info-row" key={`${key}-props`}>
@@ -392,6 +394,11 @@ export function EquipmentPanel({
                   <b>🛡️ Proteção quando equipada:</b> +{num(a.protecao, 0)} Armadura
                 </div>
               )}
+              {periciaBonuses.map((b, i) => (
+                <div className="item-info-line" key={`pb-${i}`}>
+                  <b>🎯 Perícia quando equipada:</b> +{num(b.valor, 0)} {b.pericia}
+                </div>
+              ))}
               {props.length ? (
                 props.map((p) => (
                   <div className="item-info-line" key={p.nome}>

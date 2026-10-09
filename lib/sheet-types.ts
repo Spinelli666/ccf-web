@@ -53,6 +53,8 @@ export type Arma = {
   // Atributo escolhido como bônus de dano opcional ("Força", "Destreza", "Psionismo") —
   // fica gravado na arma pra não se perder ao trocar de aba.
   atributoDano?: string;
+  // Ex: arma que dá +1 Furtividade enquanto equipada — mesmo esquema da Armadura.
+  periciaBonuses?: PericiaBonusItem[];
 };
 
 export type PericiaBonusItem = { pericia: string; valor: string };
