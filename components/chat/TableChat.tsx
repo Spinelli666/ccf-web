@@ -60,12 +60,26 @@ function renderFormula(text: string) {
 }
 
 // Nomes entre aspas (itens, habilidades, efeitos) viram destaque, sem as aspas.
-function renderLogText(text: string) {
+// Com onToggle, o primeiro nome vira botão (abre/fecha a descrição da habilidade).
+function renderLogText(text: string, onToggle?: () => void, aberto?: boolean) {
   return text.split(/"([^"]+)"/).map((part, i) =>
     i % 2 === 1 ? (
-      <b key={i} className="chat-event-hl">
-        {part}
-      </b>
+      onToggle && i === 1 ? (
+        <button
+          key={i}
+          type="button"
+          className={`chat-event-hl chat-event-hl-btn${aberto ? " is-open" : ""}`}
+          title={aberto ? "Fechar descrição" : "Ver descrição"}
+          aria-expanded={aberto}
+          onClick={onToggle}
+        >
+          {part}
+        </button>
+      ) : (
+        <b key={i} className="chat-event-hl">
+          {part}
+        </b>
+      )
     ) : (
       part
     )
@@ -94,6 +108,16 @@ export function TableChat({ mesaId }: { mesaId: string }) {
   const [, forceTick] = useState(0);
   const [showClear, setShowClear] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  // Logs de habilidade com a descrição aberta (clique no nome abre/fecha).
+  const [descAbertas, setDescAbertas] = useState<Set<string>>(new Set());
+  function toggleDesc(id: string) {
+    setDescAbertas((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
   const visibility = useRollVisibility();
   // Em celular o painel do chat cobre a tela quase inteira (fixed, largura ~viewport) —
   // começa fechado nesse caso pra não esconder a ficha, igual a SideNav/CombateClient.
@@ -215,7 +239,12 @@ export function TableChat({ mesaId }: { mesaId: string }) {
             </span>
             <span className="chat-event-time">{time}</span>
           </div>
-          <div className="chat-event-body">{renderLogText(view.body)}</div>
+          <div className="chat-event-body">
+            {view.desc
+              ? renderLogText(view.body, () => toggleDesc(item.id), descAbertas.has(item.id))
+              : renderLogText(view.body)}
+          </div>
+          {view.desc && descAbertas.has(item.id) && <div className="chat-event-desc">{view.desc}</div>}
           {view.details.length > 0 &&
             (view.details.length > 1 ? (
               <div className="chat-event-chips">

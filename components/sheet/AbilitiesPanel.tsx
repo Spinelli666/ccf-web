@@ -17,6 +17,7 @@ import { TipoAcaoBadge } from "@/components/sheet/TipoAcaoBadge";
 import { AcaoDialog } from "@/components/dialogs/AcaoDialog";
 import { EditHabilidadeDialog } from "@/components/dialogs/EditHabilidadeDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
+import { logComDescricao } from "@/lib/chat-log";
 import { Modal } from "@/components/ui/Modal";
 import {
   AdicionarHabilidadeDialog,
@@ -264,7 +265,7 @@ export function AbilitiesPanel({
     const max = usosDiariosEfetivo(h, derived);
     if (max > 0 && h.usosGastos >= max) return;
     updateRaca(i, { usosGastos: h.usosGastos + 1 });
-    onLog(`${nome} usou a habilidade racial "${h.nome}".`);
+    onLog(logComDescricao(`${nome} usou a habilidade racial "${h.nome}".`, h.desc));
   }
 
   // Se a habilidade base tiver um aprimoramento logo abaixo com custo próprio, esse custo
@@ -286,7 +287,13 @@ export function AbilitiesPanel({
       onChange({ stats: { ...sheet.stats, peAtual: String(peAtual) } });
     }
     updateClasse(i, { usosGastos: h.usosGastos + 1 });
-    onLog(`${nome} usou "${h.nome}"${custoPE ? ` (-${custoPE} PE)` : ""}.`);
+    // Descrição: efeito da base + aprimoramentos dela que estão na ficha.
+    const linhas = [h.efeito];
+    for (let j = i + 1; j < sheet.classeHabilidades.length && sheet.classeHabilidades[j].indent; j++) {
+      const ap = sheet.classeHabilidades[j];
+      if (ap.ativo !== false) linhas.push(`↳ ${ap.nome}: ${ap.efeito}`);
+    }
+    onLog(logComDescricao(`${nome} usou "${h.nome}"${custoPE ? ` (-${custoPE} PE)` : ""}.`, linhas.filter((l) => l.trim()).join("\n")));
   }
 
   const acaoTotal = clamp(num(sheet.acaoTotal, 4) || 4, 1, 12);

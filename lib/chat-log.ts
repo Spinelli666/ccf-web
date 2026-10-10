@@ -3,6 +3,17 @@
 // (inclusive o histórico antigo) — a estrutura é derivada aqui, na hora de renderizar.
 
 import { EFFECTS_CATALOG } from "@/data/effects";
+import { findAbilityEntry } from "@/lib/classes-lookup";
+
+// Separador da descrição embutida no texto do log ao usar uma habilidade — o chat mostra
+// a descrição ao clicar no nome. Fica numa linha própria depois da frase principal.
+export const LOG_DESC_SEP = "\n§desc§ ";
+
+/** Junta a frase do log com a descrição da habilidade (se houver). */
+export function logComDescricao(texto: string, descricao: string): string {
+  const d = descricao.trim();
+  return d ? texto + LOG_DESC_SEP + d : texto;
+}
 
 const EFFECT_ICONS = EFFECTS_CATALOG as Record<string, { icone?: string }>;
 
@@ -30,6 +41,8 @@ export type LogView = {
   meter?: LogMeter;
   // Avisos da mesa (rodada/turno do combate) — viram faixa centralizada, sem cartão.
   banner?: boolean;
+  // Descrição da habilidade usada — abre ao clicar no nome destacado.
+  desc?: string;
 };
 
 type Rule = { re: RegExp; icon: string; tone: LogTone; banner?: boolean; split?: "colon" | "list" };
@@ -73,7 +86,9 @@ function capitalize(s: string): string {
 }
 
 export function formatLog(text: string, characterName: string | null): LogView {
-  let body = text.trim().replace(LEADING_SYMBOLS_RE, "");
+  const sepIdx = text.indexOf(LOG_DESC_SEP);
+  let desc = sepIdx >= 0 ? text.slice(sepIdx + LOG_DESC_SEP.length).trim() : "";
+  let body = (sepIdx >= 0 ? text.slice(0, sepIdx) : text).trim().replace(LEADING_SYMBOLS_RE, "");
 
   // O nome do personagem já aparece no cabeçalho do cartão.
   const nome = (characterName || "").trim();
@@ -121,6 +136,12 @@ export function formatLog(text: string, characterName: string | null): LogView {
     });
   }
 
+  // Logs antigos (sem descrição embutida): tenta achar a habilidade usada no catálogo.
+  if (!desc && rule?.tone === "habilidade" && /^Usou /.test(body)) {
+    const nomeHab = body.match(/"([^"]+)"/)?.[1];
+    desc = (nomeHab && findAbilityEntry(nomeHab)?.efeito) || "";
+  }
+
   return {
     icon: rule?.icon ?? "📜",
     tone: rule?.tone ?? "info",
@@ -128,5 +149,6 @@ export function formatLog(text: string, characterName: string | null): LogView {
     details,
     meter,
     banner: rule?.banner,
+    desc: desc || undefined,
   };
 }

@@ -412,6 +412,13 @@ table.sheet-table td.name{ font-weight:400; font-size:15.5px; }
 .card > *{ position:relative; z-index:1; }
 .card > .card-actions{ position:absolute; z-index:2; }
 
+/* Chat: nome da habilidade usada abre/fecha a descrição */
+.chat-event-hl-btn{ background:none; border:0; padding:0; font:inherit; font-weight:700; color:#fff3df; cursor:pointer;
+  text-decoration:underline dotted; text-underline-offset:3px; }
+.chat-event-hl-btn:hover, .chat-event-hl-btn.is-open{ color:var(--gold); }
+.chat-event-desc{ margin-top:6px; padding:6px 8px; border-left:2px solid var(--gold-line); background:rgba(0,0,0,.18);
+  border-radius:4px; font-size:12.5px; line-height:1.45; white-space:pre-line; color:var(--ink); }
+
 /* Filtro de categoria do Inventário */
 .item-filtros{ display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin:18px 0 4px; }
 .item-filtro-btn{ width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; font-size:19px; line-height:1;
