@@ -18,6 +18,7 @@ import { AddEquipmentDialog } from "@/components/dialogs/AddEquipmentDialog";
 import { EditItemDialog, type EditTarget } from "@/components/dialogs/EditItemDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
 import { PROPRIEDADES_ARMAS_INFO } from "@/data/weapons";
+import { CATEGORIAS_ITEM, CATEGORIA_GERAIS, categoriaDoItem } from "@/lib/item-categorias";
 import type { Arma, Armadura, Remedio, FullSheetData } from "@/lib/sheet-types";
 
 const ATRIBUTOS_DANO = ["Força", "Destreza", "Psionismo"] as const;
@@ -69,6 +70,8 @@ export function EquipmentPanel({
   const [attackIdx, setAttackIdx] = useState<number | null>(null);
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
   const [excluindo, setExcluindo] = useState<EditTarget | null>(null);
+  // Filtro por categoria da tabela de Itens Genéricos ("Gerais" mostra tudo).
+  const [filtroCategoria, setFiltroCategoria] = useState(CATEGORIA_GERAIS);
 
   const derived = computeDerived(sheet);
   function periciaValor(nome: string): number {
@@ -364,6 +367,12 @@ export function EquipmentPanel({
   // Armas/armaduras desequipadas aparecem na mesma tabela dos Itens Genéricos.
   const totalInventario = armasInventario.length + armadurasInventario.length + remedioPairs.length;
   const inventarioHtmlVisible = totalInventario > 0;
+  const passaFiltro = (tipo: "arma" | "armadura" | "generico", item: { categoria?: string }) =>
+    filtroCategoria === CATEGORIA_GERAIS || categoriaDoItem(tipo, item) === filtroCategoria;
+  const armasInvFiltradas = armasInventario.filter(([, a]) => passaFiltro("arma", a));
+  const armadurasInvFiltradas = armadurasInventario.filter(([, a]) => passaFiltro("armadura", a));
+  const remediosFiltrados = remedioPairs.filter(([, r]) => passaFiltro("generico", r));
+  const totalFiltrado = armasInvFiltradas.length + armadurasInvFiltradas.length + remediosFiltrados.length;
 
   let slotsLeveCount = 0;
   let slotsFixos = 0;
@@ -668,12 +677,33 @@ export function EquipmentPanel({
       )}
 
       {inventarioHtmlVisible && (
+        <div className="item-filtros" role="group" aria-label="Filtrar itens por categoria">
+          {CATEGORIAS_ITEM.map((c) => (
+            <button
+              key={c.nome}
+              type="button"
+              className={`item-filtro-btn ${filtroCategoria === c.nome ? "active" : ""}`}
+              title={c.nome}
+              aria-label={c.nome}
+              aria-pressed={filtroCategoria === c.nome}
+              onClick={() => setFiltroCategoria(c.nome)}
+            >
+              {c.icone}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {inventarioHtmlVisible && (
         <div className="section">
           <h2>Inventário</h2>
           {totalInventario > 0 && (
             <>
-              {tableHead("inv-genericos", "Itens Genéricos", totalInventario)}
-              {openTables.has("inv-genericos") && (
+              {tableHead("inv-genericos", "Itens Genéricos", totalFiltrado)}
+              {openTables.has("inv-genericos") && totalFiltrado === 0 && (
+                <div className="derived-note">Nenhum item em {filtroCategoria}.</div>
+              )}
+              {openTables.has("inv-genericos") && totalFiltrado > 0 && (
               <div className="sheet-table-wrap">
               <table className="sheet-table">
                 <thead>
@@ -687,7 +717,7 @@ export function EquipmentPanel({
                   </tr>
                 </thead>
                 <tbody>
-                  {armasInventario.map(([idx, a]) => {
+                  {armasInvFiltradas.map(([idx, a]) => {
                     const qtd = qtdDe(a);
                     return (
                     <Fragment key={`wi-${idx}`}>
@@ -727,7 +757,7 @@ export function EquipmentPanel({
                     </Fragment>
                     );
                   })}
-                  {armadurasInventario.map(([idx, a]) => {
+                  {armadurasInvFiltradas.map(([idx, a]) => {
                     const qtd = qtdDe(a);
                     return (
                     <Fragment key={`ai-${idx}`}>
@@ -767,7 +797,7 @@ export function EquipmentPanel({
                     </Fragment>
                     );
                   })}
-                  {remedioPairs.map(([idx, r]) => {
+                  {remediosFiltrados.map(([idx, r]) => {
                     const max = num(r.usosMax, 0);
                     const isGenerico = max === 0;
                     return (

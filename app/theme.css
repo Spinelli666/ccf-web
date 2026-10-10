@@ -412,6 +412,14 @@ table.sheet-table td.name{ font-weight:400; font-size:15.5px; }
 .card > *{ position:relative; z-index:1; }
 .card > .card-actions{ position:absolute; z-index:2; }
 
+/* Filtro de categoria do Inventário */
+.item-filtros{ display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin:18px 0 4px; }
+.item-filtro-btn{ width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; font-size:19px; line-height:1;
+  border-radius:50%; border:1px solid var(--gold-line); background:var(--panel-deep); cursor:pointer; opacity:.6;
+  transition: opacity .15s ease, border-color .15s ease, box-shadow .15s ease; }
+.item-filtro-btn:hover{ opacity:1; }
+.item-filtro-btn.active{ opacity:1; border-color:var(--gold); box-shadow:var(--gold-glow); }
+
 /* Diálogo "Adicionar Habilidades" (catálogo das classes) */
 .add-hab-lista{ max-height:55vh; overflow-y:auto; padding-right:4px; margin-top:10px; }
 .wizard-ability-block.ja-na-ficha{ opacity:.75; }

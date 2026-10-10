@@ -59,6 +59,8 @@ export type Arma = {
   atributoDano?: string;
   // Ex: arma que dá +1 Furtividade enquanto equipada — mesmo esquema da Armadura.
   periciaBonuses?: PericiaBonusItem[];
+  // Categoria do Inventário (filtro da tabela de Itens Genéricos) — ver lib/item-categorias.ts.
+  categoria?: string;
 };
 
 export type PericiaBonusItem = { pericia: string; valor: string };
@@ -89,6 +91,8 @@ export type Armadura = {
   durabilidadeAtual: number;
   durabilidadeMax: number;
   quantidade?: string;
+  // Categoria do Inventário (filtro da tabela de Itens Genéricos) — ver lib/item-categorias.ts.
+  categoria?: string;
 };
 
 export type Remedio = {
@@ -104,6 +108,8 @@ export type Remedio = {
   // Só faz sentido pra Itens Genéricos (usosMax "0") — remédios com usos limitados
   // usam o contador de Usos em vez de empilhar quantidade.
   quantidade?: string;
+  // Categoria do Inventário (filtro da tabela de Itens Genéricos) — ver lib/item-categorias.ts.
+  categoria?: string;
 };
 
 export type Julgamento = { sentencas: number; dadivas: number };

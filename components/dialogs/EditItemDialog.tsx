@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { PericiaBonusEditor } from "@/components/dialogs/PericiaBonusEditor";
 import { getPericiaBonuses } from "@/lib/derived";
+import { CATEGORIAS_ITEM, categoriaDoItem } from "@/lib/item-categorias";
 import type { Arma, Armadura, PericiaBonusItem, Remedio } from "@/lib/sheet-types";
 
 const PESO_OPCOES = [
@@ -58,6 +59,7 @@ export function EditItemDialog({
   const [durabilidadeMax, setDurabilidadeMax] = useState(
     target.tipo === "arma" || target.tipo === "armadura" ? String(target.data.durabilidadeMax) : ""
   );
+  const [categoria, setCategoria] = useState(categoriaDoItem(target.tipo, target.data));
   const [confirmarRemover, setConfirmarRemover] = useState(false);
 
   function salvar() {
@@ -74,6 +76,7 @@ export function EditItemDialog({
           peso,
           descricao,
           protecao,
+          categoria,
           periciaBonuses: periciaBonuses.filter((b) => b.pericia.trim()),
           durabilidadeMax: novoMax,
           durabilidadeAtual,
@@ -87,6 +90,7 @@ export function EditItemDialog({
           peso,
           descricao,
           inventarioBonus,
+          categoria,
           periciaBonuses: periciaBonuses.filter((b) => b.pericia.trim()),
           periciaBonusNome: undefined,
           periciaBonusValor: undefined,
@@ -98,7 +102,7 @@ export function EditItemDialog({
         });
       }
     } else {
-      onSave({ item: item.trim(), efeito, preco, peso });
+      onSave({ item: item.trim(), efeito, preco, peso, categoria });
     }
   }
 
@@ -121,6 +125,18 @@ export function EditItemDialog({
     <div className="field">
       <label>Preço</label>
       <input type="text" value={preco} placeholder="Opcional" onChange={(e) => setPreco(e.target.value)} />
+    </div>
+  );
+  const campoCategoria = (
+    <div className="field">
+      <label>Categoria</label>
+      <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+        {CATEGORIAS_ITEM.map((c) => (
+          <option key={c.nome} value={c.nome}>
+            {c.icone} {c.nome}
+          </option>
+        ))}
+      </select>
     </div>
   );
   const campoDurabilidade = (
@@ -192,6 +208,7 @@ export function EditItemDialog({
 
             {campoPeso}
             {campoPreco}
+            {campoCategoria}
           </div>
         </div>
 
