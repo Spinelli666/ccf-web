@@ -173,7 +173,7 @@ body{
 .sheet-avatar-wrap, .sheet-head{ position:relative; z-index:1; }
 .private-tag{ border-radius:20px; }
 
-.sheet-tabs{ justify-content:flex-start; gap:4px; border-bottom:1px solid var(--gold-line); overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; }
+.sheet-tabs{ justify-content:safe center; gap:4px; border-bottom:1px solid var(--gold-line); overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; }
 .sheet-tabs::-webkit-scrollbar{ display:none; }
 .sheet-tab-btn{ font-size:14.5px; letter-spacing:.3px; padding:11px 16px; white-space:nowrap; border-bottom-width:2px; }
 .sheet-tab-btn.active{ font-weight:400; color:var(--gold); border-bottom-color:var(--gold); text-shadow:0 0 12px rgba(255,183,92,.45); }
@@ -183,7 +183,9 @@ body{
    -------------------------------------------------------------------------- */
 .res-section{ position:relative; z-index:1; }
 .res-bars{ margin-top:14px; }
-.mini-input-dinheiro{ width:72px; color:#FFD966; }
+.dinheiro-row{ display:flex; justify-content:center; align-items:center; gap:10px; margin:-4px auto 14px; font-size:15px; color:var(--ink); }
+.dinheiro-lbl{ letter-spacing:.5px; }
+.mini-input-dinheiro{ width:90px; color:#FFD966; text-align:center; font-size:15px; }
 .res-bars{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .res-bar{ padding:14px 16px; border-radius:var(--radius); background:var(--panel-deep); border:1px solid var(--gold-line); }
 .res-bar-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }

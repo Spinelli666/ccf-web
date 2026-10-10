@@ -373,18 +373,6 @@ export function StatsPanel({
             <span className="mini-label">Acerto Crítico</span>
             <span className="info-val">{derived.critRange}</span>
           </div>
-          <div className="mini-row">
-            <span className="mini-label">💰 Dinheiro</span>
-            <input
-              type="number"
-              className="mini-input mini-input-dinheiro"
-              disabled={!isMine}
-              value={sheet.dinheiro ?? "0"}
-              min={0}
-              title="Dinheiro do personagem"
-              onChange={(e) => onChange({ dinheiro: e.target.value })}
-            />
-          </div>
           <div className="mini-row armor-row" title="Armadura: Valor Atual | Valor Máximo · Bônus de Armadura">
             <span className="mini-label">Armadura</span>
             <span className="armor-fields">

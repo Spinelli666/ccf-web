@@ -500,6 +500,18 @@ export function EquipmentPanel({
         </div>
       </div>
 
+      <label className="dinheiro-row" title="Dinheiro do personagem">
+        <span className="dinheiro-lbl">🪙 Dinheiro</span>
+        <input
+          type="number"
+          className="mini-input mini-input-dinheiro"
+          disabled={!isMine}
+          value={sheet.dinheiro ?? "0"}
+          min={0}
+          onChange={(e) => onChange({ dinheiro: e.target.value })}
+        />
+      </label>
+
       {isMine && (
         <div className="add-row-center" style={{ marginBottom: 14 }}>
           <button type="button" className="btn small" onClick={() => setShowAdd(true)}>
