@@ -168,28 +168,9 @@ body{
 /* --------------------------------------------------------------------------
    Ficha — cabeçalho
    -------------------------------------------------------------------------- */
+/* Cabeçalho da ficha: mantém a estrutura antiga (avatar e nome centralizados). */
 .sheet-actions{ align-items:center; gap:10px; flex-wrap:wrap; }
-.sheet-actions-right{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
-.sheet-hero{ display:flex; align-items:center; gap:28px; position:relative; z-index:1; }
-.sheet-hero .sheet-avatar-wrap{ position:relative; margin:0; flex-shrink:0; text-align:center; }
-.sheet-avatar{
-  width:132px; height:132px; border-radius:50%;
-  border:2px solid var(--gold) !important; background: radial-gradient(circle at 50% 35%, #2a6680, #0f2630 70%) !important;
-  box-shadow: 0 0 0 5px rgba(17,42,53,.9), 0 0 0 6px var(--gold-line), 0 0 30px rgba(255,183,92,.25);
-}
-.sheet-level{
-  position:absolute; left:50%; top:122px; transform:translateX(-50%); white-space:nowrap;
-  background: linear-gradient(180deg, #ffc97f, #e99d42); color:#112a35; font-size:13px; font-weight:700;
-  padding:2px 12px; border-radius:12px; border:1.5px solid #112a35;
-}
-.sheet-hero .sheet-head{ text-align:left; margin:0; flex:1; min-width:0; }
-.sheet-head h1{ font-weight:400; font-size:42px; line-height:1.05; letter-spacing:1px; text-shadow:0 0 18px rgba(255,183,92,.25); }
-.sheet-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-.sheet-tag{
-  font-size:13px; padding:3px 11px; border-radius:20px; border:1px solid var(--gold-line);
-  color:var(--ink-soft); background:rgba(255,255,255,.03);
-}
-.sheet-tag.is-blue{ color:var(--blue); border-color:rgba(111,195,224,.45); background:var(--blue-faint); }
+.sheet-avatar-wrap, .sheet-head{ position:relative; z-index:1; }
 .private-tag{ border-radius:20px; }
 
 .sheet-tabs{ justify-content:flex-start; gap:4px; border-bottom:1px solid var(--gold-line); overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; }
@@ -477,17 +458,11 @@ table.sheet-table td.name{ font-weight:400; font-size:15.5px; }
   .res-tiles{ grid-template-columns:repeat(3, minmax(0,1fr)); }
 }
 @container main-col (max-width: 560px){
-  .sheet-hero{ flex-direction:column; text-align:center; gap:26px; }
-  .sheet-hero .sheet-head{ text-align:center; }
-  .sheet-tags{ justify-content:center; }
   .res-bars{ grid-template-columns:1fr; }
   .res-tiles{ grid-template-columns:repeat(2, minmax(0,1fr)); }
   .res-cond-rest{ margin-left:0; width:100%; }
 }
 @media (max-width: 600px){
-  .sheet-hero{ flex-direction:column; text-align:center; gap:26px; }
-  .sheet-hero .sheet-head{ text-align:center; }
-  .sheet-tags{ justify-content:center; }
   .res-bars{ grid-template-columns:1fr; }
   .res-tiles{ grid-template-columns:repeat(2, minmax(0,1fr)); }
   .efeito-card{ flex-wrap:wrap; }
