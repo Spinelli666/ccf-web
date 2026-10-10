@@ -37,9 +37,8 @@ export function SheetCard({
   const router = useRouter();
   const [duplicando, setDuplicando] = useState(false);
   const derived = computeDerived(sheet.data || {});
-  const meta = sheet.data as { name?: string; classeTitulo?: string; racaTitulo?: string; avatarUrl?: string } | undefined;
+  const meta = sheet.data as { name?: string; racaTitulo?: string; avatarUrl?: string } | undefined;
   const nome = meta?.name || sheet.name;
-  const classeTitulo = meta?.classeTitulo || "";
   const racaTitulo = meta?.racaTitulo || "";
   const avatarUrl = meta?.avatarUrl;
 
@@ -112,7 +111,7 @@ export function SheetCard({
         {nome}
       </h3>
       <div className="sub">
-        Nível {derived.nivel} {classeTitulo && `· ${classeTitulo}`} {racaTitulo && `· ${racaTitulo}`}
+        Nível {derived.nivel} {racaTitulo && `· ${racaTitulo}`}
       </div>
       <div className="row">
         <span>
