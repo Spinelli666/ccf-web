@@ -183,7 +183,7 @@ body{
    -------------------------------------------------------------------------- */
 .res-section{ position:relative; z-index:1; }
 .res-bars{ margin-top:14px; }
-.dinheiro-row{ display:flex; justify-content:center; align-items:center; gap:10px; margin:-4px auto 14px; font-size:15px; color:var(--ink); }
+.dinheiro-row{ display:flex; justify-content:center; align-items:center; gap:10px; margin:14px auto 16px; font-size:15px; color:var(--ink); }
 .dinheiro-lbl{ letter-spacing:.5px; }
 .mini-input-dinheiro{ width:90px; color:#FFD966; text-align:center; font-size:15px; }
 .res-bars{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
@@ -212,6 +212,7 @@ body{
 .res-bar{ container-type:inline-size; }
 @container (max-width: 420px){
   .res-bar-foot{ flex-direction:column; align-items:stretch; }
+  .res-bonus{ align-self:center; }
   .res-bar .resource-controls{ flex-wrap:nowrap; width:100%; }
   .res-bar .resource-controls .btn{ flex:1; justify-content:center; white-space:nowrap; padding-left:6px; padding-right:6px; }
 }

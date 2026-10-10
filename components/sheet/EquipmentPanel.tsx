@@ -42,10 +42,10 @@ function explicarPropriedades(propStr: string): { nome: string; desc: string }[]
       };
     });
 }
-
+
 // Os nomes do catálogo vêm com um emoji na frente (ex: "🗡️ Espada") — na lista só o nome.
 function semIcone(nome: string): string {
-  return nome.replace(/^[p{Extended_Pictographic}️‍s]+/u, "") || nome;
+  return nome.replace(/^[\p{Extended_Pictographic}️‍\s]+/u, "") || nome;
 }
 
 export function EquipmentPanel({
@@ -361,7 +361,9 @@ export function EquipmentPanel({
       : clamp(num(sheet.armaduraAtual), 0, armaduraMaximo);
 
   const equipHtmlVisible = armasEquipadas.length > 0 || armadurasEquipadas.length > 0;
-  const inventarioHtmlVisible = armasInventario.length > 0 || armadurasInventario.length > 0 || remedioPairs.length > 0;
+  // Armas/armaduras desequipadas aparecem na mesma tabela dos Itens Genéricos.
+  const totalInventario = armasInventario.length + armadurasInventario.length + remedioPairs.length;
+  const inventarioHtmlVisible = totalInventario > 0;
 
   let slotsLeveCount = 0;
   let slotsFixos = 0;
@@ -668,19 +670,19 @@ export function EquipmentPanel({
       {inventarioHtmlVisible && (
         <div className="section">
           <h2>Inventário</h2>
-          {armasInventario.length > 0 && (
+          {totalInventario > 0 && (
             <>
-              {tableHead("inv-armas", "Armas", armasInventario.length)}
-              {openTables.has("inv-armas") && (
+              {tableHead("inv-genericos", "Itens Genéricos", totalInventario)}
+              {openTables.has("inv-genericos") && (
               <div className="sheet-table-wrap">
               <table className="sheet-table">
                 <thead>
                   <tr>
-                    <th>Arma</th>
-                    <th>Dano</th>
+                    <th>Item</th>
                     <th>Peso</th>
+                    <th>Preço</th>
                     <th>Qtd</th>
-                    <th></th>
+                    <th>Usos</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -688,15 +690,15 @@ export function EquipmentPanel({
                   {armasInventario.map(([idx, a]) => {
                     const qtd = qtdDe(a);
                     return (
-                    <Fragment key={idx}>
+                    <Fragment key={`wi-${idx}`}>
                       <tr>
                         <td className="name">
                           <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`wi-${idx}`)}>
                             {semIcone(a.item)}
                           </button>
                         </td>
-                        <td className="col-tight">{a.dano}</td>
                         <td className="col-tight">{PESO_LABELS[pesoDe(a)]}</td>
+                        <td className="col-tight">{a.preco}</td>
                         <td className="col-tight">
                           {isMine ? (
                             <input
@@ -725,42 +727,18 @@ export function EquipmentPanel({
                     </Fragment>
                     );
                   })}
-                </tbody>
-              </table>
-              </div>
-              )}
-            </>
-          )}
-
-          {armadurasInventario.length > 0 && (
-            <>
-              {tableHead("inv-armaduras", "Armaduras", armadurasInventario.length)}
-              {openTables.has("inv-armaduras") && (
-              <div className="sheet-table-wrap">
-              <table className="sheet-table">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Armadura</th>
-                    <th>Peso</th>
-                    <th>Qtd</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
                   {armadurasInventario.map(([idx, a]) => {
                     const qtd = qtdDe(a);
                     return (
-                    <Fragment key={idx}>
+                    <Fragment key={`ai-${idx}`}>
                       <tr>
                         <td className="name">
                           <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`ai-${idx}`)}>
                             {semIcone(a.item)}
                           </button>
                         </td>
-                        <td className="col-tight">{a.armadura}</td>
                         <td className="col-tight">{PESO_LABELS[pesoDe(a)]}</td>
+                        <td className="col-tight">{a.preco}</td>
                         <td className="col-tight">
                           {isMine ? (
                             <input
@@ -789,35 +767,11 @@ export function EquipmentPanel({
                     </Fragment>
                     );
                   })}
-                </tbody>
-              </table>
-              </div>
-              )}
-            </>
-          )}
-
-          {remedioPairs.length > 0 && (
-            <>
-              {tableHead("inv-genericos", "Itens Genéricos", remedioPairs.length)}
-              {openTables.has("inv-genericos") && (
-              <div className="sheet-table-wrap">
-              <table className="sheet-table">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Peso</th>
-                    <th>Preço</th>
-                    <th>Qtd</th>
-                    <th>Usos</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
                   {remedioPairs.map(([idx, r]) => {
                     const max = num(r.usosMax, 0);
                     const isGenerico = max === 0;
                     return (
-                      <Fragment key={idx}>
+                      <Fragment key={`g-${idx}`}>
                       <tr>
                         <td className="name">
                           <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`g-${idx}`)}>
