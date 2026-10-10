@@ -411,6 +411,12 @@ table.sheet-table td.name{ font-weight:400; font-size:15.5px; }
 .card{ padding:22px 22px 18px; }
 .card > *{ position:relative; z-index:1; }
 .card > .card-actions{ position:absolute; z-index:2; }
+
+/* Diálogo "Adicionar Habilidades" (catálogo das classes) */
+.add-hab-lista{ max-height:55vh; overflow-y:auto; padding-right:4px; margin-top:10px; }
+.wizard-ability-block.ja-na-ficha{ opacity:.75; }
+.ja-na-ficha-tag{ margin-left:8px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--blue); }
+.add-hab-footer{ display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
 .card h3{ font-weight:400; font-size:24px; }
 .card:hover{ box-shadow: 0 0 0 1px var(--gold), 0 14px 32px rgba(3,10,14,.6); }
 .folder-head{ border-radius:var(--radius); }

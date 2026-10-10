@@ -3,12 +3,27 @@
 import { Fragment, useEffect, useState, useSyncExternalStore } from "react";
 import { num, clamp, getPericiaBonuses } from "@/lib/derived";
 import { computeDerived } from "@/lib/derived";
-import { AUTO_GRANT_ABILITIES, CLASSE_UNICA, classeDaHabilidade, custoComDiamante, findAbilityEntry } from "@/lib/classes-lookup";
+import {
+  ABILITIES_LIBRARY,
+  AUTO_GRANT_ABILITIES,
+  CLASSE_UNICA,
+  classeDaHabilidade,
+  custoComDiamante,
+  findAbilityClass,
+  findAbilityEntry,
+} from "@/lib/classes-lookup";
 import { EffectText } from "@/components/sheet/EffectText";
 import { TipoAcaoBadge } from "@/components/sheet/TipoAcaoBadge";
 import { AcaoDialog } from "@/components/dialogs/AcaoDialog";
 import { EditHabilidadeDialog } from "@/components/dialogs/EditHabilidadeDialog";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
+import { Modal } from "@/components/ui/Modal";
+import {
+  AdicionarHabilidadeDialog,
+  aprimoramentoDoCatalogo,
+  habilidadeDoCatalogo,
+  type HabilidadeEscolhida,
+} from "@/components/dialogs/AdicionarHabilidadeDialog";
 import type { DerivedStats } from "@/lib/derived";
 import type { FullSheetData, HabilidadeClasse, HabilidadeRaca } from "@/lib/sheet-types";
 
@@ -120,6 +135,8 @@ export function AbilitiesPanel({
     );
   const [editandoIdx, setEditandoIdx] = useState<number | null>(null);
   const [criando, setCriando] = useState(false);
+  // "+ Adicionar Habilidades" abre primeiro a escolha (criar ou pegar do catálogo).
+  const [adicionarEtapa, setAdicionarEtapa] = useState<"escolha" | "catalogo" | null>(null);
   const [excluindoIdx, setExcluindoIdx] = useState<number | null>(null);
   const [expandidas, setExpandidas] = useState<Set<number>>(new Set());
   const [aprimAbertas, setAprimAbertas] = useState<Set<number>>(new Set());
@@ -192,6 +209,41 @@ export function AbilitiesPanel({
     // Mostra a categoria da habilidade nova, se ela estava escondida no filtro.
     if (!classesSelecionadas.includes(cat)) salvarClasses(sheetId, [...classesSelecionadas, cat]);
     setCriando(false);
+  }
+
+  // Habilidades do catálogo das classes: base nova vai pro fim (com as automáticas da classe,
+  // como no wizard); aprimoramento de uma base que já está na ficha entra logo depois dos dela.
+  function adicionarDoCatalogo(escolhas: HabilidadeEscolhida[]) {
+    let next = sheet.classeHabilidades.slice();
+    const nomesAdicionados: string[] = [];
+    const classesAdicionadas = new Set<string>();
+    for (const { entry, aprims } of escolhas) {
+      const classe = findAbilityClass(entry.nome) || CLASSE_UNICA;
+      const baseIdx = next.findIndex((h) => !h.indent && h.nome === entry.nome);
+      const novosAprims = aprims.map((ai) => aprimoramentoDoCatalogo(entry, ai));
+      if (baseIdx >= 0) {
+        let fim = baseIdx + 1;
+        while (fim < next.length && next[fim].indent) fim++;
+        next = [...next.slice(0, fim), ...novosAprims, ...next.slice(fim)];
+        nomesAdicionados.push(...novosAprims.map((a) => a.nome));
+      } else {
+        const automaticas = (AUTO_GRANT_ABILITIES[classe] || [])
+          .filter((n) => n !== entry.nome && !next.some((h) => !h.indent && h.nome === n))
+          .map((n) => (ABILITIES_LIBRARY[classe] || []).find((e) => e.nome === n))
+          .filter((e): e is NonNullable<typeof e> => !!e)
+          .map(habilidadeDoCatalogo);
+        next = [...next, ...automaticas, habilidadeDoCatalogo(entry), ...novosAprims];
+        nomesAdicionados.push(...automaticas.map((a) => a.nome), entry.nome, ...novosAprims.map((a) => a.nome));
+      }
+      classesAdicionadas.add(classe);
+    }
+    onChange({ classeHabilidades: next });
+    onLog(`${nome} adicionou: ${nomesAdicionados.join(", ")}.`);
+    const faltando = [...classesAdicionadas].filter((c) => !classesSelecionadas.includes(c));
+    if (faltando.length) salvarClasses(sheetId, [...classesSelecionadas, ...faltando]);
+    setExpandidas(new Set());
+    setAprimAbertas(new Set());
+    setAdicionarEtapa(null);
   }
 
   function linhaBotoes(i: number) {
@@ -468,8 +520,8 @@ export function AbilitiesPanel({
           </div>
           {isMine && (
             <div className="hab-criar-row">
-              <button type="button" className="btn small" onClick={() => setCriando(true)}>
-                + Criar Habilidade
+              <button type="button" className="btn small" onClick={() => setAdicionarEtapa("escolha")}>
+                + Adicionar Habilidades
               </button>
             </div>
           )}
@@ -623,6 +675,36 @@ export function AbilitiesPanel({
           aprimoramentos={sheet.classeHabilidades.slice(editandoIdx + 1, editandoIdx + 1 + qtdAprimoramentosAbaixo(editandoIdx))}
           onSave={(patch, aprims) => salvarEdicao(editandoIdx, patch, aprims)}
           onCancel={() => setEditandoIdx(null)}
+        />
+      )}
+      {adicionarEtapa === "escolha" && (
+        <Modal onClose={() => setAdicionarEtapa(null)}>
+          <div className="modal-title">Adicionar Habilidades</div>
+          <div className="modal-options">
+            <button
+              type="button"
+              className="modal-opt-btn"
+              onClick={() => {
+                setAdicionarEtapa(null);
+                setCriando(true);
+              }}
+            >
+              ✍️ Criar Habilidade
+            </button>
+            <button type="button" className="modal-opt-btn" onClick={() => setAdicionarEtapa("catalogo")}>
+              📖 Adicionar Habilidades
+            </button>
+          </div>
+          <button type="button" className="btn ghost small" onClick={() => setAdicionarEtapa(null)}>
+            Cancelar
+          </button>
+        </Modal>
+      )}
+      {adicionarEtapa === "catalogo" && (
+        <AdicionarHabilidadeDialog
+          habilidades={sheet.classeHabilidades}
+          onAdd={adicionarDoCatalogo}
+          onCancel={() => setAdicionarEtapa(null)}
         />
       )}
       {criando && (
