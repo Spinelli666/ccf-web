@@ -315,7 +315,7 @@ table.sheet-table td.name{ font-weight:400; font-size:15.5px; }
 .hab-aprim{ border-radius:8px; font-weight:400; font-size:12px; letter-spacing:2px; color:var(--text-dim); }
 .hab-aprim:hover{ background:var(--gold-faint); }
 .hab-tier-sep{ display:none; }
-.hab-tier{ width:24px; height:24px; font-size:13px; background:#16384a; color:#FFD966; border-color:rgba(255,217,102,.35); font-weight:400; }
+.hab-tier{ width:24px; height:24px; font-size:13px; letter-spacing:0; text-indent:0; padding:1px 0 0; box-sizing:border-box; background:#16384a; color:#FFD966; border-color:rgba(255,217,102,.35); font-weight:400; }
 .hab-tier.learned{
   background: linear-gradient(180deg, #ffd08a, #e99d42); color:#112a35; border-color:#ffd08a; box-shadow:0 0 10px rgba(255,183,92,.5);
 }
