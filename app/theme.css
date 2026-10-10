@@ -374,11 +374,11 @@ table.sheet-table td.name{ font-weight:400; font-size:15.5px; }
 .chat-card-formula{ border-radius:8px; font-weight:400; font-size:13px; }
 .chat-dice-highlight{ font-weight:400; color:var(--blue); }
 .chat-card-total-box{ flex-direction:column; gap:2px; border-radius:8px; background:rgba(0,0,0,.25); border:none; padding:8px; }
-.chat-card-total{ font-weight:400; font-size:30px; line-height:1; }
+.chat-card-total{ font-weight:400; font-size:30px; line-height:1; text-align:center; }
 .chat-card-total.roll-crit-high{ color:#9be29e; text-shadow:0 0 14px rgba(123,198,126,.6); }
 .chat-card-total.roll-crit-low{ color:var(--red); }
 .chat-card-total.roll-crit-high::after, .chat-card-total.roll-crit-low::after{
-  display:block; text-align:center; font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); text-shadow:none; margin-top:3px;
+  display:block; text-align:center; font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); text-shadow:none; margin-top:3px; padding-left:2px; /* compensa o letter-spacing no fim */
 }
 .chat-card-total.roll-crit-high::after{ content:"Crítico"; }
 .chat-card-total.roll-crit-low::after{ content:"Falha"; }
