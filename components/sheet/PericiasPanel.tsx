@@ -22,6 +22,8 @@ export function PericiasPanel({
   isPrivate: boolean;
 }) {
   const [rollingIdx, setRollingIdx] = useState<number | null>(null);
+  // Perícia sendo editada: o losango mostra só o valor base enquanto está em foco.
+  const [editandoIdx, setEditandoIdx] = useState<number | null>(null);
 
   const ordemExibicao = [
     ...PERICIA_ORDER.map((nome) =>
@@ -70,52 +72,53 @@ export function PericiasPanel({
       <div className="pericias-grid">
         {ordemExibicao.map((i) => {
           const p = sheet.pericias[i];
-          const equipBonus = equippedPericiaBonus(sheet.armaduras, sheet.armas, p.nome);
-          const habBonus = habilidadePericiaBonus(sheet.classeHabilidades, p.nome);
+          // Losango: total (base + bônus de itens/habilidades); ao clicar, edita só a base.
+          const bonusAuto =
+            equippedPericiaBonus(sheet.armaduras, sheet.armas, p.nome) + habilidadePericiaBonus(sheet.classeHabilidades, p.nome);
+          const total = num(p.valor) + bonusAuto;
+          const editando = editandoIdx === i;
           return (
-          <div key={i} className={`pericia-row ${num(p.valor) === 0 ? "zero" : ""}`}>
-            <span className="n">
-              {p.nome}
-              {equipBonus > 0 && (
-                <span className="pericia-equip-bonus" title={`+${equipBonus} de equipamento (soma automático ao rolar)`}>
-                  🛡️+{equipBonus}
-                </span>
-              )}
-              {habBonus > 0 && (
-                <span className="pericia-equip-bonus" title={`+${habBonus} de habilidade (soma automático ao rolar)`}>
-                  ✨+{habBonus}
-                </span>
-              )}
-            </span>
-            <span className="pericia-right">
-              {isMine ? (
+            <div key={i} className="pericia-row">
+              <span className="pericia-losango">
+                {isMine ? (
+                  <input
+                    type="number"
+                    title={bonusAuto ? `Valor base ${num(p.valor)} + ${bonusAuto} de itens/habilidades` : "Valor da perícia"}
+                    value={editando ? p.valor : String(total)}
+                    onFocus={(e) => {
+                      setEditandoIdx(i);
+                      requestAnimationFrame(() => e.target.select());
+                    }}
+                    onBlur={() => setEditandoIdx(null)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") e.currentTarget.blur();
+                    }}
+                    onChange={(e) => setPericia(i, "valor", e.target.value)}
+                  />
+                ) : (
+                  <span>{total}</span>
+                )}
+              </span>
+              <span className="n">{p.nome}</span>
+              <span className="pericia-right">
                 <input
                   type="number"
-                  className="mini-input"
-                  value={p.valor}
-                  onChange={(e) => setPericia(i, "valor", e.target.value)}
+                  className="mini-input pericia-bonus-input"
+                  disabled={!isMine}
+                  value={p.bonus || "0"}
+                  title="Bônus da perícia (editável — soma ao rolar)"
+                  onChange={(e) => setPericia(i, "bonus", e.target.value.trim() || "0")}
                 />
-              ) : (
-                <span className="v">{p.valor}</span>
-              )}
-              <input
-                type="number"
-                className="mini-input pericia-bonus-input"
-                disabled={!isMine}
-                value={p.bonus || "0"}
-                title="Bônus da perícia (editável — soma ao rolar)"
-                onChange={(e) => setPericia(i, "bonus", e.target.value.trim() || "0")}
-              />
-              <button
-                type="button"
-                className="dice-btn"
-                title={`Rolar d20 + ${p.nome}`}
-                onClick={() => setRollingIdx(i)}
-              >
-                🎲
-              </button>
-            </span>
-          </div>
+                <button
+                  type="button"
+                  className="dice-btn"
+                  title={`Rolar d20 + ${p.nome}`}
+                  onClick={() => setRollingIdx(i)}
+                >
+                  🎲
+                </button>
+              </span>
+            </div>
           );
         })}
       </div>

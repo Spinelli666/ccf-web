@@ -141,6 +141,8 @@ export type FullSheetData = {
   armaduras: Armadura[];
   remedios: Remedio[];
   efeitosAtivos: string[];
+  // Dinheiro do personagem (campo livre numérico; fichas antigas não têm).
+  dinheiro?: string;
 };
 
 export function emptySheetData(overrides: Partial<FullSheetData> = {}): FullSheetData {

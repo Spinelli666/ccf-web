@@ -50,61 +50,55 @@ export function EffectsPanel({
       <h2>Efeitos</h2>
       {isMine && (
         <div className="add-row-center" style={{ marginBottom: 12 }}>
-          <button type="button" className="add-row-btn" onClick={() => setShowPicker(true)}>
+          <button type="button" className="btn small" onClick={() => setShowPicker(true)}>
             + Adicionar Efeito
           </button>
         </div>
       )}
       {sheet.efeitosAtivos.length > 0 ? (
-        <table className="sheet-table">
-          <thead>
-            <tr>
-              <th>Efeito</th>
-              <th>Descrição</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {sheet.efeitosAtivos.map((nomeEfeito) => {
-              const info =
-                (EFFECTS_CATALOG as Record<string, EffectInfo>)[nomeEfeito] ||
-                SURVIVAL_EFFECTS_CATALOG[nomeEfeito] ||
-                { desc: "" };
-              const danoValor = info.danoRodada || info.manualDano;
-              return (
-                <tr key={nomeEfeito}>
-                  <td className="name">{info.icone ? `${info.icone} ` : ""}{nomeEfeito}</td>
-                  <td>{info.desc}</td>
-                  <td>
-                    <div className="effect-row-actions">
-                      {isMine && danoValor && (
-                        <button
-                          type="button"
-                          className="effect-dano-btn"
-                          title={`Aplica ${danoValor} de dano direto (ignora armadura)`}
-                          onClick={() => aplicarDano(nomeEfeito, danoValor)}
-                        >
-                          -{danoValor}
-                        </button>
-                      )}
-                      {isMine && (
-                        <button
-                          type="button"
-                          className="btn ghost small emoji-btn is-danger"
-                          title="Remover"
-                          aria-label="Remover"
-                          onClick={() => remove(nomeEfeito)}
-                        >
-                          🗑️
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="efeito-lista">
+          {sheet.efeitosAtivos.map((nomeEfeito) => {
+            const info =
+              (EFFECTS_CATALOG as Record<string, EffectInfo>)[nomeEfeito] ||
+              SURVIVAL_EFFECTS_CATALOG[nomeEfeito] ||
+              { desc: "" };
+            const danoValor = info.danoRodada || info.manualDano;
+            return (
+              <div key={nomeEfeito} className="efeito-card">
+                <span className="efeito-icone" aria-hidden="true">
+                  {info.icone || "✦"}
+                </span>
+                <div className="efeito-texto">
+                  <div className="efeito-nome">{nomeEfeito}</div>
+                  {info.desc && <div className="efeito-desc">{info.desc}</div>}
+                </div>
+                <div className="effect-row-actions">
+                  {isMine && danoValor && (
+                    <button
+                      type="button"
+                      className="effect-dano-btn"
+                      title={`Aplica ${danoValor} de dano direto (ignora armadura)`}
+                      onClick={() => aplicarDano(nomeEfeito, danoValor)}
+                    >
+                      -{danoValor}
+                    </button>
+                  )}
+                  {isMine && (
+                    <button
+                      type="button"
+                      className="btn ghost small emoji-btn is-danger"
+                      title="Remover"
+                      aria-label="Remover"
+                      onClick={() => remove(nomeEfeito)}
+                    >
+                      🗑️
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
         <div className="derived-note">Nenhum efeito ativo no momento.</div>
       )}

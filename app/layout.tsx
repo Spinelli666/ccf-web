@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Voltaire } from "next/font/google";
 import "./globals.css";
+import "./theme.css";
 import { SessionProviderClient } from "@/components/providers/SessionProviderClient";
 
 // Fonte única do app, servida pelo próprio Next (o @import do Google Fonts no CSS era

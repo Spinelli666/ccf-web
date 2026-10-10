@@ -16,6 +16,13 @@ import type { FullSheetData } from "@/lib/sheet-types";
 
 const TABS = ["Perícias", "Equipamentos", "Habilidades", "Profissões", "Biografia"] as const;
 type Tab = (typeof TABS)[number];
+const TAB_ICONES: Record<Tab, string> = {
+  Perícias: "🎯",
+  Equipamentos: "🎒",
+  Habilidades: "✨",
+  Profissões: "🔨",
+  Biografia: "📜",
+};
 
 export function SheetView({
   mesaId,
@@ -128,75 +135,85 @@ export function SheetView({
   return (
     <div className="sheet-scale">
       <div className="sheet-actions">
-        <button className="btn ghost" onClick={() => router.push(`/mesas/${mesaId}/gallery`)}>
+        <button className="btn ghost small" onClick={() => router.push(`/mesas/${mesaId}/gallery`)}>
           ← Voltar
         </button>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn ghost" onClick={() => router.push(`/mesas/${mesaId}/rulebook`)}>
+        <div className="sheet-actions-right">
+          <button className="btn ghost small" onClick={() => router.push(`/mesas/${mesaId}/rulebook`)}>
             📖 Regras
           </button>
-          <button className="btn ghost" onClick={() => router.push(`/mesas/${mesaId}/history`)}>
+          <button className="btn ghost small" onClick={() => router.push(`/mesas/${mesaId}/history`)}>
             📜 Log da Mesa
           </button>
-          <button className="btn secondary small" disabled={downloading} onClick={handleDownloadPdf}>
-            {downloading ? "Gerando PDF..." : "📥 Baixar como PDF"}
+          <button className="btn ghost small" onClick={() => router.push(`/mesas/${mesaId}/sheets/${sheetId}/anotacoes`)}>
+            📓 Anotações
+          </button>
+          <button className="btn ghost small" disabled={downloading} onClick={handleDownloadPdf}>
+            {downloading ? "Gerando PDF..." : "📥 PDF"}
           </button>
           {canManage && (
             <button className="btn ghost small" onClick={togglePrivate}>
               {priv ? "🔒 Privada" : "🔓 Pública"}
             </button>
           )}
-          <button className="btn ghost small" onClick={() => router.push(`/mesas/${mesaId}/sheets/${sheetId}/anotacoes`)}>
-            📓 Anotações
-          </button>
           {canManage && (
-            <button className="btn danger" onClick={() => setShowDelete(true)}>
-              Apagar
+            <button className="btn ghost small is-danger" onClick={() => setShowDelete(true)}>
+              🗑️ Apagar
             </button>
           )}
         </div>
       </div>
 
       <div className="frame" id="sheet-frame">
-        <div className="corner tl" /> <div className="corner tr" /> <div className="corner bl" /> <div className="corner br" />
-        <div className="sheet-avatar-wrap">
-          <button
-            type="button"
-            className={`sheet-avatar${sheet.avatarUrl ? " has-image" : ""}`}
-            disabled={!isMine}
-            title={isMine ? "Trocar ícone do personagem" : undefined}
-            onClick={() => avatarInputRef.current?.click()}
-          >
-            {sheet.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={sheet.avatarUrl} alt="" />
-            ) : (
-              <span className="sheet-avatar-placeholder">🖼️</span>
+        <div className="sheet-hero">
+          <div className="sheet-avatar-wrap">
+            <button
+              type="button"
+              className={`sheet-avatar${sheet.avatarUrl ? " has-image" : ""}`}
+              disabled={!isMine}
+              title={isMine ? "Trocar ícone do personagem" : undefined}
+              onClick={() => avatarInputRef.current?.click()}
+            >
+              {sheet.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={sheet.avatarUrl} alt="" />
+              ) : (
+                <span className="sheet-avatar-placeholder">🖼️</span>
+              )}
+            </button>
+            <span className="sheet-level">Nível {sheet.nivel || 1}</span>
+            {isMine && (
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleAvatarFile}
+              />
             )}
-          </button>
-          {isMine && (
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={handleAvatarFile}
-            />
-          )}
-          {avatarError && <div className="survival-warn">{avatarError}</div>}
-        </div>
-        <div className="sheet-head">
-          <h1>{sheet.name || sheetName}</h1>
-          {priv && (
-            <div className="private-tag">🔒 Ficha privada — só o dono e o Mestre veem ela em &quot;Todas as fichas&quot;</div>
-          )}
-          {isMine && !isOwner && (
-            <div className="private-tag">
-              {isGM ? "🎲 Você está editando como Mestre" : "✏️ O dono permitiu que você edite essa ficha"}
+            {avatarError && <div className="survival-warn">{avatarError}</div>}
+          </div>
+          <div className="sheet-head">
+            <h1>{sheet.name || sheetName}</h1>
+            <div className="sheet-tags">
+              {sheet.racaTitulo && <span className="sheet-tag">{sheet.racaTitulo}</span>}
+              {sheet.classeTitulo && <span className="sheet-tag">{sheet.classeTitulo}</span>}
+              {sheet.subclasseTitulo && <span className="sheet-tag">{sheet.subclasseTitulo}</span>}
+              {ownerName && <span className="sheet-tag is-blue">Jogador: {ownerName}</span>}
             </div>
-          )}
+            {priv && (
+              <div className="private-tag">🔒 Ficha privada — só o dono e o Mestre veem ela em &quot;Todas as fichas&quot;</div>
+            )}
+            {isMine && !isOwner && (
+              <div className="private-tag">
+                {isGM ? "🎲 Você está editando como Mestre" : "✏️ O dono permitiu que você edite essa ficha"}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="divider">⦿</div>
+        <div className="divider">
+          <span className="divider-gem" />
+        </div>
 
         <StatsPanel sheet={sheet} isMine={isMine} onChange={patch} onLog={logToChat} />
 
@@ -208,7 +225,7 @@ export function SheetView({
               className={`sheet-tab-btn ${tab === t ? "active" : ""}`}
               onClick={() => setTab(t)}
             >
-              {t}
+              <span aria-hidden="true">{TAB_ICONES[t]}</span> {t}
             </button>
           ))}
         </div>

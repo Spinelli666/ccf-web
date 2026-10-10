@@ -54,18 +54,22 @@ export function SideNav({
   }
 
   const links = [
-    { href: "/mesas", label: "← Mesas" },
-    { href: `/mesas/${mesaId}/gallery`, label: "Fichas" },
-    { href: `/mesas/${mesaId}/wizard`, label: "Criar Personagem" },
-    { href: `/mesas/${mesaId}/rulebook`, label: "Regras" },
-    { href: `/mesas/${mesaId}/history`, label: "Log da Mesa" },
+    { href: "/mesas", label: "Mesas", icone: "🏰" },
+    { href: `/mesas/${mesaId}/gallery`, label: "Fichas", icone: "📜" },
+    { href: `/mesas/${mesaId}/wizard`, label: "Criar Personagem", icone: "✒️" },
+    { href: `/mesas/${mesaId}/rulebook`, label: "Regras", icone: "📖" },
+    { href: `/mesas/${mesaId}/history`, label: "Log da Mesa", icone: "🕯️" },
   ];
 
   return (
     <nav className={`side-nav ${collapsed ? "collapsed" : ""}`}>
       <div className="side-nav-head">
         <div className="brand">
-          Sistema Cardigan <span>· {mesaNome}</span>
+          <span className="brand-crest" aria-hidden="true">⚜️</span>
+          <span className="brand-text">
+            <span className="brand-name">Cardigan</span>
+            <span className="brand-mesa">{mesaNome}</span>
+          </span>
           {isGM && !collapsed && (
             <button type="button" className="icon-btn" title="Renomear Mesa" onClick={() => setShowRenomearMesa(true)}>
               ✏️
@@ -84,6 +88,9 @@ export function SideNav({
       <div className="side-nav-body">
         {links.map((l) => (
           <Link key={l.href} href={l.href} className={`navlink ${pathname === l.href ? "active" : ""}`}>
+            <span className="navlink-icone" aria-hidden="true">
+              {l.icone}
+            </span>
             {l.label}
           </Link>
         ))}
@@ -91,7 +98,10 @@ export function SideNav({
       <div className="side-nav-foot">
         <div className="user-chip" style={{ marginBottom: 10 }}>
           <span className="user-chip-avatar">{displayName.charAt(0).toUpperCase()}</span>
-          {displayName}
+          <span className="user-chip-text">
+            {displayName}
+            <small>{isGM ? "Mestre da mesa" : "Jogador"}</small>
+          </span>
         </div>
         <button
           type="button"

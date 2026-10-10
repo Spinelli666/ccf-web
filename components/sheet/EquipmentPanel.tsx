@@ -42,6 +42,11 @@ function explicarPropriedades(propStr: string): { nome: string; desc: string }[]
       };
     });
 }
+
+// Os nomes do catálogo vêm com um emoji na frente (ex: "🗡️ Espada") — na lista só o nome.
+function semIcone(nome: string): string {
+  return nome.replace(/^[p{Extended_Pictographic}️‍s]+/u, "") || nome;
+}
 
 export function EquipmentPanel({
   sheet,
@@ -497,7 +502,7 @@ export function EquipmentPanel({
 
       {isMine && (
         <div className="add-row-center" style={{ marginBottom: 14 }}>
-          <button type="button" className="add-row-btn" onClick={() => setShowAdd(true)}>
+          <button type="button" className="btn small" onClick={() => setShowAdd(true)}>
             + Adicionar Equipamento
           </button>
         </div>
@@ -528,7 +533,7 @@ export function EquipmentPanel({
                       <tr>
                         <td className="name">
                           <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`w-${idx}`)}>
-                            {a.item}
+                            {semIcone(a.item)}
                           </button>
                         </td>
                         <td className="col-tight">{danoComBonus(idx, a)}</td>
@@ -609,7 +614,7 @@ export function EquipmentPanel({
                         <tr>
                           <td className="name">
                             <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`a-${idx}`)}>
-                              {a.item}
+                              {semIcone(a.item)}
                             </button>
                           </td>
                           <td className="col-tight">{a.armadura}</td>
@@ -675,7 +680,7 @@ export function EquipmentPanel({
                       <tr>
                         <td className="name">
                           <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`wi-${idx}`)}>
-                            {a.item}
+                            {semIcone(a.item)}
                           </button>
                         </td>
                         <td className="col-tight">{a.dano}</td>
@@ -739,7 +744,7 @@ export function EquipmentPanel({
                       <tr>
                         <td className="name">
                           <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`ai-${idx}`)}>
-                            {a.item}
+                            {semIcone(a.item)}
                           </button>
                         </td>
                         <td className="col-tight">{a.armadura}</td>
@@ -804,7 +809,7 @@ export function EquipmentPanel({
                       <tr>
                         <td className="name">
                           <button type="button" className="item-name-btn" onClick={() => toggleExpanded(`g-${idx}`)}>
-                            {r.item}
+                            {semIcone(r.item)}
                           </button>
                         </td>
                         <td className="col-tight">{PESO_LABELS[pesoDe(r)]}</td>
