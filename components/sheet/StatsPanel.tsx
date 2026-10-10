@@ -328,6 +328,150 @@ export function StatsPanel({
         </div>
       )}
 
+      <div className="resource-grid resource-grid-top">
+        <div className="resource-box">
+          <div className="mini-row">
+            <span className="mini-label">Nível</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {isMine && (
+                <button
+                  type="button"
+                  className="counter-btn"
+                  title="Ajustar Nível (sobe ou desce com habilidades/perícias reconciliadas)"
+                  onClick={() => setShowAjustarNivel(true)}
+                >
+                  🔧
+                </button>
+              )}
+              <input
+                type="number"
+                className="mini-input"
+                disabled={!isMine}
+                value={sheet.nivel}
+                min={1}
+                onChange={(e) => onChange({ nivel: e.target.value })}
+              />
+            </span>
+          </div>
+          <div className="mini-row">
+            <span className="mini-label">XP</span>
+            <input
+              type="number"
+              className="mini-input"
+              disabled={!isMine}
+              value={xp}
+              min={0}
+              max={100}
+              onChange={(e) => onChange({ xp: clamp(num(e.target.value, 0), 0, 100) })}
+            />
+          </div>
+          <div className="mini-row">
+            <span className="mini-label">Deslocamento</span>
+            <span className="info-val">{derived.deslocamento}m</span>
+          </div>
+          <div className="mini-row">
+            <span className="mini-label">Acerto Crítico</span>
+            <span className="info-val">{derived.critRange}</span>
+          </div>
+          <div className="mini-row">
+            <span className="mini-label">💰 Dinheiro</span>
+            <input
+              type="number"
+              className="mini-input mini-input-dinheiro"
+              disabled={!isMine}
+              value={sheet.dinheiro ?? "0"}
+              min={0}
+              title="Dinheiro do personagem"
+              onChange={(e) => onChange({ dinheiro: e.target.value })}
+            />
+          </div>
+          <div className="mini-row armor-row" title="Armadura: Valor Atual | Valor Máximo · Bônus de Armadura">
+            <span className="mini-label">Armadura</span>
+            <span className="armor-fields">
+              <input
+                type="number"
+                className="mini-input"
+                disabled={!isMine}
+                value={armaduraAtual}
+                title="Valor Atual"
+                onChange={(e) => onChange({ armaduraAtual: clamp(num(e.target.value, 0), 0, armaduraMaximo) })}
+              />
+              <span className="armor-sep">|</span>
+              <span className="info-val armor-max" title="Valor Máximo">
+                {armaduraMaximo}
+              </span>
+              <input
+                type="number"
+                className="mini-input mini-input-bonus"
+                disabled={!isMine}
+                value={armaduraBonus}
+                title="Bônus de Armadura"
+                onChange={(e) => {
+                  const novoBonus = num(e.target.value, 0);
+                  const novoMax = derived.armaduraNatural + armaduraEquipada + novoBonus;
+                  onChange({ armaduraBonusManual: novoBonus, armaduraAtual: clamp(armaduraAtual, 0, novoMax) });
+                }}
+              />
+            </span>
+          </div>
+          {xp >= 100 && (
+            <>
+              <div className="survival-warn">🎉 100 XP — pronto pra subir de Nível!</div>
+              {isMine && (
+                <button
+                  type="button"
+                  className="btn small"
+                  style={{ width: "100%", marginTop: 6 }}
+                  onClick={() => setShowLevelUp(true)}
+                >
+                  ⭐ Subir de Nível
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="resource-box survival-box-combined">
+          <div className="mini-row">
+            <span className="mini-label">🦴 Fratura</span>
+            <div className="pip-boxes">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <input
+                  key={i}
+                  type="checkbox"
+                  className="pip-box"
+                  disabled={!isMine}
+                  checked={num(sheet.fraturas) > i}
+                  onChange={() => toggleFratura(i)}
+                />
+              ))}
+            </div>
+          </div>
+          {SURVIVAL_FIELDS.map(({ key, label, max }) => (
+            <div className="mini-row" key={key}>
+              <span className="mini-label">{label}</span>
+              <div className="pip-boxes">
+                {Array.from({ length: max }, (_, i) => (
+                  <input
+                    key={i}
+                    type="checkbox"
+                    className="pip-box"
+                    disabled={!isMine}
+                    checked={num(sheet[key]) > i}
+                    onChange={() => toggleSurvival(key, max, i)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+          {isMine && (
+            <button type="button" className="btn ghost small" style={{ marginTop: 10, width: "100%" }} onClick={() => setShowRest(true)}>
+              💤 Descanso
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="res-bars">
         <div className="res-bar is-pv">
           <div className="res-bar-top">
@@ -424,152 +568,6 @@ export function StatsPanel({
             )}
           </div>
         </div>
-      </div>
-
-      <div className="res-tiles">
-        <div className="res-tile">
-          <div className="res-tile-val">
-            <input
-              type="number"
-              className="res-tile-input"
-              disabled={!isMine}
-              value={sheet.nivel}
-              min={1}
-              onChange={(e) => onChange({ nivel: e.target.value })}
-            />
-          </div>
-          <div className="res-tile-lbl">
-            Nível
-            {isMine && (
-              <button
-                type="button"
-                className="res-tile-tool"
-                title="Ajustar Nível (sobe ou desce com habilidades/perícias reconciliadas)"
-                onClick={() => setShowAjustarNivel(true)}
-              >
-                🔧
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="res-tile">
-          <div className="res-tile-val">
-            <input
-              type="number"
-              className="res-tile-input"
-              disabled={!isMine}
-              value={xp}
-              min={0}
-              max={100}
-              onChange={(e) => onChange({ xp: clamp(num(e.target.value, 0), 0, 100) })}
-            />
-          </div>
-          <div className="res-tile-lbl">XP / 100</div>
-        </div>
-        <div className="res-tile is-armor" title="Armadura: Valor Atual | Valor Máximo · Bônus de Armadura">
-          <div className="res-tile-val armor-fields">
-            <input
-              type="number"
-              className="res-tile-input"
-              disabled={!isMine}
-              value={armaduraAtual}
-              title="Valor Atual"
-              onChange={(e) => onChange({ armaduraAtual: clamp(num(e.target.value, 0), 0, armaduraMaximo) })}
-            />
-            <span className="armor-sep">|</span>
-            <span className="armor-max" title="Valor Máximo">
-              {armaduraMaximo}
-            </span>
-          </div>
-          <div className="res-tile-lbl">
-            Armadura
-            <input
-              type="number"
-              className="mini-input mini-input-bonus"
-              disabled={!isMine}
-              value={armaduraBonus}
-              title="Bônus de Armadura"
-              onChange={(e) => {
-                const novoBonus = num(e.target.value, 0);
-                const novoMax = derived.armaduraNatural + armaduraEquipada + novoBonus;
-                onChange({ armaduraBonusManual: novoBonus, armaduraAtual: clamp(armaduraAtual, 0, novoMax) });
-              }}
-            />
-          </div>
-        </div>
-        <div className="res-tile">
-          <div className="res-tile-val">{derived.deslocamento}m</div>
-          <div className="res-tile-lbl">Deslocamento</div>
-        </div>
-        <div className="res-tile">
-          <div className="res-tile-val">{derived.critRange}</div>
-          <div className="res-tile-lbl">Acerto Crítico</div>
-        </div>
-        <div className="res-tile is-money">
-          <div className="res-tile-val">
-            <input
-              type="number"
-              className="res-tile-input"
-              disabled={!isMine}
-              value={sheet.dinheiro ?? "0"}
-              min={0}
-              title="Dinheiro do personagem"
-              onChange={(e) => onChange({ dinheiro: e.target.value })}
-            />
-          </div>
-          <div className="res-tile-lbl">💰 Dinheiro</div>
-        </div>
-      </div>
-
-      {xp >= 100 && (
-        <div className="res-levelup">
-          <span>🎉 100 XP — pronto pra subir de Nível!</span>
-          {isMine && (
-            <button type="button" className="btn small" onClick={() => setShowLevelUp(true)}>
-              ⭐ Subir de Nível
-            </button>
-          )}
-        </div>
-      )}
-
-      <div className="res-cond">
-        <div className="res-cond-item">
-          <span className="mini-label">🦴 Fratura</span>
-          <div className="pip-boxes">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <input
-                key={i}
-                type="checkbox"
-                className="pip-box"
-                disabled={!isMine}
-                checked={num(sheet.fraturas) > i}
-                onChange={() => toggleFratura(i)}
-              />
-            ))}
-          </div>
-        </div>
-        {SURVIVAL_FIELDS.map(({ key, label, max }) => (
-          <div className="res-cond-item" key={key}>
-            <span className="mini-label">{label}</span>
-            <div className="pip-boxes">
-              {Array.from({ length: max }, (_, i) => (
-                <input
-                  key={i}
-                  type="checkbox"
-                  className="pip-box"
-                  disabled={!isMine}
-                  checked={num(sheet[key]) > i}
-                  onChange={() => toggleSurvival(key, max, i)}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-        {isMine && (
-          <button type="button" className="btn ghost small res-cond-rest" onClick={() => setShowRest(true)}>
-            💤 Descanso
-          </button>
-        )}
       </div>
 
       {showRest && (
