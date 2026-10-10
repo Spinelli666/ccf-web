@@ -207,6 +207,14 @@ body{
 .btn.res-btn-pe{ background:transparent; color:var(--blue); border:1px solid rgba(111,195,224,.5); box-shadow:none; font-weight:400; }
 .btn.res-btn-pe:hover{ background:var(--blue-faint); }
 .res-bar .ignore-armor-label{ justify-content:flex-end; margin-top:8px; }
+/* Card estreito (notebooks): Bônus numa linha e controles ocupando a linha de baixo inteira,
+   igual nos dois cards (PV e PE) para não quebrar um e o outro não. */
+.res-bar{ container-type:inline-size; }
+@container (max-width: 420px){
+  .res-bar-foot{ flex-direction:column; align-items:stretch; }
+  .res-bar .resource-controls{ flex-wrap:nowrap; width:100%; }
+  .res-bar .resource-controls .btn{ flex:1; justify-content:center; white-space:nowrap; padding-left:6px; padding-right:6px; }
+}
 
 
 .derrotado-banner, .julgamento-panel{ border-radius:var(--radius); }
