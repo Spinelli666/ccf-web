@@ -410,9 +410,9 @@ table.sheet-table td.name{ font-weight:400; font-size:15.5px; }
    -------------------------------------------------------------------------- */
 .card{ padding:22px 22px 18px; }
 .card > *{ position:relative; z-index:1; }
+.card > .card-actions{ position:absolute; z-index:2; }
 .card h3{ font-weight:400; font-size:24px; }
 .card:hover{ box-shadow: 0 0 0 1px var(--gold), 0 14px 32px rgba(3,10,14,.6); }
-.card-avatar{ border-radius:50%; border:2px solid var(--gold); box-shadow:0 0 14px rgba(255,183,92,.25); }
 .folder-head{ border-radius:var(--radius); }
 .tab{ border-radius:20px; }
 .tab.active{ border-color:var(--gold); box-shadow:var(--gold-glow); }
